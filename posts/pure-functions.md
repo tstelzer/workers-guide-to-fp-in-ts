@@ -116,6 +116,31 @@ usersToSidebarView();
 console.log(users);
 ```
 
+```json5
+[
+  {
+    firstName: 'Barbara',
+    lastName: 'Selling',
+    registered: 'Tuesday, 3 January 2017'
+  },
+  {
+    firstName: 'John',
+    lastName: 'Smith',
+    registered: 'Tuesday, 24 December 2019'
+  },
+  {
+    firstName: 'Frank',
+    lastName: 'Helmsworth',
+    registered: 'Wednesday, 11 May 2011'
+  },
+  {
+    firstName: 'Anna',
+    lastName: 'Freeman',
+    registered: 'Wednesday, 9 July 2003'
+  }
+]
+```
+
 I guess this works. We added documentation and everything.
 
 But as it so happens, we're not working alone on this project. Our colleague
@@ -137,10 +162,66 @@ const usersToAdminCard = (users: User[]) => {
 console.log(usersToAdminCard(users));
 ```
 
+```json5
+[
+  {
+    firstName: 'Barbara',
+    lastName: 'Selling',
+    registered: 'y, 3 January 2017'
+  },
+  {
+    firstName: 'John',
+    lastName: 'Smith',
+    registered: 'y, 24 December 2019'
+  },
+  {
+    firstName: 'Frank',
+    lastName: 'Helmsworth',
+    registered: 'day, 11 May 2011'
+  },
+  {
+    firstName: 'Anna',
+    lastName: 'Freeman',
+    registered: 'day, 9 July 2003'
+  }
+]
+```
+
 Oops. Guess we broke each others code. Depending on whos function runs
 _first_, the _others_ view is broken. When `usersToSidebarView` runs first,
 `usersToAdminCard` will return garbage. When `usersToAdminCard` runs first,
 `usersToSidebarView` will always be set to January 1st of that year.
+
+```typescript
+usersToAdminCard(users);
+usersToSidebarView(users);
+console.log(users);
+```
+
+```json5
+[
+  {
+    firstName: 'Barbara',
+    lastName: 'Selling',
+    registered: 'Sunday, 1 January 2017'
+  },
+  {
+    firstName: 'John',
+    lastName: 'Smith',
+    registered: 'Tuesday, 1 January 2019'
+  },
+  {
+    firstName: 'Frank',
+    lastName: 'Helmsworth',
+    registered: 'Saturday, 1 January 2011'
+  },
+  {
+    firstName: 'Anna',
+    lastName: 'Freeman',
+    registered: 'Wednesday, 1 January 2003'
+  }
+]
+```
 
 What we're seeing here is the **cost of shared, global state**. In our function
 we are arrogantly reaching into the global scope and mutating shared state.
@@ -152,18 +233,28 @@ data. Like a spoiled toddler, we're rampaging through the sweets section of the
 supermarket, laser-focused on that unerned treat, leaving a trail of
 destruction in our wake.
 
-We can actually, easily, verify that we have a problem by running both
-functions _twice_ over the same data. As you may recall, our definition of a
-_pure function_ said that it will always return the same output for the same
-input.
+We can actually, easily, verify that we have a problem by running
+`usersToAdminCard` _twice_ over the same data. As you may recall, our
+definition of a _pure function_ said that it will always return the same output
+for the same input.
 
 ```typescript
-console.log(usersToAdminCard(users));
-console.log(usersToAdminCard(users));
+usersToAdminCard(users);
+usersToAdminCard(users);
+console.log(users);
+```
+
+```json5
+[
+  { firstName: 'Barbara', lastName: 'Selling', registered: '' },
+  { firstName: 'John', lastName: 'Smith', registered: '' },
+  { firstName: 'Frank', lastName: 'Helmsworth', registered: '' },
+  { firstName: 'Anna', lastName: 'Freeman', registered: '' }
+]
 ```
 
 Nope. Breaks. The second invocation returns an empty string for the
-`registered` [field](field).
+`registered` field.
 
 Fortunately, the solution to fixing our code is quite simple:
 
@@ -224,7 +315,7 @@ something along those lines.
 We can apply this proverb by asking ourselves, "Are we doing unnecessary work
 here that need not be a responsibility of this function?".
 
->>> Note: As with any proverb you should not follow the single responsibility
+> Note: As with any proverb you should not follow the single responsibility
 principle blindly, there are good reasons for functions to "do more than one
 thing".
 
