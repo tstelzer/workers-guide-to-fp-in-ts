@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "lib": ["esnext", "dom"],
+        "moduleResolution": "node",
+
+        "jsx": "react",
+        "strict": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "sourceMap": true
+    },
+    "exclude": ["node_modules", "dist"]
+}
