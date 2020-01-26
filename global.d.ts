@@ -1,4 +1,5 @@
 declare module '*.md';
+declare module 'refractor/lang/shell-session';
 declare module 'remark-rehype';
 declare module 'rehype-stringify';
 declare module 'rehype-prism';
