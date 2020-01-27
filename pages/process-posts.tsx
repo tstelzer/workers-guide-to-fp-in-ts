@@ -24,14 +24,15 @@ const copyFrontmatter: unified.Plugin = () => (ast, file) =>
 const Pre: React.FC<{className: string}> = ({className, ...rest}) => {
     switch (className) {
         case 'language-json5':
-            return <details>
-                <summary>data</summary>
-                <pre {...rest} className={className} />
-            </details>;
+            return (
+                <details>
+                    <summary>output</summary>
+                    <pre {...rest} className={className} />
+                </details>
+            );
         default:
             return <pre {...rest} className={className} />;
-    };
-
+    }
 };
 
 export default unified()
