@@ -1,5 +1,6 @@
 body {
     max-width: 45rem;
+    font-size: 18px;
     margin: 1rem auto 2rem;
     color: #111111;
     background-color: #eeeeee;
@@ -54,7 +55,7 @@ table thead th {
     cursor: auto;
     text-align: inherit;
     color: #444;
-    padding: .2rem .1rem;
+    padding: .4rem .3rem;
     vertical-align: inherit;
     font-style: none;
     font-weight: 700;
@@ -73,6 +74,6 @@ table tr td {
     border-top: 1px solid rgba(34,36,38,.1);
 }
 table td {
-    padding: .4rem 0;
+    padding: .4rem .3rem;
     text-align: inherit;
 }

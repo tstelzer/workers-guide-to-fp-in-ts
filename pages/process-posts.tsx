@@ -25,7 +25,7 @@ const Pre: React.FC<{className: string}> = ({className, ...rest}) => {
     switch (className) {
         case 'language-json5':
             return <details>
-                <summary>output</summary>
+                <summary>data</summary>
                 <pre {...rest} className={className} />
             </details>;
         default:

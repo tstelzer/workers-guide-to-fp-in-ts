@@ -10,7 +10,7 @@ const Home = () => {
     console.log(data)
     return (
         <>
-            <h1>Workers guide to static functional programming in TypeScript</h1>
+            <h1>A Workers guide to static functional programming in TypeScript</h1>
             <main>{contents}</main>
         </>
     );

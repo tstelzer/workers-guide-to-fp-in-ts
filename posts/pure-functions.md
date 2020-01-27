@@ -1,229 +1,321 @@
 ---
-title: Pure functions
+title: Something something pure
 ---
 
 ## Summary
+## Prelude: Mondays
 
-TODO
+It's 10AM. The window in the dev room is fogged-up from dozens of steamy cups
+of coffee. Barely awake, you wonder if you could have called in sick today.
+There is still time, the others wouldn't snitch, you could still make it.  You
+could creep back under the sheets. It is inhuman to work on Mondays.  The week
+should start on Tuesday. But, alas, it is too late. Bright-eyed Bob blows into
+the room. All confident and motivated he proclaims:
 
-## Pure functions are like maps
+"Standup!"
 
-Let me tell you about my favorite data structure: the map. There are plenty
-variations of this data structure, Python has its dictionaries, Clojure maps,
-and in JavaScript we actually have two built-in: plain objects and
-[Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map).
-They all have subtle differences, but what they all have in common is that you
-can visualize them like a table:
+Twelve devs sighs sound in harmony. You distrust Mondays.
 
-| key | value |
-|-----|-------|
-|   a | 1     |
-|   b | 2     |
-|   c | 3     |
-|   d | 4     |
+"So, we're building two new features today."
 
-```typescript
-const map = { a: 1, b: 2, c: 3, d: 4 }
-```
+He takes a sip from his mug, which boldly lies "getting shit done".
 
-It is so useful, yet so simple. If you want to find a value in the second
-column, look it up by its key in the first column. Looking up a value by its
-key will always give you the same value.
+"We are?"
 
-Pure functions are like Maps. A pure function will map input values to output
-values in exactly the same way.
+Good, Barbara is taking the lead today, you can't be the bearer of bad news
+_every day_.
 
-```typescript
-const f = (arg: 'a' | 'b' | 'c' | 'd') =>
-  arg === 'a' ? 1
-  : arg === 'b' ? 2
-  : arg === 'c' ? 3
-  : arg === 'd' ? 4;
-```
+"I didn't see any new tickets."
 
-| arg | f(arg) |
-|-----|--------|
-| a   | 1      |
-| b   | 2      |
-| c   | 3      |
-| d   | 4      |
+"Well, apparently sales sold it in December. And the client needs it by Friday."
 
-In fact, you could replace any pure function with a map.
+"Ah, well, that's doable I guess." Barbara takes an ironic sip.
 
-```typescript
-f('a') === map['a']
-```
+"Yeah, no, last Friday. They needed it by last Friday."
 
-And, the same way you can replace any _pure function_ with a map, you can
-replace any _invocation_ of that pure function with the value it returns.
-We call this property "referential transparency".
+"But that is in the past." Jim helpfully interjects.
 
-```typescript
-f('a') === 1;
-```
+"Shit happens." You just know that he has another coffee cup with those words
+imprinted. "Sorry guys, you need to get on this right now. Jim. You need to
+..."
 
-The only way we can guarantee referential transparency is by making sure that
-we avoid changing our function inputs in place ("mutating"), and avoid doing
-anything other than returning a value, commonly known as "avoiding side
-effects". Side effects include:
-* doing any IO, like reading or writing to the file system or sending data via
-  the network
-* reading or writing variables from and to any other scope than the function scope
-* mutating function arguments
+You sound another deep sigh. Why does this always happen on Monday? You lean on
+the window frame and lose yourself in painting little lambdas on the misty
+glass. You recall the meeting where your kin swore a blood oath over the
+surprisingly thin agile manifesto. "Never again", you voices echoed through
+halls of empty cubicles. Must have been in the fading days of a past summer. Or
+last Friday. Actually, yes, you think it was last Friday.
 
-## A practical example
+"Tom." Ah, here it comes. "You need to build the admin section. The junior wants
+to build the view, but could you build the model? It should display ... um ..."
+Bob glances on a napkin in his hand. "Registration date. Something locale date
+string. I can't read this. Frank said 'the data is weird', or something like
+that. I don't know what that means. I'm sure you'll figure it out! I'm
+confident you guys can do this, you're all rock stars!".
 
-Let's have a look at example code. We're building an app where we have a bunch
-of users that we want to display in a view. Exciting stuff, I know!
+And with that, Bob flies away. You attempt to take another sip before sitting
+down. The cup is empty. You wonder if you could hack the corporate calendar to
+make weeks start on Tuesday.
 
-```typescript
-type User = {
-    firstName: string;
-    lastName: string;
-    registered: string;
-};
+## Something something users.
 
-const users: User[] = [
+Every application has users. So you've been told, at least. You haven't
+personally met them. Maybe *they* like Mondays. Anyways, let's build this feature for them.
+Just you and I, it'll be fun!
+
+Let's have a look at the data first. It's supposed to be "weird".
+
+```json5
+[
     {firstName: 'Barbara', lastName: 'Selling', registered: '01.03.2017'},
     {firstName: 'John', lastName: 'Smith', registered: '12.24.2019'},
     {firstName: 'Frank', lastName: 'Helmsworth', registered: '05.11.2011'},
     {firstName: 'Anna', lastName: 'Freeman', registered: '07.09.2003'},
+    {firstName: 'Damian', lastName: 'Sipes', registered: '12.12.2001'},
+    {firstName: 'Mara', lastName: 'Homenick', registered: '08.14.2007'},
 ];
 ```
 
-At some point someone decided to save the registration date in US format, i.e.
-`MM.DD.YYYY`. Our task is to prepare the data to be displayed in the side bar
-view in a sane format. We're not allowed to touch the original data. It is
-sacred!
+Someone already created a class for us. Well, let's just re-use it.
 
 ```typescript
-/**
- * Prepares users for the side bar. Changes the registered date of users to
- * UTC, e.g. 'Sat, 18 Jan 2020 10:00:00 GMT'
- */
-const usersToSidebarView = () => {
-    for (const user of users) {
-      user.registered = new Date(user.registered).toLocaleDateString('en-gb', {
+class User {
+    firstName: string;
+    lastName: string;
+    registered: string;
+
+    constructor(firstName: string, lastName: string, registered: string) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.registered = registered;
+    }
+}
+```
+
+Ah, glancing at the `registered` field, you see whats "weird": it was stored as
+a US-formatted string, i.e. `MM.DD.YYYY`. The view needs it in a different
+format though, something like `Wednesday, 9 July 2003.` Should be easy enough
+to clean up, we'll just add a method that prepares the `User` for the admin view:
+
+```typescript
+class User {
+    firstName: string;
+    lastName: string;
+    registered: string;
+
+    constructor(firstName: string, lastName: string, registered: string) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.registered = registered;
+    }
+
+    /** Prepares users for the admin view. */
+    toAdminView() {
+        this.registered = new Date(this.registered).toLocaleDateString('en-gb', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
         day: 'numeric',
       });
     }
-};
+}
+```
 
-usersToSidebarView();
+Now loop over the data to create our model, instanciating the users and
+running the `toAdminView` method.
+
+```typescript
+let users: User[] = [];
+
+// `data` comes stright from the data base.
+for (const {firstName, lastName, registered} of data) {
+  const user = new User(firstName, lastName, registered);
+  user.toAdminView();
+  users.push(user);
+}
+```
+
+Easy enough. Let's look at our model:
+
+```typescript
 console.log(users);
 ```
 
 ```json5
 [
-  {
+  User {
     firstName: 'Barbara',
     lastName: 'Selling',
     registered: 'Tuesday, 3 January 2017'
   },
-  {
+  User {
     firstName: 'John',
     lastName: 'Smith',
     registered: 'Tuesday, 24 December 2019'
   },
-  {
+  User {
     firstName: 'Frank',
     lastName: 'Helmsworth',
     registered: 'Wednesday, 11 May 2011'
   },
-  {
+  User {
     firstName: 'Anna',
     lastName: 'Freeman',
     registered: 'Wednesday, 9 July 2003'
+  },
+  User {
+    firstName: 'Damian',
+    lastName: 'Sipes',
+    registered: 'Wednesday, 12 December 2001'
+  },
+  User {
+    firstName: 'Mara',
+    lastName: 'Homenick',
+    registered: 'Tuesday, 14 August 2007'
   }
 ]
 ```
 
-I guess this works. We added documentation and everything.
+Works. Bob said we don't need to write tests for this, so I guess we can merge
+our branch.
 
-But as it so happens, we're not working alone on this project. Our colleague
-has a task of their own, preparing the same data for a different view: a user
-profile card in the admin section. Or something. We didn't listen in the stand
-up.
+Ah, it seems that Jim already merged his changes as well. What did he work on
+again?  Guess we didn't listen in the stand up. Looks like he added a method to `User` as well:
 
 ```typescript
-/**
-  * Changes the registered date of users to YYYY format, e.g. '2001'.
-  */
-const usersToAdminCard = (users: User[]) => {
-    for (const user of users) {
-        user.registered = user.registered.slice(6);
+class User {
+    firstName: string;
+    lastName: string;
+    registered: string;
+
+    constructor(firstName: string, lastName: string, registered: string) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.registered = registered;
     }
-    return users;
+
+    /** Prepares user for the admin view. */
+    toAdminView() {
+        this.registered = new Date(this.registered).toLocaleDateString('en-gb', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+    }
+
+    // user to side bar. changes registration date to year.
+    toSidebarView() {
+        this.registered = this.registered.slice(6);
+    }
 };
 
-console.log(usersToAdminCard(users));
+let users: User[] = [];
+
+for (const {firstName, lastName, registered} of data) {
+  const user = new User(firstName, lastName, registered);
+  user.toSidebarView();
+  user.toAdminView();
+  users.push(user);
+}
 ```
 
-```json5
-[
-  {
-    firstName: 'Barbara',
-    lastName: 'Selling',
-    registered: 'y, 3 January 2017'
-  },
-  {
-    firstName: 'John',
-    lastName: 'Smith',
-    registered: 'y, 24 December 2019'
-  },
-  {
-    firstName: 'Frank',
-    lastName: 'Helmsworth',
-    registered: 'day, 11 May 2011'
-  },
-  {
-    firstName: 'Anna',
-    lastName: 'Freeman',
-    registered: 'day, 9 July 2003'
-  }
-]
-```
-
-Oops. Guess we broke each others code. Depending on whos function runs
-_first_, the _others_ view is broken. When `usersToSidebarView` runs first,
-`usersToAdminCard` will return garbage. When `usersToAdminCard` runs first,
-`usersToSidebarView` will always be set to January 1st of that year.
+Uh oh, let's have another look at the data:
 
 ```typescript
-usersToAdminCard(users);
-usersToSidebarView(users);
 console.log(users);
 ```
 
 ```json5
 [
-  {
+  User {
     firstName: 'Barbara',
     lastName: 'Selling',
     registered: 'Sunday, 1 January 2017'
   },
-  {
+  User {
     firstName: 'John',
     lastName: 'Smith',
     registered: 'Tuesday, 1 January 2019'
   },
-  {
+  User {
     firstName: 'Frank',
     lastName: 'Helmsworth',
     registered: 'Saturday, 1 January 2011'
   },
-  {
+  User {
     firstName: 'Anna',
     lastName: 'Freeman',
     registered: 'Wednesday, 1 January 2003'
+  },
+  User {
+    firstName: 'Damian',
+    lastName: 'Sipes',
+    registered: 'Monday, 1 January 2001'
+  },
+  User {
+    firstName: 'Mara',
+    lastName: 'Homenick',
+    registered: 'Monday, 1 January 2007'
   }
 ]
 ```
 
-What we're seeing here is the **cost of shared, global state**. In our function
+Yikes. Looks like the `registered` is now set to 1st of January for every User.
+Maybe if we run the methods in opposite order?
+
+```typescript
+for (const {firstName, lastName, registered} of data) {
+  const user = new User(firstName, lastName, registered);
+  user.toAdminView();
+  user.toSidebarView();
+  users.push(user);
+}
+
+console.log(users);
+```
+
+```json5
+[
+  User {
+    firstName: 'Barbara',
+    lastName: 'Selling',
+    registered: 'y, 3 January 2017'
+  },
+  User {
+    firstName: 'John',
+    lastName: 'Smith',
+    registered: 'y, 24 December 2019'
+  },
+  User {
+    firstName: 'Frank',
+    lastName: 'Helmsworth',
+    registered: 'day, 11 May 2011'
+  },
+  User {
+    firstName: 'Anna',
+    lastName: 'Freeman',
+    registered: 'day, 9 July 2003'
+  },
+  User {
+    firstName: 'Damian',
+    lastName: 'Sipes',
+    registered: 'day, 12 December 2001'
+  },
+  User {
+    firstName: 'Mara',
+    lastName: 'Homenick',
+    registered: 'y, 14 August 2007'
+  }
+]
+```
+
+Oops. Guess we break each others code. Depending on whos function runs _first_,
+the model is broken in different ways.
+
+## Shared complexity
+
+What we're seeing here is the cost of **shared state**. In our function
 we are arrogantly reaching into the global scope and mutating shared state.
 Even though our colleague thought of defining the users as explicit parameters
 and returning them, they fell into the same trap.
@@ -233,106 +325,7 @@ data. Like a spoiled toddler, we're rampaging through the sweets section of the
 supermarket, laser-focused on that unerned treat, leaving a trail of
 destruction in our wake.
 
-We can actually, easily, verify that we have a problem by running
-`usersToAdminCard` _twice_ over the same data. As you may recall, our
-definition of a _pure function_ said that it will always return the same output
-for the same input.
-
-```typescript
-usersToAdminCard(users);
-usersToAdminCard(users);
-console.log(users);
-```
-
-```json5
-[
-  { firstName: 'Barbara', lastName: 'Selling', registered: '' },
-  { firstName: 'John', lastName: 'Smith', registered: '' },
-  { firstName: 'Frank', lastName: 'Helmsworth', registered: '' },
-  { firstName: 'Anna', lastName: 'Freeman', registered: '' }
-]
-```
-
-Nope. Breaks. The second invocation returns an empty string for the
-`registered` field.
-
-Fortunately, the solution to fixing our code is quite simple:
-
-* Define any values the function is working with as parameters.
-* Treat the inputs as immutable data. That is, instead of changing inputs in
-   place, making a copy and returning it.
-
-```typescript
-const usersToSidebarView = (users: User[]) => {
-    const _users: User[] = [];
-    for (const user of users) {
-        _users.push({
-            ...user,
-            registered: new Date(user.registered).toLocaleDateString('en-gb', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-            }),
-        });
-    }
-    return _users;
-};
-
-const usersToAdminCard = (users: User[]) => {
-    const _users: User[] = [];
-    for (const user of users) {
-        _users.push({
-            ...user,
-            registered: user.registered.slice(6),
-        });
-    }
-    return _users;
-};
-```
-
-Now we can run the functions in _any order_ and _repeatedly_ without corrupting
-our global list of users, but the views that require the data will get exactly
-the data they need. Wonderful.
-
-```typescript
-const viewA = usersToSidebarView(users);
-const viewB = usersToAdminCard(users);
-
-// Unlike before, it's fine to run these again, because our functions are pure.
-console.log(usersToSidebarView(users));
-console.log(usersToAdminCard(users));
-
-// The global users did not change.
-console.log(users);
-```
-
-There is still opportunity for refactoring here. In general, the smaller the
-responsibilities of a function, the more reusable and comprehensible it is. You
-may of heard of the saying that "a function should do only one thing", or
-something along those lines.
-
-We can apply this proverb by asking ourselves, "Are we doing unnecessary work
-here that need not be a responsibility of this function?".
-
-> Note: As with any proverb you should not follow the single responsibility
-principle blindly, there are good reasons for functions to "do more than one
-thing".
-
-The answer is yes, we are doing unnecessary work:
-
-* We are needlessly low level by explicitly looping over the list even though
-  we have much higher level language semantics available for working with
-  lists.
-* In fact, we are needlessly defining both functions for a _list of users_,
-  instead of a _single user_. With the tools we will learn in the next
-  chapters, defining functions for the _simplest_ or _most general_ case
-  affords us the highest amount of reusability and comprehensibility.
-
+## Tables are simple
+## (Pure) functions
+## A way out of the tarpit
 ## Next Up
-
-TODO
-
-In the next chapter we will see how defining a function for the _simplest_ case
-(i.e. a single user) simplifies our code and aids in reusability. We will also
-start using the first functions `fp-ts` is offering!
