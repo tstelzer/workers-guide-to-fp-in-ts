@@ -57,13 +57,9 @@ And with that, Bob flies away. You attempt to take another sip before sitting
 down. The cup is empty. You wonder if you could hack the corporate calendar to
 make weeks start on Tuesday.
 
-## Something something users.
-
 Every application has users. So you've been told, at least. You haven't
-personally met them. Maybe *they* like Mondays. Anyways, let's build this feature for them.
-Just you and I, it'll be fun!
-
-Let's have a look at the data first. It's supposed to be "weird".
+personally met them. Maybe *they* like Mondays.
+You have a look at the data first. It's supposed to be "weird".
 
 ```json5
 [
@@ -76,7 +72,7 @@ Let's have a look at the data first. It's supposed to be "weird".
 ];
 ```
 
-Someone already created a class for us. Well, let's just re-use it.
+Someone already created a class for you.
 
 ```typescript
 class User {
@@ -95,7 +91,7 @@ class User {
 Ah, glancing at the `registered` field, you see whats "weird": it was stored as
 a US-formatted string, i.e. `MM.DD.YYYY`. The view needs it in a different
 format though, something like `Wednesday, 9 July 2003.` Should be easy enough
-to clean up, we'll just add a method that prepares the `User` for the admin view:
+to clean up, just add a method that prepares the `User` for the admin view:
 
 ```typescript
 class User {
@@ -135,7 +131,7 @@ for (const {firstName, lastName, registered} of data) {
 }
 ```
 
-Easy enough. Let's look at our model:
+Easy enough. Another look at the model:
 
 ```typescript
 console.log(users);
@@ -176,11 +172,11 @@ console.log(users);
 ]
 ```
 
-Works. Bob said we don't need to write tests for this, so I guess we can merge
-our branch.
+Works. Bob said we don't need to write tests for this, so you guess you can merge
+the branch.
 
 Ah, it seems that Jim already merged his changes as well. What did he work on
-again?  Guess we didn't listen in the stand up. Looks like he added a method to `User` as well:
+again?  You didn't listen in the stand up. Looks like he added a method to `User` as well:
 
 ```typescript
 class User {
@@ -220,7 +216,7 @@ for (const {firstName, lastName, registered} of data) {
 }
 ```
 
-Uh oh, let's have another look at the data:
+Uh oh.
 
 ```typescript
 console.log(users);
@@ -262,7 +258,7 @@ console.log(users);
 ```
 
 Yikes. Looks like the `registered` is now set to 1st of January for every User.
-Maybe if we run the methods in opposite order?
+Maybe if you run the methods in opposite order?
 
 ```typescript
 for (const {firstName, lastName, registered} of data) {
@@ -310,7 +306,7 @@ console.log(users);
 ]
 ```
 
-Oops. Guess we break each others code. Depending on whos function runs _first_,
+Oops. Guess we broke each others code. Depending on whos function runs _first_,
 the model is broken in different ways.
 
 ## Shared complexity
