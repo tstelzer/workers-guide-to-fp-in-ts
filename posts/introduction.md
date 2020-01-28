@@ -1,5 +1,5 @@
 ---
-title: Chapter Introduction: The road to composition
+title: Introduction: The road to composition
 ---
 
 - mostly fundamental skills
@@ -10,3 +10,5 @@ title: Chapter Introduction: The road to composition
 - composition
 
 - first encounter with fp-ts
+
+TODO: list the concrete modules we're gonna use
