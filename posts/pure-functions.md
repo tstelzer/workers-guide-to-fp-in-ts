@@ -1,5 +1,5 @@
 ---
-title: Lovely little function
+title: Pure functions
 ---
 
 ## Summary
@@ -353,14 +353,14 @@ from `users`, we would have to do it _before Jims procedure runs_, otherwise
 his mutation of specifically the `registered` field makes it impossible to
 derive our own transformation of the field.
 
-> Note: We're intentionally calling above blocks a _procedure_. There is a
+> Note: We're intentionally calling `usersToSidebar` a _procedure_. There is a
 critical difference between a _function_ and a _procedure_. A _function_
 merely takes values as inputs and returns values as outputs -- all without
 affecting its environment, e.g. by changing inputs in-place. A _procedure_ may
 run a series of statements, changing its environment, its inputs, having side
 effects other than returning values.
 
-Let's go deeper into this issue. We'll define our own model-deriving
+Let's explore this issue a bit more. We'll define our own model-deriving
 _procedure_ and see what happens.
 
 First, we extend `User` with an optional `initials` field.
@@ -450,8 +450,9 @@ console.log(users);
 ```
 
 Yikes, look at `registered`. Seems they are all fixed on `1 January` because
-_our_ procedure parses `registered` _after_ it was cut down to just the year
-by `usersToSidebar`. Let's flip the order of invocation.
+_our_ procedure transforms `registered` _after_ it was cut down to just the
+year by `usersToSidebar`. Let's flip the order of invocation, just to see if
+that would fix it.
 
 ```git
 -usersToSidebar();
@@ -515,23 +516,252 @@ of the data. Like a spoiled toddler, we're rampaging through the sweets section
 of the supermarket, trained on that unearned treat, leaving a trail of
 destruction in our wake.
 
-We _could_ "fix" the problem by introducing more fields, e.g. `registeredShort`
-or `registeredLong` and promise that we only mutate _those_ fields.
-This "solution" doesn't scale.
-
-We've introduced another problem on the type level: because we keep changing
+And we've introduced another problem on the type level: because we keep changing
 our original data _in place_, we have to stuff all our new fields into the
-original type. You can maybe imagine how the `User` would grow in size if we
-keep adding new fields for totally unrelated views. We should really have
-_three_ types:
+original type. `User` would grow in size if we kept adding new fields for
+totally unrelated views.
 
-1. the original `User`
-3. a `SidebarUser` that incldues the `shortName` field
-2. an `AdminUser` that includes the `initials` field
+We can imagine that writing an entire application in this style of unmanaged
+state mutation is an explosion of complexity.
 
-Before we tackle the type problem, let's take a step back and consider a
-_fundamental_ solution to the problem of shared, mutable state.
+Fortunately, we have a simple solution at hand: the function. Specifically, the
+**pure** function.
 
 ## Out of the tar pit
 
+You know what is fundamentally simple? A table:
+
+| key | value |
+|-----|-------|
+| a   | 1     |
+| b   | 99    |
+| c   | 1000  |
+| d   | 99999 |
+
+So simple and so utterly boring. It's so dull, I hesitate to talk about it. But
+we need to, in order to make a point. So here we go:
+
+* This table has two columns, a key and a value column.
+* We can look up values via its key.
+* Though the rows may _grow_, at the time of accessing it, all values and their
+  types are known.
+
+Know what behaves like a table? A pure function!
+
+```typescript
+const f = (key: 'a' | 'b' | 'c' | 'd') =>
+    key === 'a' ? 1
+    : key === 'b' ? 99
+    : key === 'c' ? 1000
+    : 99999;
+```
+
+* The pure function has two sets of values, input (`'a' | 'b' | 'c' | 'd'`) 
+  and output (`1 | 99 | 1000 | 99999`).
+* We can look up output values by passing input values
+* Though we may add values to input and output sets, at the time of accessing
+  it, all values and their types are known.
+
+Noteworthy, a function like this does not share any of the problems of
+procedures:
+
+* It does not reach into its parent scope, all dependencies of it are declared
+  right there in the parameters.
+* It does not mutate the values it is working with, it effectively only _maps_
+  outputs to inputs.
+* If you run it, you don't need to fear side effects. It just returns values.
+
+If we can somehow rewrite our problematic procedures so that we get these
+benefits we have improved the comprehensibility of our program immensely.
+It is quite simple, actually:
+
+1. Instead of reaching into the parent scope, explicitly define inputs as parameters.
+2. Instead of mutating inputs, treat them as immutable data and create copies.
+3. Instead of storing the outputs in shared state, return them.
+
+Let's do that for `usersToAdmin` and `usersToSidebar`:
+
+```typescript
+const usersToAdmin = (users: User[]) => {
+    const result = [];
+    for (const user of users) {
+        result.push({
+            ...user,
+            // resolves to format: EEEE, d MMMM YYYY
+            // e.g. "Wednesday, 20 June 2019"
+            registered: new Date(user.registered).toLocaleDateString('en-gb', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+            }),
+            // e.g. 'AF'
+            initials: `${user.firstName[0]}${user.lastName[0]}`,
+        });
+    }
+    return result;
+};
+
+const usersToSidebar = (users: User[]) => {
+    const result = [];
+    for (const user of users) {
+        result.push({
+            ...user,
+            // get the year, e.g. '2003'
+            registered: user.registered.slice(6),
+            // e.g. 'a.smith'
+            shortName: `${user.firstName[0].toLowerCase()}.${user.lastName.toLowerCase()}`,
+        });
+    }
+    return result;
+};
+
+const sidebarUsers = usersToSidebar(users);
+const adminUsers = usersToAdmin(users);
+
+console.log({sidebarUsers, adminUsers});
+```
+
+```json5
+{
+  sidebarUsers: [
+    {
+      firstName: 'Barbara',
+      lastName: 'Selling',
+      registered: '2017',
+      shortName: 'b.selling'
+    },
+    {
+      firstName: 'John',
+      lastName: 'Smith',
+      registered: '2019',
+      shortName: 'j.smith'
+    },
+    {
+      firstName: 'Frank',
+      lastName: 'Helmsworth',
+      registered: '2011',
+      shortName: 'f.helmsworth'
+    },
+    {
+      firstName: 'Anna',
+      lastName: 'Freeman',
+      registered: '2003',
+      shortName: 'a.freeman'
+    },
+    {
+      firstName: 'Damian',
+      lastName: 'Sipes',
+      registered: '2001',
+      shortName: 'd.sipes'
+    },
+    {
+      firstName: 'Mara',
+      lastName: 'Homenick',
+      registered: '2007',
+      shortName: 'm.homenick'
+    }
+  ],
+  adminUsers: [
+    {
+      firstName: 'Barbara',
+      lastName: 'Selling',
+      registered: 'Tuesday, 3 January 2017',
+      initials: 'BS'
+    },
+    {
+      firstName: 'John',
+      lastName: 'Smith',
+      registered: 'Tuesday, 24 December 2019',
+      initials: 'JS'
+    },
+    {
+      firstName: 'Frank',
+      lastName: 'Helmsworth',
+      registered: 'Wednesday, 11 May 2011',
+      initials: 'FH'
+    },
+    {
+      firstName: 'Anna',
+      lastName: 'Freeman',
+      registered: 'Wednesday, 9 July 2003',
+      initials: 'AF'
+    },
+    {
+      firstName: 'Damian',
+      lastName: 'Sipes',
+      registered: 'Wednesday, 12 December 2001',
+      initials: 'DS'
+    },
+    {
+      firstName: 'Mara',
+      lastName: 'Homenick',
+      registered: 'Tuesday, 14 August 2007',
+      initials: 'MH'
+    }
+  ]
+}
+```
+
+Gorgous. And the original data is untouched:
+
+```typescript
+console.log(users);
+```
+
+```json5
+[
+  {
+    firstName: 'Barbara',
+    lastName: 'Selling',
+    registered: '01.03.2017'
+  },
+  { firstName: 'John', lastName: 'Smith', registered: '12.24.2019' },
+  {
+    firstName: 'Frank',
+    lastName: 'Helmsworth',
+    registered: '05.11.2011'
+  },
+  { firstName: 'Anna', lastName: 'Freeman', registered: '07.09.2003' },
+  { firstName: 'Damian', lastName: 'Sipes', registered: '12.12.2001' },
+  { firstName: 'Mara', lastName: 'Homenick', registered: '08.14.2007' }
+]
+```
+
+Our functions are now practically pure (not _technically_ pure, but pure for
+all we care about right now). We can run them in any order, repeatedly. They
+will return the same values every time.
+
+We can also fix the type issue we talked about: Instead of stuffing fields into
+the `User` type, we can make our new models _explicit_ by defining separate
+types for them:
+
+```typescript
+type AdminUser = User & {
+    initials: string;
+};
+
+type SidebarUser = User & {
+    shortName: string;
+};
+```
+
+And adding them to our function signatures:
+
+```git
+-const usersToAdmin = (users: User[]) => {
++const usersToAdmin = (users: User[]): AdminUser[] => {
+
+-const usersToSidebar = (users: User[]) => {
++const usersToSidebar = (users: User[]): SidebarUser[] => {
+```
+
+While there is still lots of opportunity for refactoring here -- which we will
+explore in the very next chapter -- we can be happy with the progress we've
+made so far.
+
 ## Next Up
+
+In the next chapter, we will remove some redundancy from our functions by
+exploring the idea of higher order functions. We will also start using the
+`fp-ts` toolkit, specifically its `Array` module.
