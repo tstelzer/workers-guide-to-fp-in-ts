@@ -5,6 +5,7 @@ import remark2rehype from 'remark-rehype';
 import parseMarkdown from 'remark-parse';
 import refractor from 'refractor';
 import typescript from 'refractor/lang/typescript';
+import * as io from 'io-ts';
 
 import toc from 'rehype-toc';
 import slug from 'rehype-slug';
@@ -13,6 +14,14 @@ import toReact from 'rehype-react';
 
 import unified from 'unified';
 import visit from 'unist-util-visit';
+
+export const FrontmatterC = io.type({
+    frontmatter: io.partial({
+        title: io.string,
+    }),
+})
+
+export type Frontmatter = io.TypeOf<typeof FrontmatterC>;
 
 refractor.register(typescript);
 
