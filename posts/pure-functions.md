@@ -1,8 +1,8 @@
 ---
-title: Pure functions
+title: Pure Functions
 ---
 
-## Summary
+### Summary
 
 In this chapter we will begin our journey by exploring functions. We will look
 at a piece of code that violates the principle of immutability and explore the
@@ -10,7 +10,7 @@ implications, and refactor it using pure functions. If you're here to learn
 about `fp-ts` and are already familiar with the idea of pure functions, you can
 safely skip this chapter.
 
-## Prelude: Mondays
+### Prelude: Mondays
 
 It's 10AM. The window in the developer room is fogged-up from dozens of steamy cups
 of coffee. Barely awake, you wonder if you could have called in sick today.
@@ -63,7 +63,7 @@ down, lamenting the crushed dream of a slow Monday. Alas, the cup is empty. You
 wonder if you could configure the corporate calendar so that weeks start on
 Tuesdays.
 
-## Something something user
+### Something something user
 
 Alright. Let's have a look at the data. It's supposed to be "weird", after all.
 
@@ -206,7 +206,7 @@ Anna
 How concrete or general we are in defining our input types is entirely up to us. Each
 comes with benefits and trade offs we will explore in chapters to come.
 
-## Intermission: Motivational coffee
+### Intermission: Motivational coffee
 
 By now the opaque window of the developer room has cleared up. You get up, lacking
 the coffee to motivate yourself to continue. In passing, you hear
@@ -274,7 +274,7 @@ Sounds about right. You attempt to take a sip of coffee while simultaneously
 sighing, that could make things more efficient, you presume, as you pull in
 Jims changes.
 
-## Procedural impurity and shared complexity
+### Procedural impurity and shared complexity
 
 Before we write our own model, let's have a look at Jims code.
 
@@ -527,7 +527,7 @@ state mutation is an explosion of complexity.
 Fortunately, we have a simple solution at hand: the function. Specifically, the
 **pure** function.
 
-## Out of the tar pit
+### Out of the tar pit
 
 You know what is fundamentally simple? A table:
 
@@ -760,7 +760,7 @@ While there is still lots of opportunity for refactoring here -- which we will
 explore in the very next chapter -- we can be happy with the progress we've
 made so far.
 
-## Next Up
+### Next Up
 
 In the next chapter, we will remove some redundancy from our functions by
 exploring the idea of higher order functions. We will also start using the
