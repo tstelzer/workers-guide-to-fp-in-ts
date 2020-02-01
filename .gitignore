@@ -1,4 +1,5 @@
 .vscode/*
+dist
 *.log
 node_modules/
 .eslintcache

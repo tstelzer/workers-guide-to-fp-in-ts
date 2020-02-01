@@ -1,8 +1,8 @@
 ---
+slug: functions-as-values
+parent: the-road-to-composition
+order: 2
 title: Functions as values
-parent: The road to composition
-grand_parent: Tutorials
-nav_order: 2
 ---
 
 # Functions as values
@@ -90,7 +90,7 @@ tingling. `usersToSidebarView` and `usersToAdminCard` look eerily similar.
 In both cases, we're applying a function to elements of our data structure
 (users in an array) and returning a new array with the transformed elements.
 
->>> Note: DRY is a useful principle when applied sensibly. Always try to
+> Note: DRY is a useful principle when applied sensibly. Always try to
 discern between essential and accidental duplication before mindlessly
 attempting to DRY out code. We could keep going refactoring this, and extract
 the Date transformation function so that it works for any formatted Date
@@ -118,7 +118,7 @@ assert.deepStrictEqual(mapUserToSidebarView(users), usersToSidebarView(users));
 assert.deepStrictEqual(mapUserToAdminCard(users), usersToAdminCard(users));
 ```
 
->>> Note: `map` exists for many data structures (which we will have a look at
+> Note: `map` exists for many data structures (which we will have a look at
 in future chapters), but here we're using the `Array` variety.
 
 `map` is very generic, in that it does not really care which function you pass
@@ -186,7 +186,7 @@ We say that `map` is "lifting" a function into a different context, here
 specifically the `Array` context, _without having to rewrite the original
 function_.
 
->>> Note: Try to build an intuition by replacing any loops in your programs
+> Note: Try to build an intuition by replacing any loops in your programs
 meant to iterate over an array with `map`.
 
 Apparently, our apps user base grows. We're up to ten users in total now:
@@ -227,7 +227,7 @@ assert.strictEqual(didRegisterInDecember2019(users[8]), true);
 assert.strictEqual(didRegisterInDecember2019(users[9]), false);
 ```
 
->>> Note: We have defined what is commonly called a "predicate" function.  A
+> Note: We have defined what is commonly called a "predicate" function.  A
 predicate takes any value and returns a boolean. You have undoutedly used and
 written many already.  Conventionally predicates are prefixed with `is`, `has`,
 `did`, `was` to signal an assertion about the input value.
@@ -271,7 +271,7 @@ assert.deepStrictEqual(toSalesView(users), [
 ]);
 ```
 
->>> Note: The prolific reader may recognize that `map` and `filter` are
+> Note: The prolific reader may recognize that `map` and `filter` are
 built-in methods on the `Array` data structure and may wonder why we aren't
 using those. A great question, which will be answered in the composition
 chapter! Have patience!

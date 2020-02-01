@@ -1,6 +1,4 @@
-*, *:before, *:after {
-  box-sizing: border-box;
-}
+*, *:before, *:after { box-sizing: border-box; }
 
 body {
     line-height: 1.4;
@@ -12,6 +10,7 @@ body {
 
 .post {
     margin: 1rem auto 2rem;
+    padding: 0 1rem;
     max-width: 50rem;
 }
 

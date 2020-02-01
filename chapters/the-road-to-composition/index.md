@@ -1,5 +1,7 @@
 ---
-title: Introduction: The road to composition
+slug: the-road-to-composition
+order: 2
+title: The road to composition
 ---
 
 - mostly fundamental skills

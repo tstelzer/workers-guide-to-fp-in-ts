@@ -1,4 +1,6 @@
 ---
+slug: index
+order: 1
 title: Introduction
 ---
 

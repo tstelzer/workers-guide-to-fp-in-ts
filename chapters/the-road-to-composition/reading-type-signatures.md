@@ -1,8 +1,8 @@
 ---
+slug: understanding-type-signatures
+parent: the-road-to-composition
+order: 3
 title: Understanding type signatures
-parent: The road to composition
-grand_parent: Tutorials
-nav_order: 3
 ---
 
 # Understanding type signatures

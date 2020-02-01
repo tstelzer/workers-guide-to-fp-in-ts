@@ -10,3 +10,4 @@ declare module 'rehype-parse';
 declare module 'remark-frontmatter';
 declare module 'remark-parse-yaml';
 declare module 'rehype-react';
+declare module 'to-vfile';

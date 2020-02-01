@@ -5,23 +5,13 @@ import remark2rehype from 'remark-rehype';
 import parseMarkdown from 'remark-parse';
 import refractor from 'refractor';
 import typescript from 'refractor/lang/typescript';
-import * as io from 'io-ts';
-
+import unified from 'unified';
+import {VFileCompatible} from 'vfile';
+import visit from 'unist-util-visit';
 import toc from 'rehype-toc';
 import slug from 'rehype-slug';
 import highlight from '@mapbox/rehype-prism';
 import toReact from 'rehype-react';
-
-import unified from 'unified';
-import visit from 'unist-util-visit';
-
-export const FrontmatterC = io.type({
-    frontmatter: io.partial({
-        title: io.string,
-    }),
-})
-
-export type Frontmatter = io.TypeOf<typeof FrontmatterC>;
 
 refractor.register(typescript);
 
@@ -44,18 +34,22 @@ const Pre: React.FC<{className: string}> = ({className, ...rest}) => {
     }
 };
 
-export default unified()
-    .use(parseMarkdown)
-    .use(frontmatter)
-    .use(parseFrontmatter)
-    .use(copyFrontmatter)
-    .use(remark2rehype)
-    .use(highlight)
-    .use(slug)
-    .use(toc)
-    .use(toReact, {
-        createElement: React.createElement,
-        components: {
-            pre: Pre,
-        },
-    });
+export const process = (file: VFileCompatible) =>
+    unified()
+        .use(parseMarkdown)
+        .use(frontmatter)
+        .use(parseFrontmatter)
+        .use(copyFrontmatter)
+        .use(remark2rehype)
+        .use(highlight)
+        .use(slug)
+        .use(toc)
+        .use(toReact, {
+            createElement: React.createElement,
+            components: {
+                pre: Pre,
+            },
+        })
+        .process(file);
+
+export default process;

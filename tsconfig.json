@@ -1,32 +1,28 @@
 {
-  "compilerOptions": {
-    "lib": [
-      "esnext",
-      "dom"
-    ],
-    "moduleResolution": "node",
-    "jsx": "preserve",
-    "strict": true,
-    "removeComments": true,
-    "preserveConstEnums": true,
-    "sourceMap": true,
-    "target": "es5",
-    "allowJs": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "resolveJsonModule": true,
-    "isolatedModules": true
-  },
-  "exclude": [
-    "node_modules",
-    "dist"
-  ],
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx"
-  ]
+    "compilerOptions": {
+        "baseUrl": ".",
+        "lib": [
+            "esnext",
+            "dom"
+        ],
+        "moduleResolution": "node",
+        "jsx": "react",
+        "strict": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "target": "es2019",
+        "noEmit": true,
+        "esModuleInterop": true,
+        "module": "CommonJS",
+        "pretty": true,
+        "resolveJsonModule": true,
+        "typeRoots": [
+            "./typings",
+            "./node_modules/@types"
+        ]
+    },
+    "exclude": [
+        "node_modules",
+        "dist"
+    ]
 }
