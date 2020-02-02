@@ -43,7 +43,7 @@ export const process = (file: VFileCompatible) =>
         .use(remark2rehype)
         .use(highlight)
         .use(slug)
-        .use(toc)
+        /* .use(toc) */
         .use(toReact, {
             createElement: React.createElement,
             components: {

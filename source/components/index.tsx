@@ -35,7 +35,8 @@ const Link: React.FC<{href: string; title: string}> = ({href, title}) => (
 );
 
 const Nav: React.FC<ViewProps> = ({nav, byId}) => (
-    <nav>
+    <nav className="nav">
+        <h3 className="nav-title">Jump To Chapter</h3>
         <ol>
             {nav.map(({id, children}, i) => {
                 const chapter = byId[id];
@@ -80,6 +81,7 @@ export const Layout: React.FC = ({children}) => (
             <link rel="stylesheet" href="/styles.css" />
         </head>
         <body>
+            <h1 className="page-title">A Workers Guide To Typed Functional Programming</h1>
             <div className="layout">{children}</div>
         </body>
     </html>
@@ -87,8 +89,10 @@ export const Layout: React.FC = ({children}) => (
 
 export const Home: React.FC<ViewProps> = props => (
     <Layout>
-        <h1>A Workers Guide To Typed Functional Programming</h1>
         <Nav {...props} />
-        <main className="post">{props.contents}</main>
+            <main className="main">
+                <h2 className="chapter-title">{props.title}</h2>
+                {props.contents}
+            </main>
     </Layout>
 );

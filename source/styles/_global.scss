@@ -8,10 +8,46 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
 }
 
-.post {
-    margin: 1rem auto 2rem;
-    padding: 0 1rem;
-    max-width: 50rem;
+.layout {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    align-items: flex-start;
+
+    .nav {
+        flex-basis: 14.5rem;
+        padding: .5rem;
+        border: 1px solid #1e1e1e;
+    }
+
+    .main {
+        padding: 0 2rem;
+        max-width: 50rem;
+        flex-basis: 0;
+        flex-grow: 1;
+    }
+}
+
+.nav-title {
+    font-size: .9rem;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+.nav > ol {
+    font-size: .8rem;
+    list-style-type: decimal;
+    padding: 0 0 0 2rem;
+
+    & > li > ol {
+        list-style-type: lower-alpha;
+        padding: 0 0 0 2rem;
+    }
+}
+
+.chapter-title {
+    margin: 0;
 }
 
 code, pre {
@@ -43,9 +79,10 @@ h1, h2, h3, h4, h5 {
 }
 
 .page-title {
-    font-size: 1.3rem;
+    font-size: 2.4rem;
+    font-weight: 700;
+    letter-spacing: -1.2px;
     line-height: 1;
-    text-transform: uppercase;
     text-align: center;
     border-bottom: 3px solid #484848;
     margin-top: 2rem;
