@@ -72,8 +72,7 @@ pre[class*="language-"] {
 }
 
 .token.deleted {
-    background-color: #752809;
-    color: white;
+    color: #cb2431;
 }
 
 .token.selector,
@@ -85,8 +84,7 @@ pre[class*="language-"] {
 }
 
 .token.inserted {
-    background-color: #355d21;
-    color: white;
+    color: #28a745;
 }
 
 .token.operator,
@@ -178,6 +176,12 @@ pre[class*="language-"] {
 /*********************************************************
  * Language Specific
  */
+pre[class*="language-git"],
+code[class*="language-git"] {
+    color: #6a737d;
+    background: #fafbfc;
+}
+
 pre[class*="language-javascript"],
 code[class*="language-javascript"] {
     color: #4ec9b0;
