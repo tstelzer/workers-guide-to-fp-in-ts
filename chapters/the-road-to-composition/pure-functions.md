@@ -10,8 +10,8 @@ title: Pure Functions
 In this chapter we will begin our journey by exploring functions. We will look
 at a piece of code that violates the principle of immutability and explore the
 implications, and refactor it using pure functions. If you're here to learn
-about `fp-ts` and are already familiar with the idea of pure functions, you can
-safely skip this chapter.
+about [fp-ts](https://gcanti.github.io/fp-ts/) and are already familiar with the
+idea of pure functions, you can safely skip this chapter.
 
 ### Prelude: Mondays
 
