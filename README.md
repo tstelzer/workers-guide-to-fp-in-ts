@@ -13,11 +13,11 @@ npm ci
 Build assets into `doc`:
 
 ```sh
-npm build
+npm run build
 ```
 
 Run build in watch mode and serve locally on `localhost:3000`:
 
 ```sh
-npm run dev
+npm run start
 ```
