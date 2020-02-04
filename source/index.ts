@@ -12,6 +12,7 @@ import {pipe} from 'fp-ts/lib/pipeable';
 import * as E from 'fp-ts/lib/Either';
 import {renderToStaticMarkup} from 'react-dom/server';
 import * as path from 'path';
+import {PathReporter} from 'io-ts/lib/PathReporter';
 
 import {
     Home,
@@ -88,6 +89,7 @@ const ParsedChapterCodec = io.type({
                 title: io.string,
                 slug: io.string,
                 order: io.number,
+                state: io.keyof({draft: null, outline: null, release: null}),
             }),
             io.partial({
                 parent: io.string,
@@ -109,6 +111,7 @@ const defaultParsedChapter = (): ParsedChapter => ({
             title: '',
             slug: '',
             order: 99,
+            state: 'outline',
         },
     },
 });
@@ -203,14 +206,22 @@ readDir('./chapters/**/*.md')
             pipe(
                 chapter,
                 ParsedChapterCodec.decode,
+                // FIXME: This is lazy.
                 E.mapLeft(l => {
-                    console.error(l);
+                    const e = PathReporter.report(E.left(l));
+                    console.error(e);
                     return l;
                 }),
-                // FIXME: Lazy.
                 E.getOrElse(defaultParsedChapter),
                 chapter => ({...chapter, id: toId(chapter.data.frontmatter)}),
             ),
+        ),
+        Ro.filter(
+            chapter =>
+                // in development mode, all chapters need to be seen
+                process.env['NODE_ENV'] === 'development' ||
+                // in production mode, reject outlines
+                ['draft', 'release'].includes(chapter.data.frontmatter.state),
         ),
         // view model
         Ro.reduce(

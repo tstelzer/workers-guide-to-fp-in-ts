@@ -3,6 +3,7 @@ slug: functions-as-values
 parent: the-road-to-composition
 order: 2
 title: Functions as values
+state: outline
 ---
 
 # Functions as values
