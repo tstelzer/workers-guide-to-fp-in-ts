@@ -4,10 +4,14 @@
     "description": "An introduction to static functional programming in typescript.",
     "main": "index.ts",
     "scripts": {
-        "dev": "nodemon",
-        "dev:styles": "node-sass --omit-source-map-url --watch --output-style=compressed source/styles/index.scss dist/styles.css",
-        "styles": "node-sass --omit-source-map-url --output-style=compressed source/styles/index.scss dist/styles.css",
-        "build": "ts-node --pretty source/index.ts -D"
+        "clean": "trash doc",
+        "build:html": "ts-node --pretty source/index.ts -D",
+        "build:styles": "node-sass --omit-source-map-url --output-style=compressed source/styles/index.scss doc/styles.css",
+        "build": "npm-run-all clean build:*",
+        "serve": "http-server doc -p 3000",
+        "dev:styles": "npm run build:styles && npm run build:styles -- --watch",
+        "dev:html": "nodemon",
+        "start": "npm run clean && npm-run-all -p serve dev:*"
     },
     "repository": {
         "type": "git",
@@ -64,7 +68,9 @@
         "eslint-plugin-react": "^7.18.0",
         "http-server": "^0.12.1",
         "npm-check-updates": "^4.0.1",
+        "npm-run-all": "^4.1.5",
         "prettier": "^1.19.1",
+        "trash-cli": "^3.0.0",
         "typescript": "^3.7.5"
     }
 }

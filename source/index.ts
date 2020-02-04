@@ -225,7 +225,7 @@ readDir('./chapters/**/*.md')
         Ro.flatMap(state =>
             state.ids.map(slug => {
                 const chapter = state.byId[slug];
-                const filedir = path.resolve('dist', chapter.parent || '');
+                const filedir = path.resolve('doc', chapter.parent || '');
                 const filename = `${chapter.slug}.html`;
                 const filecontent = render(Home)({...state, ...chapter});
                 const filepath = path.join(filedir, filename);
