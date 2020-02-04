@@ -10,7 +10,7 @@ cd workers-guide-to-fp-in-ts
 npm ci
 ```
 
-Build assets into `doc`:
+Build assets into `docs`:
 
 ```sh
 npm run build

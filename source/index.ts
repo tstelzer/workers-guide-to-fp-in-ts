@@ -146,7 +146,7 @@ const reduceBySlug = (
             slug,
             title,
             parent,
-            href: (!!parent ? `/${parent}` : '') + `/${slug}.html`,
+            href: !!parent ? `${parent}/${slug}.html` : `${slug}.html`,
             contents,
         },
     };
@@ -236,7 +236,7 @@ readDir('./chapters/**/*.md')
         Ro.flatMap(state =>
             state.ids.map(slug => {
                 const chapter = state.byId[slug];
-                const filedir = path.resolve('doc', chapter.parent || '');
+                const filedir = path.resolve('docs', chapter.parent || '');
                 const filename = `${chapter.slug}.html`;
                 const filecontent = render(Home)({...state, ...chapter});
                 const filepath = path.join(filedir, filename);

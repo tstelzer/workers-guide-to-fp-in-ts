@@ -70,7 +70,7 @@ const Nav: React.FC<ViewProps> = ({nav, byId}) => (
 export const Layout: React.FC = ({children}) => (
     <html lang="en">
         <head>
-            <base href="/" />
+            <base href="/workers-guide-to-fp-in-ts/" />
             <meta charSet="UTF-8" />
             <meta
                 name="viewport"
@@ -78,10 +78,12 @@ export const Layout: React.FC = ({children}) => (
             />
             <meta httpEquiv="X-UA-Compatible" content="ie=edge" />
             <title>A Workers Guide To Typed Functional Programming</title>
-            <link rel="stylesheet" href="/styles.css" />
+            <link rel="stylesheet" href="styles.css" />
         </head>
         <body>
-            <h1 className="page-title">A Workers Guide To Typed Functional Programming</h1>
+            <h1 className="page-title">
+                A Workers Guide To Typed Functional Programming
+            </h1>
             <div className="layout">{children}</div>
         </body>
     </html>
@@ -90,9 +92,9 @@ export const Layout: React.FC = ({children}) => (
 export const Home: React.FC<ViewProps> = props => (
     <Layout>
         <Nav {...props} />
-            <main className="main">
-                <h2 className="chapter-title">{props.title}</h2>
-                {props.contents}
-            </main>
+        <main className="main">
+            <h2 className="chapter-title">{props.title}</h2>
+            {props.contents}
+        </main>
     </Layout>
 );
