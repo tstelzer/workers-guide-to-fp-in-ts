@@ -4,10 +4,14 @@
     "description": "An introduction to static functional programming in typescript.",
     "main": "index.ts",
     "scripts": {
+        "clean": "trash doc",
         "build:html": "ts-node --pretty source/index.ts -D",
         "build:styles": "node-sass --omit-source-map-url --output-style=compressed source/styles/index.scss doc/styles.css",
-        "build": "npm run build:html && npm run build:styles",
-        "dev": "trash doc && http-server doc -p 3000 & npm run build:styles && npm run build:styles -- --watch & nodemon"
+        "build": "npm-run-all clean build:*",
+        "serve": "http-server doc -p 3000",
+        "dev:styles": "npm run build:styles && npm run build:styles -- --watch",
+        "dev:html": "nodemon",
+        "start": "npm run clean && npm-run-all -p serve dev:*"
     },
     "repository": {
         "type": "git",
