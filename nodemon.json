@@ -1,14 +1,10 @@
 {
-    "events": {
-        "start": "clear",
-        "restart": "clear"
-    },
     "execMap": {
         "ts": "ts-node --pretty source/index.ts -D"
     },
     "env": {
         "NODE_ENV": "development"
     },
-    "ext": "tsx,ts,env,json,md",
+    "ext": "tsx,ts,md",
     "watch": ["source/**/*", "chapters/**/*"]
 }
