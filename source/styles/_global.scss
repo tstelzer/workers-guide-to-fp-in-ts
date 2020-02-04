@@ -15,16 +15,16 @@ body {
     align-items: flex-start;
 
     .nav {
-        flex-basis: 14.5rem;
+        width: 14.5rem;
         padding: .5rem;
+        margin-bottom: 2rem;
         border: 1px solid #1e1e1e;
     }
 
     .main {
+        width: 50rem;
+        max-width: 100vw;
         padding: 0 2rem;
-        max-width: 50rem;
-        flex-basis: 0;
-        flex-grow: 1;
     }
 }
 
