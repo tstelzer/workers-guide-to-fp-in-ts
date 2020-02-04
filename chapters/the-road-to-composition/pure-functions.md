@@ -3,6 +3,7 @@ slug: pure-functions
 parent: the-road-to-composition
 order: 1
 title: Pure Functions
+state: draft
 ---
 
 ### Summary

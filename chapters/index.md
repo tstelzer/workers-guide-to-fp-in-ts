@@ -2,6 +2,7 @@
 slug: index
 order: 1
 title: Introduction
+state: draft
 ---
 
 ## you
