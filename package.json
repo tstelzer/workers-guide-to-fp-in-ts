@@ -7,7 +7,7 @@
         "build:html": "ts-node --pretty source/index.ts -D",
         "build:styles": "node-sass --omit-source-map-url --output-style=compressed source/styles/index.scss doc/styles.css",
         "build": "npm run build:html && npm run build:styles",
-        "dev": "trash-cli doc && http-server doc -p 3000 & npm run build:styles -- --watch & nodemon"
+        "dev": "trash doc && http-server doc -p 3000 & npm run build:styles && npm run build:styles -- --watch & nodemon"
     },
     "repository": {
         "type": "git",
