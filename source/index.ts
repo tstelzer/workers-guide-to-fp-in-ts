@@ -216,12 +216,12 @@ readDir('./chapters/**/*.md')
                 chapter => ({...chapter, id: toId(chapter.data.frontmatter)}),
             ),
         ),
-        Ro.filter(chapter =>
-            process.env['NODE_ENV'] === 'development'
-                ? // in development mode, all chapters need to be seen
-                  true
-                : // in production mode, reject outlines
-                  ['draft', 'release'].includes(chapter.data.frontmatter.state),
+        Ro.filter(
+            chapter =>
+                // in development mode, all chapters need to be seen
+                process.env['NODE_ENV'] === 'development' ||
+                // in production mode, reject outlines
+                ['draft', 'release'].includes(chapter.data.frontmatter.state),
         ),
         // view model
         Ro.reduce(
