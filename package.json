@@ -7,7 +7,7 @@
         "build:html": "ts-node --pretty source/index.ts -D",
         "build:styles": "node-sass --omit-source-map-url --output-style=compressed source/styles/index.scss doc/styles.css",
         "build": "npm run build:html && npm run build:styles",
-        "dev": "http-server doc -p 3000 & npm run build:styles -- --watch & nodemon"
+        "dev": "trash-cli doc && http-server doc -p 3000 & npm run build:styles -- --watch & nodemon"
     },
     "repository": {
         "type": "git",
@@ -65,6 +65,7 @@
         "http-server": "^0.12.1",
         "npm-check-updates": "^4.0.1",
         "prettier": "^1.19.1",
+        "trash-cli": "^3.0.0",
         "typescript": "^3.7.5"
     }
 }
