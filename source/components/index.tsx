@@ -70,7 +70,9 @@ const Nav: React.FC<ViewProps> = ({nav, byId}) => (
 export const Layout: React.FC = ({children}) => (
     <html lang="en">
         <head>
-            {process.env['NODE_ENV'] !== 'development' && (
+            {process.env['NODE_ENV'] === 'development' ? (
+                <base href="/" />
+            ) : (
                 <base href="/workers-guide-to-fp-in-ts/" />
             )}
             <meta charSet="UTF-8" />
