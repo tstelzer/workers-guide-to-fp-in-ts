@@ -1,9 +1,27 @@
+// Variation on https://github.com/PrismJS/prism-themes/blob/master/themes/prism-vsc-dark-plus.css
+
+pre {
+    padding: 1em;
+}
+
+pre, code {
+    font-size: 0.9rem;
+    font-family: Consolas, "Andale Mono WT", "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
+    color: #d4d4d4;
+    background-color: #1e1e1e;
+    overflow: auto;
+}
+
+p code, li code {
+    color: #1c1c1c;
+    background-color: #DDDDDD;
+    border: 1px solid #888888;
+    padding: .1rem .4rem;
+}
+
 pre[class*="language-"],
 code[class*="language-"] {
-    color: #d4d4d4;
-    font-size: 13px;
     text-shadow: none;
-    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
     direction: ltr;
     text-align: left;
     white-space: pre;
@@ -30,12 +48,6 @@ code[class*="language-"]::selection {
     code[class*="language-"] {
         text-shadow: none;
     }
-}
-
-pre[class*="language-"] {
-    padding: 1em;
-    overflow: auto;
-    background: #1e1e1e;
 }
 
 :not(pre) > code[class*="language-"] {
