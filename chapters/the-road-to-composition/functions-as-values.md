@@ -6,23 +6,45 @@ title: Functions as values
 state: outline
 ---
 
-# Functions as values
+### Summary
 
-## Summary
+In this chapter we're discovering that we can use functions as values and
+having a look at two higher-order functions: `map` and `filter`. If you
+already know about higher order functions and have built an intuition for `map`
+and `filter` you can skip this chapter.
 
-TODO
+### Refactoring with map
 
-## Simplicity is king
+At the end of the last chapter I promised an opportunity for refactoring.
 
-Let's start by implementing what we've promised ourselves at the end of the
-last chapter: defining our two functions for the single user case. As a
-reminder, here they are again:
+> Note: *Refactoring* is defined as changing the structure and organization of
+code -- without breaking expected behaviour of the program -- with the goal of
+improving readability, maintainability and reducing overall complexity.
+
+First, let's have a quick look at the status quo:
 
 ```typescript
-const usersToSidebarView = (users: User[]) => {
-    const _users: User[] = [];
+const users = [
+    {firstName: 'Barbara', lastName: 'Selling', registered: '01.03.2017'},
+    {firstName: 'John', lastName: 'Smith', registered: '12.24.2019'},
+    {firstName: 'Frank', lastName: 'Helmsworth', registered: '05.11.2011'},
+    {firstName: 'Anna', lastName: 'Freeman', registered: '07.09.2003'},
+    {firstName: 'Damian', lastName: 'Sipes', registered: '12.12.2001'},
+    {firstName: 'Mara', lastName: 'Homenick', registered: '08.14.2007'},
+];
+
+type User = {
+    firstName: string;
+    lastName: string;
+    registered: string;
+    shortName?: string;
+    initials?: string;
+};
+
+const usersToAdmin = (users: User[]) => {
+    const result = [];
     for (const user of users) {
-        _users.push({
+        result.push({
             ...user,
             registered: new Date(user.registered).toLocaleDateString('en-gb', {
                 weekday: 'long',
@@ -30,30 +52,52 @@ const usersToSidebarView = (users: User[]) => {
                 month: 'long',
                 day: 'numeric',
             }),
+            initials: `${user.firstName[0]}${user.lastName[0]}`,
         });
     }
-    return _users;
+    return result;
 };
 
-const usersToAdminCard = (users: User[]) => {
-    const _users: User[] = [];
+const usersToSidebar = (users: User[]) => {
+    const result = [];
     for (const user of users) {
-        _users.push({
+        result.push({
             ...user,
             registered: user.registered.slice(6),
+            shortName: `${user.firstName[0].toLowerCase()}.${user.lastName.toLowerCase()}`,
         });
     }
-    return _users;
+    return result;
 };
 ```
 
-Let's start simple by separating the "transforming the user" concern from
-"looping over the list" concern, by splitting the functions into two.
-`userToSidebarView` and `userToAdminCard` are no longer aware of lists of users,
-we've simplified them to work for a single user.
+To identify opportunities for refactoring, you can ask ourself a couple of
+questions. The first question -- the one that seems to be hammered into
+programmers from day one -- is: Am I repeating myself needlessly?
+
+> Note: "Dont't Repeat Yourself", or "DRY" is a useful principle when applied
+sensibly. Always try to discern between essential and accidental duplication
+before mindlessly attempting to DRY out code.
+
+Comparing our two functions, we can see a pattern:
+
+1. Create an empty array that will be populated and serve as the output value.
+2. For each value in the input ...
+3. Transform the value ...
+    1. For `usersToAdmin`, localize `registered` and derive `initials`.
+    2. For `usersToSidebar`, derive the year in `registered` and derive `shortName`.
+5. Add the transformed value to the output array.
+6. Return the output array.
+
+Note how all steps are identical, **except for the third step**: the
+transformation of individual user values is different. If we could _extract_
+those steps (3-1 and 3-2), we could formalize the "iterate over the
+array" aspect.
+
+First, let's extract the "business logic" into functions:
 
 ```typescript
-const userToSidebarView = (user: User) => ({
+const userToAdmin = (user: User): User => ({
     ...user,
     registered: new Date(user.registered).toLocaleDateString('en-gb', {
         weekday: 'long',
@@ -61,136 +105,377 @@ const userToSidebarView = (user: User) => ({
         month: 'long',
         day: 'numeric',
     }),
+    initials: `${user.firstName[0]}${user.lastName[0]}`,
 });
 
-const usersToSidebarView = (users: User[]) => {
-    const _users: User[] = [];
-    for (const user of users) {
-        _users.push(userToSidebarView(user));
-    }
-    return _users;
-};
-
-const userToAdminCard = (user: User) => ({
+const userToSidebar = (user: User): User => ({
     ...user,
     registered: user.registered.slice(6),
+    shortName: `${user.firstName[0].toLowerCase()}.${user.lastName.toLowerCase()}`,
 });
+```
 
-const usersToAdminCard = (users: User[]) => {
-    const _users: User[] = [];
+Here we've simplified the business logic so that it is defined for a _single
+user_, instead of a _list of users_. Now, let's use them in the original functions:
+
+```git
+ const usersToAdmin = (users: User[]) => {
+     const result = [];
+     for (const user of users) {
+-        result.push({
+-           ...user,
+-           registered: new Date(user.registered).toLocaleDateString('en-gb', {
+-               weekday: 'long',
+-               year: 'numeric',
+-               month: 'long',
+-               day: 'numeric',
+-           }),
+-           initials: `${user.firstName[0]}${user.lastName[0]}`,
+-        });
++        result.push(userToAdmin(user));
+     }
+     return result;
+ };
+ 
+ const usersToSidebar = (users: User[]) => {
+     const result = [];
+     for (const user of users) {
+-        result.push({
+-            ...user,
+-            registered: user.registered.slice(6),
+-            shortName: `${user.firstName[0].toLowerCase()}.${user.lastName.toLowerCase()}`,
+-        });
++        result.push(userToSidebar(user));
+     }
+     return result;
+ };
+```
+
+Now it should be obvious which part of the code can be generalized: everything
+but the specific function call. So, how can we generalize this code? By
+defining the function as a parameter of course. In TypeScript (i.e. JavaScript)
+functions are values and call be passed as arguments to other functions. Let's
+first build an intuition for that with simple functions.
+
+
+```typescript
+function emphasise(s: string): string;
+function emphasise(s) {
+    return `_${s}_`;
+}
+
+function timesTen(n: number): number;
+function timesTen(n) {
+    return n * 10;
+}
+```
+
+> Note: We're using the `function` syntax here to separate the type declaration
+from the implementation to make a point later.
+
+* pass as general f
+
+```typescript
+const transformUsers = (f: (user: User) => User, users: User[]) => {
+    const result = [];
     for (const user of users) {
-        _users.push(userToAdminCard(user));
+        result.push(f(user));
     }
-    return _users;
+    return result;
 };
 ```
 
-We simplified the code without breaking it, great. But. As a fellow acolyte of
-the church of "clean code" your DRY ("don't repeat yourself") senses should be
-tingling. `usersToSidebarView` and `usersToAdminCard` look eerily similar.
-In both cases, we're applying a function to elements of our data structure
-(users in an array) and returning a new array with the transformed elements.
+Instead of hardcoding the transformation, we're asking the caller of
+`transformUsers` to supply the transformation as an argument. This works as
+long as the caller passes a function that has the signature `f: (user: User) => User`.
+Now we have to simplify `userToAdmin` and `userToSidebar`, so that they
+fit the signature of `f` and work for a _single_ `User` ...
 
-> Note: DRY is a useful principle when applied sensibly. Always try to
-discern between essential and accidental duplication before mindlessly
-attempting to DRY out code. We could keep going refactoring this, and extract
-the Date transformation function so that it works for any formatted Date
-string. If it is worth doing, and its implementation is left as an exercise to
-the reader.
-
-There is an abstraction hiding in plain sight, meet your new favorite toy,
-`map`:
+... so we can use them like ...
 
 ```typescript
-import * as A from 'fp-ts/lib/Array';
-import * as assert from 'assert';
+const sidebarUsers = transformUsers(userToSidebar, users);
+const adminUsers = transformUsers(userToAdmin, users);
 
-const mapUserToSidebarView = A.map(userToSidebarView);
-const mapUserToAdminCard = A.map(userToAdminCard);
+console.log({sidebarUsers, adminUsers});
 ```
 
-`map` is a higher order function, which means that it takes a function as
-argument and returns a new function that was modifed in a certain way.  Before
-we try to understand how it works, we can show that the new, mapped functions
-are equivalent to the old functions:
+```json5
+{
+  sidebarUsers: [
+    {
+      firstName: 'Barbara',
+      lastName: 'Selling',
+      registered: '2017',
+      shortName: 'b.selling'
+    },
+    {
+      firstName: 'John',
+      lastName: 'Smith',
+      registered: '2019',
+      shortName: 'j.smith'
+    },
+    {
+      firstName: 'Frank',
+      lastName: 'Helmsworth',
+      registered: '2011',
+      shortName: 'f.helmsworth'
+    },
+    {
+      firstName: 'Anna',
+      lastName: 'Freeman',
+      registered: '2003',
+      shortName: 'a.freeman'
+    },
+    {
+      firstName: 'Damian',
+      lastName: 'Sipes',
+      registered: '2001',
+      shortName: 'd.sipes'
+    },
+    {
+      firstName: 'Mara',
+      lastName: 'Homenick',
+      registered: '2007',
+      shortName: 'm.homenick'
+    }
+  ],
+  adminUsers: [
+    {
+      firstName: 'Barbara',
+      lastName: 'Selling',
+      registered: 'Tuesday, 3 January 2017',
+      initials: 'BS'
+    },
+    {
+      firstName: 'John',
+      lastName: 'Smith',
+      registered: 'Tuesday, 24 December 2019',
+      initials: 'JS'
+    },
+    {
+      firstName: 'Frank',
+      lastName: 'Helmsworth',
+      registered: 'Wednesday, 11 May 2011',
+      initials: 'FH'
+    },
+    {
+      firstName: 'Anna',
+      lastName: 'Freeman',
+      registered: 'Wednesday, 9 July 2003',
+      initials: 'AF'
+    },
+    {
+      firstName: 'Damian',
+      lastName: 'Sipes',
+      registered: 'Wednesday, 12 December 2001',
+      initials: 'DS'
+    },
+    {
+      firstName: 'Mara',
+      lastName: 'Homenick',
+      registered: 'Tuesday, 14 August 2007',
+      initials: 'MH'
+    }
+  ]
+}
+```
+
+We have somewhat generalized the "iterate over users" concern, and extracted
+and simplified the business logic without breaking the code. Great!
+
+But we're not done yet. We've only generalized `transformUsers` for any function
+that *takes a user and returns a user*, but why stop there? As it so happens, a
+lot of programs iterate over arrays, applying functions to each element.
+Can we generalize the function even more?
+
+We don't have to, as this function already exists: `map`. Unlike our
+`transformUsers`, which only works for functions `f: (user: User) => User`,
+`map` works for _any_ function `f: <A, B>(a: A) => B`, where `A` and `B` are [generics](http://www.typescriptlang.org/docs/handbook/generics.html).
+
+> Note: In a nutshell, generics are place holder types, or type variables that
+stand in for a concrete type that TypeScript derives once it is used. For
+example, if you define a function with a signature `f: <A>(a: A) => A` and use
+it like `f('Hello, World!')`, TypeScript infers `A` to be a `string`, so the
+concrete signature would be derived as `f: (a: string) => string`. If you used
+it like `f(42)` it would be derived as `f: (a: number) => number`, and so on.
+
+JavaScript has `map` [built-in](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map) as a method on arrays: it applies the passed
+function `f` to every element in a copy of the array and returns the copy. We
+can use that to replace `transformUsers` entirely:
 
 ```typescript
-assert.deepStrictEqual(mapUserToSidebarView(users), usersToSidebarView(users));
-assert.deepStrictEqual(mapUserToAdminCard(users), usersToAdminCard(users));
+const usersToSidebar = (users: User[]) => users.map(userToSidebar);
+const usersToAdmin = (users: User[]) => users.map(usersToAdmin);
+
+const sidebarUsers = usersToSidebar(users);
+const adminUsers = usersToAdmin(users);
+console.log({sidebarUsers, adminUsers});
 ```
 
-> Note: `map` exists for many data structures (which we will have a look at
-in future chapters), but here we're using the `Array` variety.
+```json5
+{
+  sidebarUsers: [
+    {
+      firstName: 'Barbara',
+      lastName: 'Selling',
+      registered: '2017',
+      shortName: 'b.selling'
+    },
+    {
+      firstName: 'John',
+      lastName: 'Smith',
+      registered: '2019',
+      shortName: 'j.smith'
+    },
+    {
+      firstName: 'Frank',
+      lastName: 'Helmsworth',
+      registered: '2011',
+      shortName: 'f.helmsworth'
+    },
+    {
+      firstName: 'Anna',
+      lastName: 'Freeman',
+      registered: '2003',
+      shortName: 'a.freeman'
+    },
+    {
+      firstName: 'Damian',
+      lastName: 'Sipes',
+      registered: '2001',
+      shortName: 'd.sipes'
+    },
+    {
+      firstName: 'Mara',
+      lastName: 'Homenick',
+      registered: '2007',
+      shortName: 'm.homenick'
+    }
+  ],
+  adminUsers: [
+    {
+      firstName: 'Barbara',
+      lastName: 'Selling',
+      registered: 'Tuesday, 3 January 2017',
+      initials: 'BS'
+    },
+    {
+      firstName: 'John',
+      lastName: 'Smith',
+      registered: 'Tuesday, 24 December 2019',
+      initials: 'JS'
+    },
+    {
+      firstName: 'Frank',
+      lastName: 'Helmsworth',
+      registered: 'Wednesday, 11 May 2011',
+      initials: 'FH'
+    },
+    {
+      firstName: 'Anna',
+      lastName: 'Freeman',
+      registered: 'Wednesday, 9 July 2003',
+      initials: 'AF'
+    },
+    {
+      firstName: 'Damian',
+      lastName: 'Sipes',
+      registered: 'Wednesday, 12 December 2001',
+      initials: 'DS'
+    },
+    {
+      firstName: 'Mara',
+      lastName: 'Homenick',
+      registered: 'Tuesday, 14 August 2007',
+      initials: 'MH'
+    }
+  ]
+}
+```
 
-`map` is very generic, in that it does not really care which function you pass
-in, as long as it takes some argument and returns a new value. Here is a much
-simpler example of a function you can `map`:
+> Note: We're only temporarily switching to using built-in methods. In the next
+couple of chapters we will use `fp-ts`, which comes with its own version of
+`map`. Using that, however, requires us to understand a couple more concepts.
+
+To build an intuition for `map`, let's look at more examples:
 
 ```typescript
 const words = ['Hey', 'Ho', "Let's Go"];
 
-const f = (x: string) => `${x}!`;
-const mapF = A.map(f);
+const emphazise = (x: string) => `${x}!`;
 
-assert.deepStrictEqual(
-  mapF(words),
-  ['Hey!', 'Ho!', "Let's Go!"],
-);
+console.log(words.map(emphazise));
 ```
 
-Here, the signatures of the functions are:
-
-```typescript
-type f = (x: string) => string;
-type mapF = (xs: string[]) => string[];
+```json5
+['Hey!', 'Ho!', "Let's Go!"]
 ```
 
-Another example:
-
 ```typescript
-const g = (x: number) => `${x * 10}`;
 const numbers = [1, 2, 3, 4, 5];
 
-const mapG = A.map(g);
-assert.deepStrictEqual(mapG(numbers), ['10', '20', '30', '40', '50']);
+const timesTen = (x: number) => x * 10;
+
+console.log(numbers.map(timesTen));
 ```
 
-The signatures are:
-
-```typescript
-type g = (x: number) => string;
-type mapG = (xs: number[]) => string[];
+```json5
+[10, 20, 30, 40, 50]
 ```
 
-`map` itself has a curious signature:
+When passing a function to `map`, we say that `map` is "lifting" the function
+into the array context. The passed function knows nothing of the context it is
+used in. By using `map`, we can greatly simplify our business logic and
+separate it from concerns of iterating over our data structures.
 
-```typescript
-type map = (fab: (a: A) => B) => A[] => B[];
+> Note: `map` happens to be quite a generic function, in later chapters we'll
+discover that a most data types in `fp-ts` support `map`.
+
+### Intermission
+
+In the cold glare of the overhead office lights, a street urchin approaches you
+with another slip of paper. Strange, how management decides to distribute
+tickets these days. You assume Jira is broken again. You can barely discern the
+contents under all the dirt:
+
+```
+We need a list of all users
+* that registered after January 2015
+* with surnames from a to g, but excluding c
 ```
 
-Don't worry if you don't understand the signature yet, we'll explain this in
-detail in the next chapter. For now, simply recognize the pattern when
-comparing the signatures of the original and the mapped functions:
+Straight to the point. You too distrust those with family names starting with
+c. Strange folk.
 
-| function               | input type | output type |
-|------------------------|------------|-------------|
-| f                      | string     | string      |
-| map(f)                 | string[]   | string[]    |
-| g                      | number     | string      |
-| map(g)                 | number[]   | string[]    |
-| userToSidebarView      | User       | User        |
-| map(userToSidebarView) | User[]     | User[]      |
-| userToAdminCard        | User       | User        |
-| map(userToAdminCard)   | User[]     | User[]      |
+As you are checking out the latest data, you discover that the user count as
+increased: 
 
-We say that `map` is "lifting" a function into a different context, here
-specifically the `Array` context, _without having to rewrite the original
-function_.
+```json5
+[
+    {firstName: 'Barbara', lastName: 'Selling', registered: '01.03.2017'},
+    {firstName: 'John', lastName: 'Smith', registered: '12.24.2019'},
+    {firstName: 'Frank', lastName: 'Helmsworth', registered: '05.11.2011'},
+    {firstName: 'Anna', lastName: 'Freeman', registered: '07.09.2003'},
+    {firstName: 'Damian', lastName: 'Sipes', registered: '12.12.2001'},
+    {firstName: 'Mara', lastName: 'Homenick', registered: '08.14.2007'},
+    {firstName: 'Preston', lastName: 'Brekke', registered: '2020.02.12'},
+    {firstName: 'Matilda', lastName: 'Gorczany', registered: '2019.12.16'},
+    {firstName: 'Matteo', lastName: 'Hauck', registered: '2020.03.09'},
+    {firstName: 'Marielle', lastName: 'Treutel', registered: '2020.02.28'},
+    {firstName: 'Elaina', lastName: 'Braun', registered: '2019.12.16'},
+    {firstName: 'Alessandro', lastName: 'Hammes', registered: '2019.12.13'},
+    {firstName: 'Rozella', lastName: 'Beier', registered: '2019.12.26'},
+    {firstName: 'Molly', lastName: 'Koelpin', registered: '2019.12.01'},
+    {firstName: 'Cleveland', lastName: 'Calvarro', registered: '2020.03.04'},
+]
+```
 
-> Note: Try to build an intuition by replacing any loops in your programs
-meant to iterate over an array with `map`.
+### Introducing filter
 
-Apparently, our apps user base grows. We're up to ten users in total now:
+Before we do any advanced shananigans, let's write the straight forward code
+(though we'll treat the data as immutable, as we learned in the previous
+chapter):
 
 ```typescript
 const users: User[] = [
@@ -198,85 +483,104 @@ const users: User[] = [
     {firstName: 'John', lastName: 'Smith', registered: '12.24.2019'},
     {firstName: 'Frank', lastName: 'Helmsworth', registered: '05.11.2011'},
     {firstName: 'Anna', lastName: 'Freeman', registered: '07.09.2003'},
-    {firstName: 'Seline', lastName: 'Xanathu', registered: '12.01.2019'},
-    {firstName: 'Friedrich', lastName: 'Tischler', registered: '12.14.2019'},
-    {firstName: 'Kyōko', lastName: 'Zbygněv', registered: '12.14.2019'},
-    {firstName: 'Miguelito', lastName: 'Aada', registered: '12.17.2019'},
-    {firstName: 'Mehveş', lastName: 'Badem', registered: '12.31.2019'},
-    {firstName: 'Goeffrey', lastName: 'Dorr', registered: '01.01.2020'},
+    {firstName: 'Damian', lastName: 'Sipes', registered: '12.12.2001'},
+    {firstName: 'Mara', lastName: 'Homenick', registered: '08.14.2007'},
+    {firstName: 'Preston', lastName: 'Brekke', registered: '2020.02.12'},
+    {firstName: 'Matilda', lastName: 'Gorczany', registered: '2019.12.16'},
+    {firstName: 'Matteo', lastName: 'Hauck', registered: '2020.03.09'},
+    {firstName: 'Marielle', lastName: 'Treutel', registered: '2020.02.28'},
+    {firstName: 'Elaina', lastName: 'Braun', registered: '2019.12.16'},
+    {firstName: 'Alessandro', lastName: 'Hammes', registered: '2019.12.13'},
+    {firstName: 'Rozella', lastName: 'Beier', registered: '2019.12.26'},
+    {firstName: 'Molly', lastName: 'Koelpin', registered: '2019.12.01'},
+    {firstName: 'Cleveland', lastName: 'Calvarro', registered: '2020.03.04'},
 ];
-```
 
-Sales wants us to generate a list of all users that registered in December 2019.
-We've just learned that defining our function for the _simple_ case is ­ well ­ simpler.
-So let's start there. Let's define a function that asserts that a user registered in December 2019:
-
-```typescript
-const didRegisterInDecember2019 = (user: User) =>
-    new Date(user.registered) >= new Date('2019.12.01') &&
-    new Date(user.registered) <= new Date('2019.12.31');
-```
-
-Ugh, lots of red flags here; hard coded dates, function still relies on the
-badly formatted user data, etc. pp. But my coffee cup claims we're agile, so
-let's verify that we solved the problem at hand and keep moving:
-
-```typescript
-assert.strictEqual(didRegisterInDecember2019(users[3]), false);
-assert.strictEqual(didRegisterInDecember2019(users[4]), true);
-assert.strictEqual(didRegisterInDecember2019(users[8]), true);
-assert.strictEqual(didRegisterInDecember2019(users[9]), false);
-```
-
-> Note: We have defined what is commonly called a "predicate" function.  A
-predicate takes any value and returns a boolean. You have undoutedly used and
-written many already.  Conventionally predicates are prefixed with `is`, `has`,
-`did`, `was` to signal an assertion about the input value.
-
-Nice, onto applying our function to the list! Meet `filter`. Like `map`,
-`filter` is another higher order function. It takes a predicate function and
-returns a function that filters a list using that predicate. In our case, we're
-getting a function that goes through `users` and only leaves those registered
-in December 2019. 
-
-```typescript
-import * as A from 'fp-ts/lib/Array';
-
-const toSalesView = A.filter(registeredInDec2019);
-```
-
-If we were to write above function by hand, it would look something like:
-
-```typescript
-const toSalesView = (users: User[]) => {
-    const _users = [];
+const usersToSalesView = (users: User[]) => {
+    const characters = ['a', 'b', 'd', 'e', 'f', 'g'];
+    const result = [];
     for (const user of users) {
-        if (registeredInDec2019(user)) {
-            _users.push(user);
+        if (
+            new Date(user.registered) >= new Date(2015, 0, 1) &&
+            characters.includes(user.lastName[0].toLowerCase())
+        ) {
+            result.push(user);
         }
     }
-    return _users;
+    return result;
+};
+
+console.log(usersToSalesView(users));
+```
+
+```json5
+[
+  { firstName: 'Preston', lastName: 'Brekke', registered: '2020.02.12' },
+  { firstName: 'Matilda', lastName: 'Gorczany', registered: '2019.12.16' },
+  { firstName: 'Elaina', lastName: 'Braun', registered: '2019.12.16' },
+  { firstName: 'Rozella', lastName: 'Beier', registered: '2019.12.26' }
+]
+```
+
+> Note: The thoughtful reader might notice that the condition is somewhat
+unsafe, as we're expecting the `lastName` _always_ to have a 0th index. We will
+address that problem in a later chapter.
+
+Seems to work. But again, we're conflating the business logic ("filter
+registered after January 2015" and "filter last name starting with a to g,
+excluding c") with iterating over the user array. To fix that -- like we did
+with our previous refactoring -- we extract the core logic into a function:
+
+```typescript
+const isRelevantForSales = (user: User): boolean =>
+    new Date(user.registered) >= new Date(2015, 0, 1) &&
+    ['a', 'b', 'd', 'e', 'f', 'g'].includes(user.lastName[0].toLowerCase());
+
+const usersToSales = (users: User[]) => {
+    const result = [];
+    for (const user of users) {
+        if (isRelevantForSales(user)) {
+            result.push(user);
+        }
+    }
+    return result;
 };
 ```
 
-Again, we can verify that it works:
+Ignore for now that the name of the function is a bit obscure and notice again
+the pattern: We're iterating over our users again, though this time we're not
+_transforming_ the user, we're _filtering_ them based on a predicate function
+`isRelevantForSales`. By the way, when we say _predicate function_, we mean
+_any_ function taking a value that resolves to a `boolean` value. For example,
+all of the following functions are considered preciate functions as they all
+have the generalized function signature of `<A>(a: A) => boolean`.
 
 ```typescript
-assert.deepStrictEqual(toSalesView(users), [
-    users[1],
-    users[4],
-    users[5],
-    users[6],
-    users[7],
-    users[8],
-]);
+const startsWithC = (s: string): boolean => s.startsWith('c');
+
+const moreThanThreeDigits = (n: number): boolean => n.toString().length > 3;
+
+const afterMoonLanding = (d: Date): boolean => d > new Date(1969, 6, 20);
 ```
 
-> Note: The prolific reader may recognize that `map` and `filter` are
-built-in methods on the `Array` data structure and may wonder why we aren't
-using those. A great question, which will be answered in the composition
-chapter! Have patience!
+And again, as with `map`, we don't have to re-invent the wheel: `filter` abstracts
+away the concern of "iterate over an array and filter values based on a predicate".
+It too is a built-in method on `Array`, so we can use it to replace `usersToSales`:
+
+```typescript
+const salesToUsers = (users: User[]) => users.filter(isRelevantForSales);
+
+const salesUsers = salesToUsers(users);
+console.log(salesUsers);
+```
+
+```json5
+[
+  { firstName: 'Preston', lastName: 'Brekke', registered: '2020.02.12' },
+  { firstName: 'Matilda', lastName: 'Gorczany', registered: '2019.12.16' },
+  { firstName: 'Elaina', lastName: 'Braun', registered: '2019.12.16' },
+  { firstName: 'Rozella', lastName: 'Beier', registered: '2019.12.26' }
+]
+```
 
 ## Next Up
-
-TODO

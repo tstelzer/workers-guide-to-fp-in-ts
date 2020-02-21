@@ -9,67 +9,33 @@ state: draft
 ### Summary
 
 In this chapter we will begin our journey by exploring functions. We will look
-at a piece of code that violates the principle of immutability and explore the
-implications, and refactor it using pure functions. If you're here to learn
-about [fp-ts](https://gcanti.github.io/fp-ts/) and are already familiar with the
-idea of pure functions, you can safely skip this chapter.
+at a piece of code that can be improved by using pure functions. If you are
+already familiar with the idea of pure functions and immutability, you can
+safely skip this chapter.
 
-### Prelude: Mondays
+### Prelude
 
-It's 10AM. The window in the developer room is fogged-up from dozens of steamy cups
-of coffee. Barely awake, you wonder if you could have called in sick today.
-There is still time, of course, the others wouldn't snitch, you could still make it. You
-could creep back under those comforting sheets. The week should really start on
-Tuesday, you think. But, regrettably, it is too late. Bright-eyed Bob blows
-into the room. All confident and motivated he proclaims:
+It's 10AM. The window in the developer room is fogged-up from dozens of steamy
+cups of coffee. You lean on the window frame and lose yourself in painting
+little lambdas on the misty glass. A tiny hummingbird flaps your way, with a
+coffee-stained slip of paper in its beak. Unfazed -- and feeling like a disney
+princess (this isn't the first time workload was sent by way of fowl) -- you
+snatch it from the air with swift hands. It reads:
 
-"Stand-up!"
+```
+The junior wants to build the admin view, could you aid him and build the
+model? It should display the registration date in long date format and the user
+initials. Jim is building the side bar, maybe you guys should have a quick
+chat?
+```
 
-Twelve developers sighs sound in harmony. You distrust Mondays.
-
-"So, we're building two new features today."
-
-Bob takes a sip from his mug, which boldly lies "getting shit done".
-
-"We are?", Barbara inquires. "I didn't see any new tickets."
-
-"Well, apparently sales sold it in December. And the client needs it by Friday."
-
-"Ah, well, that's doable I guess." Barbara takes an ironic sip.
-
-"Yeah, no, last Friday. They needed it by last Friday."
-
-"But that is in the past." Jim helpfully interjects.
-
-"Shit happens." Bob raises his hands in defense. You are pretty sure he owns
-another coffee cup with the words "shit happens" imprinted. "Sorry guys, you
-need to get on this right now. Jim. You need to get onto the side bar ..."
-
-You voice another sigh. Why does this always happen on Monday? You lean on the
-window frame and lose yourself in painting little lambdas on the misty glass.
-You recall the meeting where your kin swore a blood oath over the _surprisingly_
-thin agile manifesto. "Never again", you voices echoed through halls of empty
-cubicles. A war cry of misunderstood craftspeople. Where are those blessed days?
-When was this? It must have been in the fading days of a past summer.
-
-Or was it last Friday? Actually, yes, you think it was last Friday.
-
-"Tom." Ah. That's you. Better listen. "You need to do the admin section. The
-junior wants to build the view, but could you create the model? It should
-display ...  um ..." Bob glances on a stained napkin in his hand.
-"Registration date in ... long date format. I can't read this. Frank said
-something like 'the data is weird'. I don't know what that means. And we need
-to display the user initials. Anyways, I'm sure you'll figure it out! I'm
-confident you guys can do this, you're all rock stars, after all!".
-
-And with that, Bob marches away. You attempt to take another sip before sitting
-down, lamenting the crushed dream of a slow Monday. Alas, the cup is empty. You
-wonder if you could configure the corporate calendar so that weeks start on
-Tuesdays.
+You open up your editor, excited to solve some problems. The small bird briefly
+pauses on your shoulder, silently judging your choice of programing language,
+before fluttering away again.
 
 ### Something something user
 
-Alright. Let's have a look at the data. It's supposed to be "weird", after all.
+Alright. Let's have a look at the data.
 
 ```json5
 [
@@ -82,7 +48,7 @@ Alright. Let's have a look at the data. It's supposed to be "weird", after all.
 ];
 ```
 
-Ah, glancing at the `registered` field, we can see whats "weird": it was stored
+Ah, glancing at the `registered` field we can see that it was stored
 as a US-formatted string, `MONTH.DAY.YEAR`, or `MM.DD.YYYY`, if you are
 familiar with [date field notation](https://www.unicode.org/reports/tr35/tr35-dates.html#Date_Field_Symbol_Table).
 The view needs it in a different format though, something like `Wednesday, 9 July 2003`,
@@ -210,73 +176,19 @@ Anna
 How concrete or general we are in defining our input types is entirely up to us. Each
 comes with benefits and trade offs we will explore in chapters to come.
 
-### Intermission: Motivational coffee
+### Intermission
 
-By now the opaque window of the developer room has cleared up. You get up, lacking
-the coffee to motivate yourself to continue. In passing, you hear
-Jim muttering "fuck fuck fuuuck" under his breath. Barbara seems to hold her
-temples for dear life, staring in disbelief at some code the junior wrote the
-past week. "Well, you approved it", you think to yourself, while said junior
-furiously researches ways to center divs.
+By now the opaque window of the developer room has cleared up. You get up,
+lacking the coffee to motivate yourself to continue. In passing, you hear Jim
+muttering curses under his breath. Barbara seems to hold on to her temples for
+dear life, staring in disbelief at the juniors code from past week, while said
+junior furiously researches ways to center divs.
 
-On your way to the coffee machine you cross ways with Bob, who fixes you with
-a gaze that could pierce stone.
+As you sit down again, armed with fresh coffee ready to directly inject it into
+your blood stream, your colleague Jim (who works on a similar part of the code)
+erupts: "Done. Pushed. Merged."
 
-"Making progress?", he asks, all too casually.
-
-"Sure. Seems simple enough. Just grabbing a cup before I write some tests, then
-I'm going to write the model."
-
-"Oh, don't worry about tests! We _really_ need this feature. You can test
-afterwards."
-
-As you mentally prepare yourself to attack Bob with a plethora of arguments
-about professional ethics and maintainability, he grabs your shoulders with
-both hands, pulls you in, uncomfortably close.
-
-"Please, man! My boss is breathing down my neck.", Bob whispers, while
-literally breathing down your neck. "You'll get all the time in the world to
-test this, _after_ we've released. I promise!", he lies.
-
-Something in the moment instills a feeling of protectiveness in you. You just
-want to wrap Bob in a warm blanket and tell him everything is going to be
-alright. Nothing else matters, not sales, not his boss, not these features,
-only this intimate moment between the two of you.
-
-"OK.", you resign. "But I'll take you up on that promise!"
-
-"Thank you!", a wave of relief washes over Bob, as the familiar cockiness
-visibly returns, and he [richtet sich auf]. "So, I can expect your feature by
-tomorrow?"
-
-You feel violated, somehow.
-
-As you wait for the coffee machine to aggressively squirt coffee into your cup,
-your eyes wander over the floor in irritation. You feel like you have lost
-something, on your way from your machine. Your keys? No, you can feel them in
-your pocket. Your phone? Nah, you left that on your desk. Your integrity? Ah,
-yes, that's it.
-
-You lost your integrity.
-
-As you sit down again, ready to directly inject the caffeine into your blood stream, Jim
-erupts:
-
-"Done. Pushed. Merged."
-
-"Okay, who reviewed?", you voice your concern.
-
-"No need, it's working, I checked it!", he proudly proclaims. "And Bob said
-it's critical anyways, don't worry about it."
-
-"Bob just told me not to write tests, I just worry about the stability of these
-features."
-
-"He told you not to write what?", Jim asks absentmindedly.
-
-Sounds about right. You attempt to take a sip of coffee while simultaneously
-sighing, that could make things more efficient, you presume, as you pull in
-Jims changes.
+You raise your eyebrows, concerned, as you pull in Jims changes.
 
 ### Procedural impurity and shared complexity
 
@@ -760,12 +672,18 @@ And adding them to our function signatures:
 +const usersToSidebar = (users: User[]): SidebarUser[] => {
 ```
 
-While there is still lots of opportunity for refactoring here -- which we will
-explore in the very next chapter -- we can be happy with the progress we've
-made so far.
+> Note: We're being somewhat naive here, forcing immutability by aggressively
+copying data. While individually, the cost is small, in a large application the
+memory overhead _will_ add up. Though we _can_ alleviate some of the cost by
+using libraries that provide data structures made specifically for enabling
+immutability (such as [immer.js](https://www.npmjs.com/package/immer)), the
+memory overhead is a tradeoff functional programers are willing to make.
+
+There are lots of opportunity for refactoring here which we will
+explore in the very next chapter, but we can be happy with the progress we've
+made so far!
 
 ### Next Up
 
-In the next chapter, we will remove some redundancy from our functions by
-exploring the idea of higher order functions. We will also start using the
-`fp-ts` toolkit, specifically its `Array` module.
+In the next chapter we will refactor our code, removing some redundancies by
+exploring the idea of using functions as values.
