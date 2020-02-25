@@ -1,48 +1,25 @@
-<html lang="en"><head><base href="/workers-guide-to-fp-in-ts/"/><meta charSet="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="ie=edge"/><title>A Workers Guide To Typed Functional Programming</title><link rel="stylesheet" href="styles.css"/></head><body><h1 class="page-title">A Workers Guide To Typed Functional Programming</h1><div class="layout"><nav class="nav"><h3 class="nav-title">Jump To Chapter</h3><ol><li><a href="index.html">Introduction</a><ol></ol></li><li><a href="the-road-to-composition.html">The road to composition</a><ol><li><a href="the-road-to-composition/pure-functions.html">Pure Functions</a></li></ol></li></ol></nav><main class="main"><h2 class="chapter-title">Pure Functions</h2><div><h3 id="summary">Summary</h3>
+<html lang="en"><head><base href="/workers-guide-to-fp-in-ts/"/><meta charSet="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="ie=edge"/><title>A Workers Guide To Typed Functional Programming</title><link rel="stylesheet" href="styles.css"/></head><body><h1 class="page-title">A Workers Guide To Typed Functional Programming</h1><div class="layout"><nav class="nav"><h3 class="nav-title">Jump To Chapter</h3><ol><li><a href="index.html">Introduction</a><ol></ol></li><li><a href="the-road-to-composition.html">The road to composition</a><ol><li><a href="the-road-to-composition/pure-functions.html">Pure Functions</a></li><li><a href="the-road-to-composition/functions-as-values.html">Functions as values</a></li></ol></li></ol></nav><main class="main"><h2 class="chapter-title">Pure Functions</h2><div><h3 id="summary">Summary</h3>
 <p>In this chapter we will begin our journey by exploring functions. We will look
-at a piece of code that violates the principle of immutability and explore the
-implications, and refactor it using pure functions. If you&#x27;re here to learn
-about <a href="https://gcanti.github.io/fp-ts/">fp-ts</a> and are already familiar with the
-idea of pure functions, you can safely skip this chapter.</p>
-<h3 id="prelude-mondays">Prelude: Mondays</h3>
-<p>It&#x27;s 10AM. The window in the developer room is fogged-up from dozens of steamy cups
-of coffee. Barely awake, you wonder if you could have called in sick today.
-There is still time, of course, the others wouldn&#x27;t snitch, you could still make it. You
-could creep back under those comforting sheets. The week should really start on
-Tuesday, you think. But, regrettably, it is too late. Bright-eyed Bob blows
-into the room. All confident and motivated he proclaims:</p>
-<p>&quot;Stand-up!&quot;</p>
-<p>Twelve developers sighs sound in harmony. You distrust Mondays.</p>
-<p>&quot;So, we&#x27;re building two new features today.&quot;</p>
-<p>Bob takes a sip from his mug, which boldly lies &quot;getting shit done&quot;.</p>
-<p>&quot;We are?&quot;, Barbara inquires. &quot;I didn&#x27;t see any new tickets.&quot;</p>
-<p>&quot;Well, apparently sales sold it in December. And the client needs it by Friday.&quot;</p>
-<p>&quot;Ah, well, that&#x27;s doable I guess.&quot; Barbara takes an ironic sip.</p>
-<p>&quot;Yeah, no, last Friday. They needed it by last Friday.&quot;</p>
-<p>&quot;But that is in the past.&quot; Jim helpfully interjects.</p>
-<p>&quot;Shit happens.&quot; Bob raises his hands in defense. You are pretty sure he owns
-another coffee cup with the words &quot;shit happens&quot; imprinted. &quot;Sorry guys, you
-need to get on this right now. Jim. You need to get onto the side bar ...&quot;</p>
-<p>You voice another sigh. Why does this always happen on Monday? You lean on the
-window frame and lose yourself in painting little lambdas on the misty glass.
-You recall the meeting where your kin swore a blood oath over the <em>surprisingly</em>
-thin agile manifesto. &quot;Never again&quot;, you voices echoed through halls of empty
-cubicles. A war cry of misunderstood craftspeople. Where are those blessed days?
-When was this? It must have been in the fading days of a past summer.</p>
-<p>Or was it last Friday? Actually, yes, you think it was last Friday.</p>
-<p>&quot;Tom.&quot; Ah. That&#x27;s you. Better listen. &quot;You need to do the admin section. The
-junior wants to build the view, but could you create the model? It should
-display ...  um ...&quot; Bob glances on a stained napkin in his hand.
-&quot;Registration date in ... long date format. I can&#x27;t read this. Frank said
-something like &#x27;the data is weird&#x27;. I don&#x27;t know what that means. And we need
-to display the user initials. Anyways, I&#x27;m sure you&#x27;ll figure it out! I&#x27;m
-confident you guys can do this, you&#x27;re all rock stars, after all!&quot;.</p>
-<p>And with that, Bob marches away. You attempt to take another sip before sitting
-down, lamenting the crushed dream of a slow Monday. Alas, the cup is empty. You
-wonder if you could configure the corporate calendar so that weeks start on
-Tuesdays.</p>
+at a piece of code that can be improved by using pure functions. If you are
+already familiar with the idea of pure functions and immutability, you can
+safely skip this chapter.</p>
+<h3 id="prelude">Prelude</h3>
+<p>It&#x27;s 10AM. The window in the developer room is fogged-up from dozens of steamy
+cups of coffee. You lean on the window frame and lose yourself in painting
+little lambdas on the misty glass. A tiny hummingbird flaps your way, with a
+coffee-stained slip of paper in its beak. Unfazed -- and feeling like a disney
+princess (this isn&#x27;t the first time workload was sent by way of fowl) -- you
+snatch it from the air with swift hands. It reads:</p>
+<pre><code>The junior wants to build the admin view, could you aid him and build the
+model? It should display the registration date in long date format and the user
+initials. Jim is building the side bar, maybe you guys should have a quick
+chat?
+</code></pre>
+<p>You open up your editor, excited to solve some problems. The small bird briefly
+pauses on your shoulder, silently judging your choice of programing language,
+before fluttering away again.</p>
 <h3 id="something-something-user">Something something user</h3>
-<p>Alright. Let&#x27;s have a look at the data. It&#x27;s supposed to be &quot;weird&quot;, after all.</p>
+<p>Alright. Let&#x27;s have a look at the data.</p>
 <details><summary>output</summary><pre class="language-json5"><code class="language-json5"><span class="token punctuation">[</span>
     <span class="token punctuation">{</span><span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Barbara&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Selling&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;01.03.2017&#x27;</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
     <span class="token punctuation">{</span><span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;John&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Smith&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;12.24.2019&#x27;</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
@@ -52,7 +29,7 @@ Tuesdays.</p>
     <span class="token punctuation">{</span><span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Mara&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Homenick&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;08.14.2007&#x27;</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
 <span class="token punctuation">]</span>;
 </code></pre></details>
-<p>Ah, glancing at the <code>registered</code> field, we can see whats &quot;weird&quot;: it was stored
+<p>Ah, glancing at the <code>registered</code> field we can see that it was stored
 as a US-formatted string, <code>MONTH.DAY.YEAR</code>, or <code>MM.DD.YYYY</code>, if you are
 familiar with <a href="https://www.unicode.org/reports/tr35/tr35-dates.html#Date_Field_Symbol_Table">date field notation</a>.
 The view needs it in a different format though, something like <code>Wednesday, 9 July 2003</code>,
@@ -137,60 +114,23 @@ care about the <code>firstName</code> property, so we can
 it from the input. Now we&#x27;ve signaled to the caller that we care <em>even less</em>
 about the label of the input, as long as it contains a <code>firstName</code> of type
 <code>string</code>.</p>
-<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">const</span> firstName <span class="token operator">=</span> <span class="token punctuation">(</span>input<span class="token punctuation">:</span> <span class="token punctuation">{</span>firstName<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token parameter"><span class="token builtin">string</span></span> <span class="token arrow operator">=&gt;</span> input<span class="token punctuation">.</span><span class="token property-access">firstName</span><span class="token punctuation">;</span>
+<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">const</span> firstName <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">{</span>firstName<span class="token punctuation">}</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>firstName<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token parameter"><span class="token builtin">string</span></span> <span class="token arrow operator">=&gt;</span> input<span class="token punctuation">.</span><span class="token property-access">firstName</span><span class="token punctuation">;</span>
 <span class="token console class-name">console</span><span class="token punctuation">.</span><span class="token method function property-access">log</span><span class="token punctuation">(</span><span class="token function">firstName</span><span class="token punctuation">(</span>anna<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 </code></pre>
 <details><summary>output</summary><pre class="language-json5"><code class="language-json5">Anna
 </code></pre></details>
 <p>How concrete or general we are in defining our input types is entirely up to us. Each
 comes with benefits and trade offs we will explore in chapters to come.</p>
-<h3 id="intermission-motivational-coffee">Intermission: Motivational coffee</h3>
-<p>By now the opaque window of the developer room has cleared up. You get up, lacking
-the coffee to motivate yourself to continue. In passing, you hear
-Jim muttering &quot;fuck fuck fuuuck&quot; under his breath. Barbara seems to hold her
-temples for dear life, staring in disbelief at some code the junior wrote the
-past week. &quot;Well, you approved it&quot;, you think to yourself, while said junior
-furiously researches ways to center divs.</p>
-<p>On your way to the coffee machine you cross ways with Bob, who fixes you with
-a gaze that could pierce stone.</p>
-<p>&quot;Making progress?&quot;, he asks, all too casually.</p>
-<p>&quot;Sure. Seems simple enough. Just grabbing a cup before I write some tests, then
-I&#x27;m going to write the model.&quot;</p>
-<p>&quot;Oh, don&#x27;t worry about tests! We <em>really</em> need this feature. You can test
-afterwards.&quot;</p>
-<p>As you mentally prepare yourself to attack Bob with a plethora of arguments
-about professional ethics and maintainability, he grabs your shoulders with
-both hands, pulls you in, uncomfortably close.</p>
-<p>&quot;Please, man! My boss is breathing down my neck.&quot;, Bob whispers, while
-literally breathing down your neck. &quot;You&#x27;ll get all the time in the world to
-test this, <em>after</em> we&#x27;ve released. I promise!&quot;, he lies.</p>
-<p>Something in the moment instills a feeling of protectiveness in you. You just
-want to wrap Bob in a warm blanket and tell him everything is going to be
-alright. Nothing else matters, not sales, not his boss, not these features,
-only this intimate moment between the two of you.</p>
-<p>&quot;OK.&quot;, you resign. &quot;But I&#x27;ll take you up on that promise!&quot;</p>
-<p>&quot;Thank you!&quot;, a wave of relief washes over Bob, as the familiar cockiness
-visibly returns, and he [richtet sich auf]. &quot;So, I can expect your feature by
-tomorrow?&quot;</p>
-<p>You feel violated, somehow.</p>
-<p>As you wait for the coffee machine to aggressively squirt coffee into your cup,
-your eyes wander over the floor in irritation. You feel like you have lost
-something, on your way from your machine. Your keys? No, you can feel them in
-your pocket. Your phone? Nah, you left that on your desk. Your integrity? Ah,
-yes, that&#x27;s it.</p>
-<p>You lost your integrity.</p>
-<p>As you sit down again, ready to directly inject the caffeine into your blood stream, Jim
-erupts:</p>
-<p>&quot;Done. Pushed. Merged.&quot;</p>
-<p>&quot;Okay, who reviewed?&quot;, you voice your concern.</p>
-<p>&quot;No need, it&#x27;s working, I checked it!&quot;, he proudly proclaims. &quot;And Bob said
-it&#x27;s critical anyways, don&#x27;t worry about it.&quot;</p>
-<p>&quot;Bob just told me not to write tests, I just worry about the stability of these
-features.&quot;</p>
-<p>&quot;He told you not to write what?&quot;, Jim asks absentmindedly.</p>
-<p>Sounds about right. You attempt to take a sip of coffee while simultaneously
-sighing, that could make things more efficient, you presume, as you pull in
-Jims changes.</p>
+<h3 id="intermission">Intermission</h3>
+<p>By now the opaque window of the developer room has cleared up. You get up,
+lacking the coffee to motivate yourself to continue. In passing, you hear Jim
+muttering curses under his breath. Barbara seems to hold on to her temples for
+dear life, staring in disbelief at the juniors code from past week, while said
+junior furiously researches ways to center divs.</p>
+<p>As you sit down again, armed with fresh coffee ready to directly inject it into
+your blood stream, your colleague Jim (who works on a similar part of the code)
+erupts: &quot;Done. Pushed. Merged.&quot;</p>
+<p>You raise your eyebrows, concerned, as you pull in Jims changes.</p>
 <h3 id="procedural-impurity-and-shared-complexity">Procedural impurity and shared complexity</h3>
 <p>Before we write our own model, let&#x27;s have a look at Jims code.</p>
 <pre class="language-git"><code class="language-git"> type User = {
@@ -644,10 +584,17 @@ types for them:</p>
 <span class="token deleted">-const usersToSidebar = (users: User[]) =&gt; {</span>
 <span class="token inserted">+const usersToSidebar = (users: User[]): SidebarUser[] =&gt; {</span>
 </code></pre>
-<p>While there is still lots of opportunity for refactoring here -- which we will
-explore in the very next chapter -- we can be happy with the progress we&#x27;ve
-made so far.</p>
+<blockquote>
+<p>Note: We&#x27;re being somewhat naive here, forcing immutability by aggressively
+copying data. While individually, the cost is small, in a large application the
+memory overhead <em>will</em> add up. Though we <em>can</em> alleviate some of the cost by
+using libraries that provide data structures made specifically for enabling
+immutability (such as <a href="https://www.npmjs.com/package/immer">immer.js</a>), the
+memory overhead is a trade-off functional programmers are willing to make.</p>
+</blockquote>
+<p>There are lots of opportunity for refactoring here which we will
+explore in the very next chapter, but we can be happy with the progress we&#x27;ve
+made so far!</p>
 <h3 id="next-up">Next Up</h3>
-<p>In the next chapter, we will remove some redundancy from our functions by
-exploring the idea of higher order functions. We will also start using the
-<code>fp-ts</code> toolkit, specifically its <code>Array</code> module.</p></div></main></div></body></html>
+<p>In the next chapter we will refactor our code, removing some redundancies by
+exploring the idea of using functions as values.</p></div></main></div></body></html>
