@@ -165,7 +165,7 @@ about the label of the input, as long as it contains a `firstName` of type
 `string`.
 
 ```typescript
-const firstName = (input: {firstName: string}): string => input.firstName;
+const firstName = ({firstName}: {firstName: string}): string => input.firstName;
 console.log(firstName(anna));
 ```
 
@@ -677,7 +677,7 @@ copying data. While individually, the cost is small, in a large application the
 memory overhead _will_ add up. Though we _can_ alleviate some of the cost by
 using libraries that provide data structures made specifically for enabling
 immutability (such as [immer.js](https://www.npmjs.com/package/immer)), the
-memory overhead is a tradeoff functional programers are willing to make.
+memory overhead is a trade-off functional programmers are willing to make.
 
 There are lots of opportunity for refactoring here which we will
 explore in the very next chapter, but we can be happy with the progress we've
