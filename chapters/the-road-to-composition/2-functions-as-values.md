@@ -168,9 +168,9 @@ const uppercaseWithF = (f: (s: string) => string, s: string) =>
     f(s.toUpperCase());
 ```
 
-It knows that it can apply `f`, because uppercasing a string also returns a
-string, and it defines `f` so that it takes a string. Let's define a couple of
-functions that we can pass as arguments to `uppercaseWithF`:
+TypeScript knows that it can apply `f`, because uppercasing a string also
+returns a string, and it defines `f` so that it takes a string. Let's define a
+couple of functions that we can pass as arguments to `uppercaseWithF`:
 
 ```typescript
 const emphasize = (s: string): string => `_${s}_`;
@@ -587,7 +587,7 @@ const afterMoonLanding = (d: Date): boolean => d > new Date(1969, 6, 20);
 ```
 
 And again, as with `map`, we don't have to reinvent the wheel: `filter` abstracts
-away the concern of "iterate over an array and filter values based on a predicate".
+the concern of "iterate over an array and filter values based on a predicate".
 It too is a built-in method on `Array`, let's have a look at a couple of examples:
 
 ```typescript

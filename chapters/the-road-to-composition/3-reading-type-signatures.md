@@ -22,10 +22,10 @@ so code like this should not surprise you:
 const startsWithC = (s: string): boolean => s.toLowerCase().startsWith('c');
 ```
 
-You've seen this function at the end of the last chapter.
-Nothing fancy, it's just a simple function that asserts that a `string` starts with
-a `c`. This code combines type signature and implementation, though. For the
-sake of isolating its type signature, let's define it as a `type`:
+You've seen this function at the end of the last chapter.  Nothing fancy, it's
+just a simple function that asserts that a `string` starts with the character
+`c`. This code combines type signature and implementation, though. For the sake
+of isolating its type signature, let's define it as a `type`:
 
 ```typescript
 type startsWithC = (s: string) => boolean;
@@ -93,8 +93,7 @@ Fortunately, there is such a thing in TypeScript: meet [generics](http://www.typ
 In a nutshell, generics are place holder types, or type variables that stand in
 for a concrete type. Generics let us define generalized functions without
 concrete types, allowing the _caller_ of the functions to define them
-instead, either explicitly by passing them to the generic, or automatically
-inferred from usage by TypeScript.
+instead, either explicitly, or implicitly inferred by TypeScript.
 
 Using generics, we can define our `Predicate` like this:
 
