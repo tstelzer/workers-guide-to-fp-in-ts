@@ -71,11 +71,11 @@ const usersToSidebar = (users: User[]) => {
 };
 ```
 
-To identify opportunities for refactoring, you can ask ourself a couple of
+To identify opportunities for refactoring, you can ask ourselves a couple of
 questions. The first question -- the one that seems to be hammered into
 programmers from day one -- is: Am I repeating myself needlessly?
 
-> Note: "Dont't Repeat Yourself", or "DRY" is a useful principle when applied
+> Note: "Don't Repeat Yourself", or "DRY" is a useful principle when applied
 sensibly. Always try to discern between essential and accidental duplication
 before mindlessly attempting to DRY out code.
 
@@ -310,15 +310,8 @@ Can we generalize the function even more?
 
 We don't have to, as this function already exists: `map`. Unlike our
 `transformUsers`, which only works for functions `f: (user: User) => User`,
-`map` works for _any_ function `f: <A, B>(a: A) => B`, where `A` and `B` are generics.
-
-> Note: In a nutshell, generics are place holder types, or type variables that
-stand in for a concrete type that TypeScript derives once it is used. For
-example, if you define a function with a signature `f: <A>(a: A) => A` and use
-it like `f('Hello, World!')`, TypeScript infers `A` to be a `string`, so the
-concrete signature would be derived as `f: (a: string) => string`. If you used
-it like `f(42)` it would be derived as `f: (a: number) => number`, and so on.
-If you've never seen generics, I encourage you to [read through the official documentation](http://www.typescriptlang.org/docs/handbook/generics.html).
+`map` works for _any_ function that takes a value of some type and returns a
+value of the same type.
 
 JavaScript has `map` [built-in](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map) as a method on arrays: it applies the passed
 function `f` to every element in a copy of the array and returns the copy.
@@ -583,23 +576,22 @@ predicate function `isRelevantForSales`.
 
 When we say _predicate function_, we mean _any_ function taking a value that
 resolves to a `boolean` value. For example, all of the following functions are
-considered predicate functions as they all have the generalized function
-signature of `<A>(a: A) => boolean`.
+considered predicate functions:
 
 ```typescript
-const startsWithC = (s: string): boolean => s.startsWith('c');
+const startsWithC = (s: string): boolean => s.toLowerCase().startsWith('c');
 
 const moreThanThreeDigits = (n: number): boolean => n.toString().length > 3;
 
 const afterMoonLanding = (d: Date): boolean => d > new Date(1969, 6, 20);
 ```
 
-And again, as with `map`, we don't have to re-invent the wheel: `filter` abstracts
+And again, as with `map`, we don't have to reinvent the wheel: `filter` abstracts
 away the concern of "iterate over an array and filter values based on a predicate".
 It too is a built-in method on `Array`, let's have a look at a couple of examples:
 
 ```typescript
-const startsWithC = (s: string): boolean => s.startsWith('c');
+const startsWithC = (s: string): boolean => s.toLowerCase().startsWith('c');
 const strings = ['horse', 'cow', 'cat', 'dog'];
 
 console.log(strings.filter(startsWithC));
@@ -623,7 +615,7 @@ console.log(numbers.filter(moreThanThreeDigits));
 
 Simple, right? Let's now use it to simplify our `usersToSalesView`:
 
-```typescript
+```git
 -const usersToSalesView = (users: User[]) => {
 -    const result = [];
 -    for (const user of users) {
