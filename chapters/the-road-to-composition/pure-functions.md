@@ -15,21 +15,21 @@ safely skip this chapter.
 
 ### Prelude
 
-It's 10AM. The window in the developer room is fogged-up from dozens of steamy
+It is 10 A.M. The window in the developer room is fogged up from dozens of steamy
 cups of coffee. You lean on the window frame and lose yourself in painting
 little lambdas on the misty glass. A tiny hummingbird flaps your way, with a
-coffee-stained slip of paper in its beak. Unfazed -- and feeling like a disney
-princess (this isn't the first time workload was sent by way of fowl) -- you
+coffee stained slip of paper in its beak. Unfazed -- and feeling like a Disney
+princess as this is not the first time workload was sent by way of fowl -- you
 snatch it from the air with swift hands. It reads:
 
-```
+```text
 The junior wants to build the admin view, could you aid him and build the
 model? It should display the registration date in long date format and the user
 initials. Jim is building the side bar, maybe you guys should have a quick
 chat?
 ```
 
-You open up your editor, excited to solve some problems. The small bird briefly
+You open up your editor, excited to solve problems. The small bird briefly
 pauses on your shoulder, silently judging your choice of programing language,
 before fluttering away again.
 
@@ -81,6 +81,8 @@ It means that the type of a thing is not defined by its place of declaration or
 internal name (as is the case in nominal typed languages like Java or C#), but
 by its properties. This means that the same piece of data can match many types.
 
+> Note that as of writing this, there is an open discussion [whether to introduce nominal typing to TypeScript](https://github.com/Microsoft/TypeScript/issues/202).
+
 Let's have a look at an example: We can explicitly tell TypeScript which shape
 we're expecting this object, `damian`, to have. If the structure wouldn't match
 the type, TypeScript would yell at us.
@@ -108,7 +110,7 @@ console.log(firstName(damian));
 Damian
 ```
 
-Damians friend Mara doesn't like to be labeled:
+Damians friend Mara doesn't want to be labeled:
 
 ```typescript
 const mara = {
@@ -374,7 +376,7 @@ that would fix it.
 -usersToSidebar();
  usersToAdminView();
 +usersToSidebar();
- 
+
  console.log(users);
 ```
 
@@ -425,7 +427,7 @@ that would fix it.
 ]
 ```
 
-Oof. Completely broken. What we're seeing here is the cost of **shared, mutable
+Oof. Broken. What we're seeing here is the cost of **shared, mutable
 state**. In our procedures we are reaching into the global scope and changing
 data in place that is used in other places. We're not preserving the integrity
 of the data. Like a spoiled toddler, we're rampaging through the sweets section
@@ -445,7 +447,7 @@ Fortunately, we have a simple solution at hand: the function. Specifically, the
 
 ### Out of the tar pit
 
-You know what is fundamentally simple? A table:
+Know what is fundamentally simple? A table:
 
 | key | value |
 |-----|-------|
@@ -472,7 +474,7 @@ const f = (key: 'a' | 'b' | 'c' | 'd') =>
     : 99999;
 ```
 
-* The pure function has two sets of values, input (`'a' | 'b' | 'c' | 'd'`) 
+* The pure function has two sets of values, input (`'a' | 'b' | 'c' | 'd'`)
   and output (`1 | 99 | 1000 | 99999`).
 * We can look up output values by passing input values
 * Though we may add values to input and output sets, at the time of accessing
@@ -619,7 +621,7 @@ console.log({sidebarUsers, adminUsers});
 }
 ```
 
-Gorgous. And the original data is untouched:
+Gorgeous. And the original data is untouched:
 
 ```typescript
 console.log(users);
@@ -673,17 +675,20 @@ And adding them to our function signatures:
 ```
 
 > Note: We're being somewhat naive here, forcing immutability by aggressively
-copying data. While individually, the cost is small, in a large application the
-memory overhead _will_ add up. Though we _can_ alleviate some of the cost by
-using libraries that provide data structures made specifically for enabling
-immutability (such as [immer.js](https://www.npmjs.com/package/immer)), the
-memory overhead is a trade-off functional programmers are willing to make.
+> copying data. While individually, the cost is small, in a large application
+> the memory overhead _will_ add up. We _can_ alleviate some of the cost by
+> using libraries that provide data structures made specifically for enabling
+> immutability (such as [immer.js](https://www.npmjs.com/package/immer)).
+> Other languages, such as Haskell, Rust or Clojure enable immutable data by
+> design, and offer built-in solutions for effecient, immutable programs. For
+> the purposes of this tutorial though, the memory overhead is a trade-off we
+> are willing to make.
 
-There are lots of opportunity for refactoring here which we will
+There is lots of opportunity for refactoring here which we will
 explore in the very next chapter, but we can be happy with the progress we've
 made so far!
 
 ### Next Up
 
-In the next chapter we will refactor our code, removing some redundancies by
+In the next chapter we will refactor our code, removing redundancies by
 exploring the idea of using functions as values.
