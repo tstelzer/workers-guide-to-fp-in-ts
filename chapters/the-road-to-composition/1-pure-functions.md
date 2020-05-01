@@ -6,32 +6,14 @@ title: Pure Functions
 state: draft
 ---
 
-### Summary
+### When the facts don't change
+
+We are starting small. Before we look at any advanced patterns of functional
 
 In this chapter we will begin our journey by exploring functions. We will look
 at a piece of code that can be improved by using pure functions. If you are
 already familiar with the idea of pure functions and immutability, you can
 safely skip this chapter.
-
-### Prelude
-
-It is 10 A.M. The window in the developer room is fogged up from dozens of steamy
-cups of coffee. You lean on the window frame and lose yourself in painting
-little lambdas on the misty glass. A tiny hummingbird flaps your way, with a
-coffee stained slip of paper in its beak. Unfazed -- and feeling like a Disney
-princess as this is not the first time workload was sent by way of fowl -- you
-snatch it from the air with swift hands. It reads:
-
-```text
-The junior wants to build the admin view, could you aid him and build the
-model? It should display the registration date in long date format and the user
-initials. Jim is building the side bar, maybe you guys should have a quick
-chat?
-```
-
-You open up your editor, excited to solve problems. The small bird briefly
-pauses on your shoulder, silently judging your choice of programing language,
-before fluttering away again.
 
 ### Something something user
 
@@ -69,8 +51,11 @@ programming that we will learn as part of this series of tutorials, we clearly
 distinguish and separate these.
 
 When we see a type, we don't mean an "an instance of a class", we mean "a piece
-of data that matches a certain structure". In our specific case, any data that
-matches its structure can be considered a `User`. Think one of those toys that
+of data that matches a certain structure" (think "struct", if you are familiar
+with that term). In our specific case, any data that matches its structure can
+be considered a `User`.
+
+Think one of those toys that
 seem to be sold exclusively to doctors waiting rooms, where children are
 supposed to match wooden blocks in various shapes (stars, circles, rectangles)
 to their corresponding holes. If the block matches the "star" hole, for all
@@ -177,20 +162,6 @@ Anna
 
 How concrete or general we are in defining our input types is entirely up to us. Each
 comes with benefits and trade offs we will explore in chapters to come.
-
-### Intermission
-
-By now the opaque window of the developer room has cleared up. You get up,
-lacking the coffee to motivate yourself to continue. In passing, you hear Jim
-muttering curses under his breath. Barbara seems to hold on to her temples for
-dear life, staring in disbelief at the juniors code from past week, while said
-junior furiously researches ways to center divs.
-
-As you sit down again, armed with fresh coffee ready to directly inject it into
-your blood stream, your colleague Jim (who works on a similar part of the code)
-erupts: "Done. Pushed. Merged."
-
-You raise your eyebrows, concerned, as you pull in Jims changes.
 
 ### Procedural impurity and shared complexity
 
