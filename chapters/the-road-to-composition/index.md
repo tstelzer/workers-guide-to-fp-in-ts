@@ -5,15 +5,15 @@ title: The road to composition
 state: draft
 ---
 
-And so our journey begins. Our first goal is building an understanding for the
-basic building blocks of functional programming, on the road to composition.
-In the following chapters you will learn about:
-
-- The value and application of pure functions.
-- Data immutability.
-- Partial application of functions.
-- Function currying.
-- Basic function composition.
-
-To build an intuition for these skills, be sure to do the accompanying
-exercises.
+And so our journey begins. On the road to composition, we're building an
+understanding for the basic building blocks of functional programming. In
+chapter one, we will learn to appreciate the objective simplicitly of pure
+functions and data immutability and use this knowledge to refactor a piece of
+code. In chapter two, we discover that functions are themselfes values and use
+this to further simplify our code. Chapter three offers an in-depth look at
+concept of function signatures and some advanced TypeScript features.  In
+chapter four, we name a concept that we've been using in previous chapters
+without knowing that we did: partial application. Chapter five builds on this
+knowledgeand examines the idea of function currying. Finally, chapter six
+combines all of the skills we have learned up to this point in exploring
+function composition.
