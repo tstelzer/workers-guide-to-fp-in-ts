@@ -16,7 +16,8 @@ is expressed as a function.
 
 In this practical and introductory book on typed functional programming
 we're having a look at the basic tool kit of the paradigm. We're using
-TypeScript and the extensive ecosystem of the [fp-ts](https://gcanti.github.io/fp-ts/) library, though these skills are transferrable between languages and libraries.
+TypeScript and the extensive ecosystem of the [fp-ts](https://gcanti.github.io/fp-ts/) library,
+though these skills are transferrable between languages and libraries.
 Once you have learned these concepts, you can use them in almost any other
 language that supports functional programming.
 
@@ -35,12 +36,9 @@ JavaScript or TypeScript, you should:
 - Be familiar with general software development language and basic programming concepts.
 - Know your way around your own development environment. For example, this book will not guide you through setting up the TypeScript runtime.
 
-Chapters are accompanied by exercises.
-
 ### Work In Progress
 
 This tutorial is written in good faith, to the best of the authors knowledge,
 and is a work-in-progress. Some chapters may be missing, some exercises lacking
 in depth. It will grow and evolve over time. If you find any factual errors,
-please offer your corrections by opening issues on the repository or by voicing
-your suggestions in the [functional programming slack](https://fpchat-invite.herokuapp.com/).
+please offer your corrections by opening issues on the repository.

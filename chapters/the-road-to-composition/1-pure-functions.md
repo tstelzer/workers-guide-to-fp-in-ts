@@ -6,14 +6,15 @@ title: Pure Functions
 state: draft
 ---
 
-### When the facts don't change
+### Summary
 
-We are starting small. Before we look at any advanced patterns of functional
+We are starting small. Before we explore any advanced patterns of functional
+programming, we're looking at the fundamental and essential building block that
+defines the paradigm: the pure function. Exploring a simple problem, we'll
+refactor an initially imperative solution to be more functional.
 
-In this chapter we will begin our journey by exploring functions. We will look
-at a piece of code that can be improved by using pure functions. If you are
-already familiar with the idea of pure functions and immutability, you can
-safely skip this chapter.
+If you are already familiar with the idea of pure functions and immutability,
+you can safely skip this chapter.
 
 ### Something something user
 
