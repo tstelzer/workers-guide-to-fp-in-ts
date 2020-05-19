@@ -6,6 +6,8 @@ title: Pure Functions
 state: draft
 ---
 
+"You wonder if Velod is still making that mead with juniper berries mixed in..."
+
 ### Summary
 
 We are starting small. Before we explore any advanced patterns of functional
