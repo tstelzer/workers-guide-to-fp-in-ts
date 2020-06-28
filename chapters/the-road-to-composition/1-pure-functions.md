@@ -6,70 +6,288 @@ title: Pure Functions
 state: draft
 ---
 
-"You wonder if Velod is still making that mead with juniper berries mixed in..."
+### Capitalism, ho!
 
-### Summary
-
-We are starting small. Before we explore any advanced patterns of functional
-programming, we're looking at the fundamental and essential building block that
-defines the paradigm: the pure function. Exploring a simple problem, we'll
-refactor an initially imperative solution to be more functional.
-
-If you are already familiar with the idea of pure functions and immutability,
-you can safely skip this chapter.
-
-### Something something user
-
-Alright. Let's have a look at the data.
+As you step onto the creaking floor boards of the old shop, you breathe in a
+whiff of mouldy air. You firmly grip the key in your hand, melancholy washing
+over you, as you recall the many times you spent helping your granny running the shop
+in your childhood. Brushing off a layer of thick dust on the counter, you begin
+to inspect the inventory.
 
 ```json5
 [
-    {firstName: 'Barbara', lastName: 'Selling', registered: '01.03.2017'},
-    {firstName: 'John', lastName: 'Smith', registered: '12.24.2019'},
-    {firstName: 'Frank', lastName: 'Helmsworth', registered: '05.11.2011'},
-    {firstName: 'Anna', lastName: 'Freeman', registered: '07.09.2003'},
-    {firstName: 'Damian', lastName: 'Sipes', registered: '12.12.2001'},
-    {firstName: 'Mara', lastName: 'Homenick', registered: '08.14.2007'},
-];
+  {
+    "name": "Pearl",
+    "cost": 75,
+    "rarity": 0.05
+  },
+  {
+    "name": "Boar Tusk",
+    "cost": 20,
+    "rarity": 0.35
+  },
+  {
+    "name": "Moon Sugar",
+    "cost": 9.39,
+    "rarity": 0.41
+  },
+  {
+    "name": "Deathbell",
+    "cost": 0.18,
+    "rarity": 0.45
+  },
+  {
+    "name": "Hawk Feathers",
+    "cost": 3.25,
+    "rarity": 0.45
+  },
+  {
+    "name": "Hawk Beak",
+    "cost": 7.9,
+    "rarity": 0.45
+  },
+  {
+    "name": "Hawk Feathers",
+    "cost": 3.25,
+    "rarity": 0.45
+  },
+  {
+    "name": "Glowing Mushroom",
+    "cost": 1.4,
+    "rarity": 0.5
+  },
+  {
+    "name": "Bone Meal",
+    "cost": 5.2,
+    "rarity": 0.5
+  },
+  {
+    "name": "Canis Root",
+    "cost": 0.09,
+    "rarity": 0.6
+  },
+  {
+    "name": "Blisterwort",
+    "cost": 0.02,
+    "rarity": 0.6
+  },
+  {
+    "name": "Canis Root",
+    "cost": 0.09,
+    "rarity": 0.6
+  },
+  {
+    "name": "Canis Root",
+    "cost": 0.09,
+    "rarity": 0.6
+  },
+  {
+    "name": "Beehive Husk",
+    "cost": 1.1,
+    "rarity": 0.7
+  },
+  {
+    "name": "Beehive Husk",
+    "cost": 1.1,
+    "rarity": 0.7
+  },
+  {
+    "name": "Garlic",
+    "cost": 0.21,
+    "rarity": 0.75
+  },
+  {
+    "name": "Lavender",
+    "cost": 0.09,
+    "rarity": 0.78
+  },
+  {
+    "name": "Lavender",
+    "cost": 0.09,
+    "rarity": 0.78
+  },
+  {
+    "name": "Hanging Moss",
+    "cost": 0.04,
+    "rarity": 0.82
+  },
+  {
+    "name": "Hanging Moss",
+    "cost": 0.04,
+    "rarity": 0.82
+  },
+  {
+    "name": "Hanging Moss",
+    "cost": 0.04,
+    "rarity": 0.82
+  },
+  {
+    "name": "Hanging Moss",
+    "cost": 0.04,
+    "rarity": 0.82
+  },
+  {
+    "name": "Wheat",
+    "cost": 0.05,
+    "rarity": 1
+  },
+  {
+    "name": "Wheat",
+    "cost": 0.05,
+    "rarity": 1
+  },
+  {
+    "name": "Wheat",
+    "cost": 0.05,
+    "rarity": 1
+  }
+]
 ```
 
-Ah, glancing at the `registered` field we can see that it was stored
-as a US-formatted string, `MONTH.DAY.YEAR`, or `MM.DD.YYYY`, if you are
-familiar with [date field notation](https://www.unicode.org/reports/tr35/tr35-dates.html#Date_Field_Symbol_Table).
-The view needs it in a different format though, something like `Wednesday, 9 July 2003`,
-or `EEEE, d MMMM YYYY`. Before we go about and create our view
-model, we'll capture the _structure_ of our data in a type.
+Grandmother supplied ingredients to adventurous alchemists, and you will pick
+up the trade. She used to do her accounting with pen and paper, but you will
+bring the shop into the 21th century, modeling the shop in a TypeScript
+program. So far, the list of ingredients look simple enough, let's describe it
+in a `type`. Ingredients have a unique `name`, a `cost`, which denotes how much
+we payed for them, and a `rarity`, which describes a range of how likely it is
+to find, from `0` to `1`.
 
 ```typescript
-type User {
-    firstName: string;
-    lastName: string;
-    registered: string;
-}
+// file: Ingredient.ts
+export type Ingredient = {
+    name: string;
+    cost: number;
+    rarity: number;
+};
 ```
 
-Unlike in classical object-oriented programming (OOP), where designs tend to
-combine data, behaviour, state and identity, in the style of functional
-programming that we will learn as part of this series of tutorials, we clearly
-distinguish and separate these.
+This `type` describes the shape, or structure of the data in our program (think
+`struct`, if you're familiar with that term). We can then define functions that
+take data of this type and transform it. For example, we could define a
+constructor function that creates data that fits the `Ingredient` type:
 
-When we see a type, we don't mean an "an instance of a class", we mean "a piece
-of data that matches a certain structure" (think "struct", if you are familiar
-with that term). In our specific case, any data that matches its structure can
-be considered a `User`.
+```typescript
+export const from = (name: string, cost: number, rarity: number): Ingredient => ({
+    name,
+    cost,
+    rarity,
+});
+```
 
-Think one of those toys that
-seem to be sold exclusively to doctors waiting rooms, where children are
-supposed to match wooden blocks in various shapes (stars, circles, rectangles)
-to their corresponding holes. If the block matches the "star" hole, for all
-intents and purposes, its a star.
+Note that, unlike in object-oriented programming, our data is not an instance
+of a class. It is just that, data. Simple, serializable, context-free data.
+Our `Ingredient` does not have any behaviour (methods) attached to it. Any
+transformations we need, we will define as functions that take data of the type
+`Ingredient` as input. Note that our constructor function is just a helper,
+we don't actually need it to create an `Ingredient`:
 
-This kind of type system is called [structural sub typing](https://www.typescriptlang.org/docs/handbook/type-compatibility.html).
-It means that the type of a thing is not defined by its place of declaration or
-internal name (as is the case in nominal typed languages like Java or C#), but
-by its properties. This means that the same piece of data can match many types.
+```typescript
+import * as assert from 'assert';
 
-> Note that as of writing this, there is an open discussion [whether to introduce nominal typing to TypeScript](https://github.com/Microsoft/TypeScript/issues/202).
+assert.deepStrictEqual(from('Garlic', 0.1, 0.7), {
+    name: 'Garlic',
+    cost: 0.1,
+    rarity: 0.7,
+});
+```
+
+Both pieces of data can be considered an `Ingredient`. In fact, any data that
+shares properties with our type can be, for all intents and purposes,
+considered an `Ingredient`. Here is a function `name`, that takes an
+`Ingredient` and returns its `name`:
+
+```typescript
+const name = (ingredient: Ingredient) => ingredient.name;
+```
+
+We can use it on both pieces of data, the one we created manually and the
+one by using `from`:
+
+```typescript
+assert.deepEqual(name(from('Garlic', 0.1, 0.7)), 'Garlic');
+
+assert.deepEqual(
+    name({
+        name: 'Garlic',
+        cost: 0.1,
+        rarity: 0.7,
+    }),
+    'Garlic',
+);
+```
+
+TypeScript requires us to be exact about the properties when passing in an
+object literal into `name`, the following will not compile, warning us that
+`color` does not exist on our `Ingredient` type:
+
+```typescript
+assert.deepEqual(
+    name({
+        name: 'Tyme',
+        cost: 0.2,
+        rarity: 0.5,
+        // Does not compile.
+        color: 'green',
+    }),
+    'Tyme',
+);
+```
+
+In fact, TypeScript will complain when we explicitly hint the type and we
+define our data ad-hoc:
+
+```typescript
+const tyme: Ingredient = {
+    name: 'Tyme',
+    cost: 0.2,
+    rarity: 0.5,
+    // Does not compile.
+    color: 'green',
+};
+```
+
+Interestingly, when we drop the type hint, we can define the data prior and
+pass it into `name` without TypeScript complaining:
+
+```typescript
+const tyme = {
+    name: 'Tyme',
+    cost: 0.2,
+    rarity: 0.5,
+    color: 'green',
+};
+
+assert.deepEqual(name(tyme), 'Tyme');
+```
+
+This is very much expected, as TypeScripts type system is using [structural sub typing](https://www.typescriptlang.org/docs/handbook/type-compatibility.html),
+meaning that the type of a thing is defined by its properties, not its name.
+When a JavaScript object has the properties `name`, `cost`, and `rarity` that
+are of the primitive types `string`, `number` and `number` respectively, we can
+use it in any function that requires an `Ingredient`, regardless of where and
+how it was defined, and which other properties it holds. One interesting
+property that follows from this is that one piece of data can match different
+types.
+
+Alright, now that we have a basic type for our data, let's define one for our
+store. For now, a `Store` will simply hold the inventory, a list of all
+`Ingredient`s we have available.
+
+```typescript
+// file: Store.ts
+import * as I from './Ingredient';
+
+export type Store = {
+    inventory: I.Ingredient[];
+}
+
+export const from = (inventory: I.Ingredient[]) => ({
+    inventory,
+});
+
+```
+
+---
 
 Let's have a look at an example: We can explicitly tell TypeScript which shape
 we're expecting this object, `damian`, to have. If the structure wouldn't match
