@@ -1,20 +1,34 @@
-<html lang="en"><head><base href="/workers-guide-to-fp-in-ts/"/><meta charSet="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="ie=edge"/><title>A Workers Guide To Typed Functional Programming</title><link rel="stylesheet" href="styles.css"/></head><body><h1 class="page-title">A Workers Guide To Typed Functional Programming</h1><div class="layout"><nav class="nav"><h3 class="nav-title">Jump To Chapter</h3><ol><li><a href="index.html">Introduction</a><ol></ol></li><li><a href="the-road-to-composition.html">The road to composition</a><ol><li><a href="the-road-to-composition/pure-functions.html">Pure Functions</a></li><li><a href="the-road-to-composition/functions-as-values.html">Functions as values</a></li></ol></li></ol></nav><main class="main"><h2 class="chapter-title">Introduction</h2><div><p>This is an introductory tutorial on typed functional programming in TypeScript,
-using the extensive toolkit of <a href="https://gcanti.github.io/fp-ts/">fp-ts</a>. You
-are in the right place if:</p>
+<html lang="en"><head><base href="/workers-guide-to-fp-in-ts/"/><meta charSet="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="ie=edge"/><title>A Workers Guide To Typed Functional Programming</title><link rel="stylesheet" href="styles.css"/></head><body><h1 class="page-title">A Workers Guide To Typed Functional Programming</h1><div class="layout"><nav class="nav"><h3 class="nav-title">Jump To Chapter</h3><ol><li><a href="index.html">Introduction</a><ol></ol></li><li><a href="the-road-to-composition.html">The road to composition</a><ol><li><a href="the-road-to-composition/pure-functions.html">Pure Functions</a></li><li><a href="the-road-to-composition/functions-as-values.html">Functions as values</a></li></ol></li></ol></nav><main class="main"><h2 class="chapter-title">Introduction</h2><div><p>In functional programming we structure programs by piping data through
+functions. That&#x27;s it, really. Regardless which part of the program you are
+looking at -- from the tiniest, single-responsibility helper, to complex
+services, to the full application -- it is all functions; bottom to top.
+Modules and services are built by composing small functions into yet another
+function with commonly-known, proven abstractions that often originate in
+mathematics (lambda calculus, category theory). In fact, the entire application
+is expressed as a function.</p>
+<p>In this practical and introductory book on typed functional programming
+we&#x27;re having a look at the basic tool kit of the paradigm. We&#x27;re using
+TypeScript and the extensive ecosystem of the <a href="https://gcanti.github.io/fp-ts/">fp-ts</a> library,
+though these skills are transferrable between languages and libraries.
+Once you have learned these concepts, you can use them in almost any other
+language that supports functional programming.</p>
+<p>This book is for you if:</p>
 <ul>
 <li>You want to learn functional programming.</li>
-<li>You want to learn <a href="https://gcanti.github.io/fp-ts/">fp-ts</a>.</li>
+<li>You want a practical introduction to <a href="https://gcanti.github.io/fp-ts/">fp-ts</a>.</li>
 <li>You are being forced into functional programming by your coworkers.</li>
+<li>You are forcing your coworkers into functional programming (one could argue, the reason this book exists in the first place).</li>
 </ul>
-<p>We are using TypeScript and fp-ts to explore this paradigm, but these skills
-are transferrable between languages and libraries. You will learn to solve
-problems in a typed, functional style using composition and data types, such as
-<code>Optional</code>, <code>Either</code> and whatever else we find useful.</p>
-<p>To get the most out of this tutorial, you should bring a solid understanding
-and intuition for JavaScript, including its ES6+ feature set and basic
-knowledge of TypeScript.</p>
+<p>As this is <strong>not</strong> a fundamental introduction to programming in general,
+JavaScript or TypeScript, you should:</p>
+<ul>
+<li>Have a solid understanding of ES6+ JavaScript. For example, arrow function syntax will not be explained.</li>
+<li>Have a basic understanding of TypeScript. For example, primitive types and basic TypeScript syntax will not be explained.</li>
+<li>Be familiar with general software development language and basic programming concepts.</li>
+<li>Know your way around your own development environment. For example, this book will not guide you through setting up the TypeScript runtime.</li>
+</ul>
 <h3 id="work-in-progress">Work In Progress</h3>
-<p>As the authors of this tutorial are employed full time, it will grow and evolve
-as they find time to write it, but feel free to offer critique and corrections
-by opening issues on the repository, or by voicing your suggestions in the
-<a href="https://fpchat-invite.herokuapp.com/">functional programming slack</a>.</p></div></main></div></body></html>
+<p>This tutorial is written in good faith, to the best of the authors knowledge,
+and is a work-in-progress. Some chapters may be missing, some exercises lacking
+in depth. It will grow and evolve over time. If you find any factual errors,
+please offer your corrections by opening issues on the repository.</p></div></main></div></body></html>

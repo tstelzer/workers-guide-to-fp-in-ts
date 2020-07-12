@@ -57,11 +57,11 @@ improving readability, maintainability and reducing overall complexity.</p>
     <span class="token keyword">return</span> result<span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span>
 </code></pre>
-<p>To identify opportunities for refactoring, you can ask ourself a couple of
+<p>To identify opportunities for refactoring, you can ask ourselves a couple of
 questions. The first question -- the one that seems to be hammered into
 programmers from day one -- is: Am I repeating myself needlessly?</p>
 <blockquote>
-<p>Note: &quot;Dont&#x27;t Repeat Yourself&quot;, or &quot;DRY&quot; is a useful principle when applied
+<p>Note: &quot;Don&#x27;t Repeat Yourself&quot;, or &quot;DRY&quot; is a useful principle when applied
 sensibly. Always try to discern between essential and accidental duplication
 before mindlessly attempting to DRY out code.</p>
 </blockquote>
@@ -143,9 +143,9 @@ arguments, uppercases the string and applies <code>f</code> to it.</p>
 <pre class="language-typescript"><code class="language-typescript"><span class="token keyword">const</span> <span class="token function-variable function">uppercaseWithF</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token function-variable function">f</span><span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token parameter">s<span class="token punctuation">:</span> <span class="token builtin">string</span></span><span class="token punctuation">)</span> <span class="token arrow operator">=&gt;</span> <span class="token builtin">string</span><span class="token punctuation">,</span> s<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token arrow operator">=&gt;</span>
     <span class="token function">f</span><span class="token punctuation">(</span>s<span class="token punctuation">.</span><span class="token method function property-access">toUpperCase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 </code></pre>
-<p>It knows that it can apply <code>f</code>, because uppercasing a string also returns a
-string, and it defines <code>f</code> so that it takes a string. Let&#x27;s define a couple of
-functions that we can pass as arguments to <code>uppercaseWithF</code>:</p>
+<p>TypeScript knows that it can apply <code>f</code>, because uppercasing a string also
+returns a string, and it defines <code>f</code> so that it takes a string. Let&#x27;s define a
+couple of functions that we can pass as arguments to <code>uppercaseWithF</code>:</p>
 <pre class="language-typescript"><code class="language-typescript"><span class="token keyword">const</span> emphasize <span class="token operator">=</span> <span class="token punctuation">(</span>s<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token parameter"><span class="token builtin">string</span></span> <span class="token arrow operator">=&gt;</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">_</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>s<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">_</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
 
 <span class="token keyword">const</span> scream <span class="token operator">=</span> <span class="token punctuation">(</span>s<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token parameter"><span class="token builtin">string</span></span> <span class="token arrow operator">=&gt;</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>s<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">!</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
@@ -266,16 +266,8 @@ lot of programs iterate over arrays, applying functions to each element.
 Can we generalize the function even more?</p>
 <p>We don&#x27;t have to, as this function already exists: <code>map</code>. Unlike our
 <code>transformUsers</code>, which only works for functions <code>f: (user: User) =&gt; User</code>,
-<code>map</code> works for <em>any</em> function <code>f: &lt;A, B&gt;(a: A) =&gt; B</code>, where <code>A</code> and <code>B</code> are generics.</p>
-<blockquote>
-<p>Note: In a nutshell, generics are place holder types, or type variables that
-stand in for a concrete type that TypeScript derives once it is used. For
-example, if you define a function with a signature <code>f: &lt;A&gt;(a: A) =&gt; A</code> and use
-it like <code>f(&#x27;Hello, World!&#x27;)</code>, TypeScript infers <code>A</code> to be a <code>string</code>, so the
-concrete signature would be derived as <code>f: (a: string) =&gt; string</code>. If you used
-it like <code>f(42)</code> it would be derived as <code>f: (a: number) =&gt; number</code>, and so on.
-If you&#x27;ve never seen generics, I encourage you to <a href="http://www.typescriptlang.org/docs/handbook/generics.html">read through the official documentation</a>.</p>
-</blockquote>
+<code>map</code> works for <em>any</em> function that takes a value of some type and returns a
+value of the same type.</p>
 <p>JavaScript has <code>map</code> <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map">built-in</a> as a method on arrays: it applies the passed
 function <code>f</code> to every element in a copy of the array and returns the copy.
 In fact, we can use that to replace <code>transformUsers</code> entirely:</p>
@@ -507,18 +499,17 @@ logic, but this time we&#x27;re not <em>changing</em> the user, we&#x27;re <em>f
 predicate function <code>isRelevantForSales</code>.</p>
 <p>When we say <em>predicate function</em>, we mean <em>any</em> function taking a value that
 resolves to a <code>boolean</code> value. For example, all of the following functions are
-considered predicate functions as they all have the generalized function
-signature of <code>&lt;A&gt;(a: A) =&gt; boolean</code>.</p>
-<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">const</span> startsWithC <span class="token operator">=</span> <span class="token punctuation">(</span>s<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token parameter"><span class="token builtin">boolean</span></span> <span class="token arrow operator">=&gt;</span> s<span class="token punctuation">.</span><span class="token method function property-access">startsWith</span><span class="token punctuation">(</span><span class="token string">&#x27;c&#x27;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+considered predicate functions:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">const</span> startsWithC <span class="token operator">=</span> <span class="token punctuation">(</span>s<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token parameter"><span class="token builtin">boolean</span></span> <span class="token arrow operator">=&gt;</span> s<span class="token punctuation">.</span><span class="token method function property-access">toLowerCase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token method function property-access">startsWith</span><span class="token punctuation">(</span><span class="token string">&#x27;c&#x27;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
 <span class="token keyword">const</span> moreThanThreeDigits <span class="token operator">=</span> <span class="token punctuation">(</span>n<span class="token punctuation">:</span> <span class="token builtin">number</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token parameter"><span class="token builtin">boolean</span></span> <span class="token arrow operator">=&gt;</span> n<span class="token punctuation">.</span><span class="token method function property-access">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token property-access">length</span> <span class="token operator">&gt;</span> <span class="token number">3</span><span class="token punctuation">;</span>
 
 <span class="token keyword">const</span> afterMoonLanding <span class="token operator">=</span> <span class="token punctuation">(</span>d<span class="token punctuation">:</span> <span class="token known-class-name class-name">Date</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token parameter"><span class="token builtin">boolean</span></span> <span class="token arrow operator">=&gt;</span> d <span class="token operator">&gt;</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token number">1969</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">20</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 </code></pre>
-<p>And again, as with <code>map</code>, we don&#x27;t have to re-invent the wheel: <code>filter</code> abstracts
-away the concern of &quot;iterate over an array and filter values based on a predicate&quot;.
+<p>And again, as with <code>map</code>, we don&#x27;t have to reinvent the wheel: <code>filter</code> abstracts
+the concern of &quot;iterate over an array and filter values based on a predicate&quot;.
 It too is a built-in method on <code>Array</code>, let&#x27;s have a look at a couple of examples:</p>
-<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">const</span> startsWithC <span class="token operator">=</span> <span class="token punctuation">(</span>s<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token parameter"><span class="token builtin">boolean</span></span> <span class="token arrow operator">=&gt;</span> s<span class="token punctuation">.</span><span class="token method function property-access">startsWith</span><span class="token punctuation">(</span><span class="token string">&#x27;c&#x27;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">const</span> startsWithC <span class="token operator">=</span> <span class="token punctuation">(</span>s<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token parameter"><span class="token builtin">boolean</span></span> <span class="token arrow operator">=&gt;</span> s<span class="token punctuation">.</span><span class="token method function property-access">toLowerCase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token method function property-access">startsWith</span><span class="token punctuation">(</span><span class="token string">&#x27;c&#x27;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token keyword">const</span> strings <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">&#x27;horse&#x27;</span><span class="token punctuation">,</span> <span class="token string">&#x27;cow&#x27;</span><span class="token punctuation">,</span> <span class="token string">&#x27;cat&#x27;</span><span class="token punctuation">,</span> <span class="token string">&#x27;dog&#x27;</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
 
 <span class="token console class-name">console</span><span class="token punctuation">.</span><span class="token method function property-access">log</span><span class="token punctuation">(</span>strings<span class="token punctuation">.</span><span class="token method function property-access">filter</span><span class="token punctuation">(</span>startsWithC<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -534,19 +525,19 @@ It too is a built-in method on <code>Array</code>, let&#x27;s have a look at a c
 <pre class="language-json"><code class="language-json"><span class="token punctuation">[</span> <span class="token number">12345</span> <span class="token punctuation">]</span>
 </code></pre>
 <p>Simple, right? Let&#x27;s now use it to simplify our <code>usersToSalesView</code>:</p>
-<pre class="language-typescript"><code class="language-typescript"><span class="token operator">-</span><span class="token keyword">const</span> <span class="token function-variable function">usersToSalesView</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">users<span class="token punctuation">:</span> <span class="token maybe-class-name">User</span><span class="token punctuation">[</span><span class="token punctuation">]</span></span><span class="token punctuation">)</span> <span class="token arrow operator">=&gt;</span> <span class="token punctuation">{</span>
-<span class="token operator">-</span>    <span class="token keyword">const</span> result <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-<span class="token operator">-</span>    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> user <span class="token keyword">of</span> users<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-<span class="token operator">-</span>        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">isRelevantForSales</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-<span class="token operator">-</span>            result<span class="token punctuation">.</span><span class="token method function property-access">push</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token operator">-</span>        <span class="token punctuation">}</span>
-<span class="token operator">-</span>    <span class="token punctuation">}</span>
-<span class="token operator">-</span>    <span class="token keyword">return</span> result<span class="token punctuation">;</span>
-<span class="token operator">-</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
-<span class="token operator">+</span><span class="token keyword">const</span> <span class="token function-variable function">usersToSalesView</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">users<span class="token punctuation">:</span> <span class="token maybe-class-name">User</span><span class="token punctuation">[</span><span class="token punctuation">]</span></span><span class="token punctuation">)</span> <span class="token arrow operator">=&gt;</span>
-<span class="token operator">+</span>    users<span class="token punctuation">.</span><span class="token method function property-access">filter</span><span class="token punctuation">(</span>isRelevantForSales<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<pre class="language-git"><code class="language-git"><span class="token deleted">-const usersToSalesView = (users: User[]) =&gt; {</span>
+<span class="token deleted">-    const result = [];</span>
+<span class="token deleted">-    for (const user of users) {</span>
+<span class="token deleted">-        if (isRelevantForSales(user)) {</span>
+<span class="token deleted">-            result.push(user);</span>
+<span class="token deleted">-        }</span>
+<span class="token deleted">-    }</span>
+<span class="token deleted">-    return result;</span>
+<span class="token deleted">-};</span>
+<span class="token inserted">+const usersToSalesView = (users: User[]) =&gt;</span>
+<span class="token inserted">+    users.filter(isRelevantForSales);</span>
 
-<span class="token console class-name">console</span><span class="token punctuation">.</span><span class="token method function property-access">log</span><span class="token punctuation">(</span><span class="token function">usersToSalesView</span><span class="token punctuation">(</span>users<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+console.log(usersToSalesView(users));
 </code></pre>
 <details><summary>output</summary><pre class="language-json5"><code class="language-json5"><span class="token punctuation">[</span>
   <span class="token punctuation">{</span> <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Preston&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Brekke&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;2020.02.12&#x27;</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>

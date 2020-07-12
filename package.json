@@ -6,7 +6,7 @@
     "scripts": {
         "clean": "del docs",
         "build:html": "ts-node --pretty source/index.ts -D",
-        "build:styles": "node-sass --omit-source-map-url --output-style=compressed source/styles/index.scss docs/styles.css",
+        "build:styles": "sass --no-source-map --style=compressed source/styles/index.scss docs/styles.css",
         "build": "npm-run-all clean build:*",
         "serve": "http-server docs -p 3000",
         "dev:styles": "npm run build:styles && npm run build:styles -- --watch",
@@ -26,7 +26,7 @@
         "io-ts": "^2.2.1",
         "io-ts-types": "^0.5.6",
         "monocle-ts": "^2.1.0",
-        "node-sass": "^4.14.0",
+        "sass": "^1.25.0",
         "nodemon": "^2.0.3",
         "prismjs": "^1.20.0",
         "ramda": "^0.27.0",

@@ -14,143 +14,15 @@ over you, as you recall the many times you spent helping your granny running the
 in your childhood. Brushing off a layer of thick dust on the counter, you begin
 to inspect the inventory.
 
-```json5
-[
-  {
-    "name": "Pearl",
-    "cost": 75,
-    "rarity": 0.05
-  },
-  {
-    "name": "Boar Tusk",
-    "cost": 20,
-    "rarity": 0.35
-  },
-  {
-    "name": "Moon Sugar",
-    "cost": 9.39,
-    "rarity": 0.41
-  },
-  {
-    "name": "Deathbell",
-    "cost": 0.18,
-    "rarity": 0.45
-  },
-  {
-    "name": "Hawk Feathers",
-    "cost": 3.25,
-    "rarity": 0.45
-  },
-  {
-    "name": "Hawk Beak",
-    "cost": 7.9,
-    "rarity": 0.45
-  },
-  {
-    "name": "Hawk Feathers",
-    "cost": 3.25,
-    "rarity": 0.45
-  },
-  {
-    "name": "Glowing Mushroom",
-    "cost": 1.4,
-    "rarity": 0.5
-  },
-  {
-    "name": "Bone Meal",
-    "cost": 5.2,
-    "rarity": 0.5
-  },
-  {
-    "name": "Canis Root",
-    "cost": 0.09,
-    "rarity": 0.6
-  },
-  {
-    "name": "Blisterwort",
-    "cost": 0.02,
-    "rarity": 0.6
-  },
-  {
-    "name": "Canis Root",
-    "cost": 0.09,
-    "rarity": 0.6
-  },
-  {
-    "name": "Canis Root",
-    "cost": 0.09,
-    "rarity": 0.6
-  },
-  {
-    "name": "Beehive Husk",
-    "cost": 1.1,
-    "rarity": 0.7
-  },
-  {
-    "name": "Beehive Husk",
-    "cost": 1.1,
-    "rarity": 0.7
-  },
-  {
-    "name": "Garlic",
-    "cost": 0.21,
-    "rarity": 0.75
-  },
-  {
-    "name": "Lavender",
-    "cost": 0.09,
-    "rarity": 0.78
-  },
-  {
-    "name": "Lavender",
-    "cost": 0.09,
-    "rarity": 0.78
-  },
-  {
-    "name": "Hanging Moss",
-    "cost": 0.04,
-    "rarity": 0.82
-  },
-  {
-    "name": "Hanging Moss",
-    "cost": 0.04,
-    "rarity": 0.82
-  },
-  {
-    "name": "Hanging Moss",
-    "cost": 0.04,
-    "rarity": 0.82
-  },
-  {
-    "name": "Hanging Moss",
-    "cost": 0.04,
-    "rarity": 0.82
-  },
-  {
-    "name": "Wheat",
-    "cost": 0.05,
-    "rarity": 1
-  },
-  {
-    "name": "Wheat",
-    "cost": 0.05,
-    "rarity": 1
-  },
-  {
-    "name": "Wheat",
-    "cost": 0.05,
-    "rarity": 1
-  }
-]
-```
+[inventory.json](./inventory-01.json)
 
-Grandmother supplied ingredients to adventurous alchemists, and you will pick
+Grandmother supplied ingredients to adventurous alchemists, and you are picking
 up the trade. She used to do her accounting with pen and paper, but you will
 bring the shop into the 21th century, modeling the shop in a TypeScript
 program. So far, the list of ingredients look simple enough, let's describe it
 in a `type`. Ingredients have a unique `name`, a `cost`, which denotes how much
 we payed for them, and a `rarity`, which describes a range of how likely it is
-to find, from `0` to `1`.
+to find, from `0` to `1`, with `1` being abundant.
 
 ```typescript
 // file: Ingredient.ts
@@ -167,6 +39,7 @@ take data of this type and transform it. For example, we could define a
 constructor function that creates data that fits the `Ingredient` type:
 
 ```typescript
+// file: Ingredient.ts
 export const from = (name: string, cost: number, rarity: number): Ingredient => ({
     name,
     cost,
@@ -182,12 +55,15 @@ transformations we need, we will define as functions that take data of the type
 we don't actually need it to create an `Ingredient`:
 
 ```typescript
-import * as assert from 'assert';
+// file: Ingredient.test.ts
+import * as I from './Ingredient';
 
-assert.deepStrictEqual(from('Garlic', 0.1, 0.7), {
-    name: 'Garlic',
-    cost: 0.1,
-    rarity: 0.7,
+const flower = I.from('Flower', 0.1, 0.95);
+
+describe('Ingredient::from', () => {
+    it('creates a single ingredient', () => {
+        expect(flower).toStrictEqual({name: 'Flower', cost: 0.1, rarity: 0.95});
+    });
 });
 ```
 
@@ -197,23 +73,25 @@ considered an `Ingredient`. Here is a function `name`, that takes an
 `Ingredient` and returns its `name`:
 
 ```typescript
-const name = (ingredient: Ingredient) => ingredient.name;
+// file: Ingredient.ts
+export const name = (ingredient: Ingredient) => ingredient.name;
 ```
 
 We can use it on both pieces of data, the one we created manually and the
 one by using `from`:
 
-```typescript
-assert.deepEqual(name(from('Garlic', 0.1, 0.7)), 'Garlic');
-
-assert.deepEqual(
-    name({
-        name: 'Garlic',
-        cost: 0.1,
-        rarity: 0.7,
-    }),
-    'Garlic',
-);
+```git
+// file: Ingredient.test.ts
+@@ -7,3 +7,9 @@ describe('Ingredient::from', () => {
+         expect(flower).toStrictEqual({name: 'Flower', cost: 0.1, rarity: 0.95});
+     });
+ });
++
++describe('Ingredient::name', () => {
++    it('returns the name of an ingredient', () => {
++        expect(I.name(flower)).toStrictEqual('Flower');
++    });
++});
 ```
 
 TypeScript requires us to be exact about the properties when passing in an
@@ -221,23 +99,20 @@ object literal into `name`, the following will not compile, warning us that
 `color` does not exist on our `Ingredient` type:
 
 ```typescript
-assert.deepEqual(
-    name({
-        name: 'Tyme',
-        cost: 0.2,
-        rarity: 0.5,
-        // Does not compile.
-        color: 'green',
-    }),
-    'Tyme',
-);
+const name = I.name({
+    name: 'Tyme',
+    cost: 0.2,
+    rarity: 0.5,
+    // Does not compile.
+    color: 'green',
+});
 ```
 
-In fact, TypeScript will complain when we explicitly hint the type and we
+TypeScript will also complain when we explicitly hint the type and we
 define our data ad-hoc:
 
 ```typescript
-const tyme: Ingredient = {
+const tyme: I.Ingredient = {
     name: 'Tyme',
     cost: 0.2,
     rarity: 0.5,
@@ -257,21 +132,50 @@ const tyme = {
     color: 'green',
 };
 
-assert.deepEqual(name(tyme), 'Tyme');
+const name = I.name(tyme);
 ```
 
-This is very much expected, as TypeScripts type system is using [structural sub typing](https://www.typescriptlang.org/docs/handbook/type-compatibility.html),
-meaning that the type of a thing is defined by its properties, not its name.
-When a JavaScript object has the properties `name`, `cost`, and `rarity` that
-are of the primitive types `string`, `number` and `number` respectively, we can
-use it in any function that requires an `Ingredient`, regardless of where and
-how it was defined, and which other properties it holds. One interesting
-property that follows from this is that one piece of data can match different
-types.
+This is expected behaviour, as TypeScript is using [structural sub typing](https://www.typescriptlang.org/docs/handbook/type-compatibility.html),
+meaning that a piece of data is considered of type some `A`, when its
+properties match those of `A`. Excess properties are ignored. Only when we
+_explicitly_ use a type hint, or constructor function, will TypeScript complain
+about excess properties. One interesting property that follows from this is
+that one piece of data can match many types:
 
-Alright, now that we have a basic type for our data, let's define one for our
-store. For now, a `Store` will simply hold the inventory, a list of all
-`Ingredient`s we have available.
+```typescript
+type A = { foo: string; };
+type B = { bar: number; };
+
+const f = (a: A) => a.foo;
+const g = (b: B) => b.bar;
+
+const data = {foo: 'Jeff', bar: 24};
+console.log(f(data)); // 'Jeff'
+console.log(g(data)); // 24
+```
+
+In our case, when a JavaScript object has the properties `name`, `cost`, and `rarity` that
+are of the primitive types `string`, `number` and `number` respectively, we can
+use it in any function that requires an `Ingredient`, even when we didn't explicitly
+define it as such.
+
+### A store from boards and nails
+
+Alright, now that we've defined our data type, let's think about what else we need
+for our little item store to work. Rummaging around in grannies cupboards, you can't
+find the program she was using to buy and sell ingredients, so we have to write our
+own. To make it easier for ourselfes, and as is the premise of this tutorial, we will
+write the store using stateless, pure functions. Immutable transformations or
+"pure functions", by definition, produce the same output for the same input.
+Every time. Not only does this have benefits for the reasonability of our
+program, it is essentially the prerequisite for writing it in a composable,
+functional style. In later chapters, we can explore deeper the reasons,
+benefits and problems for that, for now, let's just start writing.
+
+For now, our `Store` will simply hold the inventory, a list of all
+`Ingredient`s we have available. This is somewhat of a naíve way to represent
+the inventory, but we will have plenty of opportunity to change and refactor
+this code.
 
 ```typescript
 // file: Store.ts
@@ -281,606 +185,206 @@ export type Store = {
     inventory: I.Ingredient[];
 }
 
-export const from = (inventory: I.Ingredient[]) => ({
-    inventory,
+export const create = (): Store => ({
+    inventory: [],
 });
-
 ```
 
----
+Here, `create` acts as a constructor function for our `Store`, which is a plain
+object. Unlike in classical object-oriented programming, we're not
+instantiating an object, we're simply creating plain data. It does not have any
+behaviour ("methods") attached, and thus is stateless. If we want to change
+it, we have to define pure functions that transform it, creating new data,
+without changing the original. Though we're co-locating them, we're clearly separating
+between the data type (`Store`) and our transformations (so far only `create`).
 
-Let's have a look at an example: We can explicitly tell TypeScript which shape
-we're expecting this object, `damian`, to have. If the structure wouldn't match
-the type, TypeScript would yell at us.
+Note that we can still combine object-oriented programming and functional
+programming in an elegant way, by using type classes, if we want to. Defining
+that is beyond this chapter though.
+
+A pure function has a couple of properties:
+
+1. Following the principle of least astonishment, for any function input `a`, it always returns the output `b`, regardless of how often we call it, or in which context. For example, the function
+    ```typescript
+    const add = (a, b) => a + b;
+    ```
+    always returns `4` for the inputs `1` and `3`. A formal way of describing this property saying that the function is "referentially transparent", that is, you could replace the function invocation with its result, without breaking the program.
+2. It does not depend on its context or scope, otherwise it would break (1).
+3. It does not mutate its inputs, otherwise calling it multiple times with the same inputs would result in different outputs, and thus break (1).
+4. It does not cause any side effects in your program, it simply returns values. This is more of a theoretical problem, some side effects are harmless, others change the environment in a way where calling the function multiple times would result in different results, which would, again, break (1). Examples include making api calls, updating a database, interacting with the file system.
+
+Callign `create`, unremarkably, creates a plain object that fits the `Store` type:
 
 ```typescript
-const damian: User = {
-    firstName: 'Damian',
-    lastName: 'Sipes',
-    registered: '12.12.2001',
-};
+// file: run.ts
+import * as S from './Store.ts'
+
+const store = S.create();
 ```
 
-Just to re-iterate, we're not _instantiating_ a `User` here, we're just giving
-a type hint. `damian` is just labeled data. Poor Damian. To show the use,
-let's define a function that explicitly takes a user and returns its
-`firstName`.
-
-```typescript
-const firstName = (user: User): string => user.firstName;
-
-console.log(firstName(damian));
-```
-
-```json5
-Damian
-```
-
-Damians friend Mara doesn't want to be labeled:
-
-```typescript
-const mara = {
-    firstName: 'Mara',
-    lastName: 'Homenick',
-    registered: '08.14.2007',
-};
-```
-
-TypeScript doesn't care, `mara` matches the shape of a `User`, so the following
-code is perfectly valid and reasonable:
-
-```typescript
-console.log(firstName(mara));
-```
-
-```json5
-Mara
-```
-
-Yet another friend of theirs, Anna, does not feel like a `User` _at all_,
-they're off, creating their own type, with black jack and hookers:
-
-```typescript
-type Person = {
-    firstName: string;
-    lastName: string;
-    registered: string;
-};
-
-const anna: Person = {
-    firstName: 'Anna',
-    lastName: 'Freeman',
-    registered: '07.09.2003',
-};
-```
-
-But, if it has a `firstName`, a `lastName` and `registered`, it can be used
-like a `User`.
-
-```typescript
-console.log(firstName(anna));
-```
-
-```json5
-Anna
-```
-
-Noteworthy: Our function doesn't even need to take a `User`, we only really
-care about the `firstName` property, so we can
-[destructure](https://www.typescriptlang.org/docs/handbook/variable-declarations.html#function-declarations)
-it from the input. Now we've signaled to the caller that we care _even less_
-about the label of the input, as long as it contains a `firstName` of type
-`string`.
-
-```typescript
-const firstName = ({firstName}: {firstName: string}): string => input.firstName;
-console.log(firstName(anna));
-```
-
-```json5
-Anna
-```
-
-How concrete or general we are in defining our input types is entirely up to us. Each
-comes with benefits and trade offs we will explore in chapters to come.
-
-### Procedural impurity and shared complexity
-
-Before we write our own model, let's have a look at Jims code.
+Granny left us a little bit of cash, `$95.4`, not enough to live decadently. Let's
+extend the `Store`, so that it holds a balance, and an alternative constructor that
+allows us to define an initial stock and balance.
 
 ```git
- type User = {
-     firstName: string;
-     lastName: string;
-     registered: string;
-+    shortName?: string;
+// file: Store.ts
+@@ -2,8 +2,21 @@ import * as I from './Ingredient';
+ 
+ export type Store = {
+     inventory: I.Ingredient[];
++    balance: number;
  };
+ 
+ export const create = (): Store => ({
+     inventory: [],
++    balance: 0,
++});
 +
-+const usersToSidebar = () => {
-+    for (const user of users) {
-+        // get the year, e.g. '2003'
-+        user.registered = user.registered.slice(6);
-+        // e.g. 'a.smith'
-+        user.shortName = `${user.firstName[0].toLowerCase()}.${user.lastName.toLowerCase()}`;
++export const from = ({
++    inventory,
++    balance,
++}: {
++    inventory: I.Ingredient[];
++    balance: number;
++}): Store => ({
++    inventory,
++    balance,
+ });
+```
+
+Now we use `from` to generate a store with our humble balance and inventory.
+
+```typescript
+// file: run.ts
+import * as S from './Store';
+
+import * as inventory from './inventory.json';
+
+const store = S.from({inventory, balance: 95.4});
+```
+
+And we can see that our store is still a plain object:
+
+```typescript
+console.log(store);
+```
+
+[store-output.json](./02-store-output.json')
+
+But we still can't do anything with our store. Let's change that by extending it
+with a function to stock up on ingredients:
+
+```typescript
+@@ -1,5 +1,12 @@
+ import * as I from './Ingredient';
+ 
++export class BalanceExhausted extends Error {
++    constructor() {
++        super("The balance can't go below 0.");
++        this.name = this.constructor.name;
 +    }
-+};
++}
 +
-+usersToSidebar();
+ export type Store = {
+     inventory: I.Ingredient[];
+     balance: number;
+@@ -20,3 +27,21 @@ export const from = ({
+     inventory,
+     balance,
+ });
++
++/**
++ * Adds `ingredient` to the `store`, given that the balance can
++ * cover the cost.
++ *
++ * @throws BalanceExhausted
++ */
++export const stockOne = (store: Store, ingredient: I.Ingredient): Store => {
++    const balance = store.balance - ingredient.cost;
++
++    // There are no money lenders around in this back-water town. We can only
++    // work with the money we've got in the balance.
++    if (balance < 0) {
++        throw new BalanceExhausted();
++    }
++
++    return {inventory: store.inventory.concat(ingredient), balance};
++};
 ```
 
-We didn't really listen in the stand-up, so we don't know precisely what Jims
-feature is supposed to do, but we can assume from the comments. Let's have a
-look at the result.
+Note that `stockOne` does not mutate the passed in `store`, but instead creates
+a new object. We're being naive here in forcing immutability by aggressively
+copying data. While individually, the cost is small, in a large application the
+memory overhead _will_ add up. We _can_ alleviate some of the cost by using
+libraries that provide data structures made specifically for enabling
+immutability (such as [immer.js](https://www.npmjs.com/package/immer)). Other
+languages, such as Haskell, Rust or Clojure afford us immutable data by design,
+and offer built-in efficient, immutable data structures. For the purposes of
+this tutorial though, the memory overhead is a trade-off we are willing to
+make.
+
+Our function is not quite pure, though, as we don't have an elegant way yet to
+handle failure cases in our program (later we will use the `Either` type to do
+that), so we we will resort to the crude way of throwing exceptions.
+
+For now that is good enough, we'll refactor it later. Let's verify our new
+functionality:
 
 ```typescript
-console.log(users);
-```
+// file: Store.test.ts
+import * as I from './Ingredient';
+import * as S from './Store';
 
-```json5
-[
-  {
-    firstName: 'Barbara',
-    lastName: 'Selling',
-    registered: '2017',
-    shortName: 'b.selling'
-  },
-  {
-    firstName: 'John',
-    lastName: 'Smith',
-    registered: '2019',
-    shortName: 'j.smith'
-  },
-  {
-    firstName: 'Frank',
-    lastName: 'Helmsworth',
-    registered: '2011',
-    shortName: 'f.helmsworth'
-  },
-  {
-    firstName: 'Anna',
-    lastName: 'Freeman',
-    registered: '2003',
-    shortName: 'a.freeman'
-  },
-  {
-    firstName: 'Damian',
-    lastName: 'Sipes',
-    registered: '2001',
-    shortName: 'd.sipes'
-  },
-  {
-    firstName: 'Mara',
-    lastName: 'Homenick',
-    registered: '2007',
-    shortName: 'm.homenick'
-  }
-]
-```
+describe('Store::stockOne', () => {
+    const createInitialStore = () => S.from({inventory: [], balance: 10});
 
-This may work for Jim, but we have a problem. Jims _procedure_ freely mutates
-the data (i.e. changes it in place). If we want to derive our own view model
-from `users`, we would have to do it _before Jims procedure runs_, otherwise
-his mutation of specifically the `registered` field makes it impossible to
-derive our own transformation of the field.
+    const initialStore = createInitialStore();
 
-> Note: We're intentionally calling `usersToSidebar` a _procedure_. There is a
-critical difference between a _function_ and a _procedure_. A _function_
-merely takes values as inputs and returns values as outputs -- all without
-affecting its environment, e.g. by changing inputs in-place. A _procedure_ may
-run a series of statements, changing its environment, its inputs, having side
-effects other than returning values.
+    it('stocks a single ingredient', () => {
+        const flower = I.from('Flower', 0.1, 0.95);
 
-Let's explore this issue a bit more. We'll define our own model-deriving
-_procedure_ and see what happens.
-
-First, we extend `User` with an optional `initials` field.
-
-```git
- type User = {
-     firstName: string;
-     lastName: string;
-     registered: string;
-     shortName?: string;
-+    initials?: string;
- };
-```
-
-Then we're adding our own _procedure_ and execute it _after_ Jims.
-
-```typescript
-const usersToAdmin = () => {
-    for (const user of users) {
-        // resolves to format: EEEE, d MMMM YYYY
-        // e.g. "Wednesday, 20 June 2019"
-        user.registered = new Date(user.registered).toLocaleDateString(
-            'en-gb',
-            {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-            },
-        );
-        // e.g. 'AF'
-        user.initials = `${user.firstName[0]}${user.lastName[0]}`;
-    }
-};
-
-usersToSidebar();
-usersToAdminView();
-
-console.log(users);
-```
-
-```json5
-[
-  {
-    firstName: 'Barbara',
-    lastName: 'Selling',
-    registered: 'Sunday, 1 January 2017',
-    shortName: 'b.selling',
-    initials: 'BS'
-  },
-  {
-    firstName: 'John',
-    lastName: 'Smith',
-    registered: 'Tuesday, 1 January 2019',
-    shortName: 'j.smith',
-    initials: 'JS'
-  },
-  {
-    firstName: 'Frank',
-    lastName: 'Helmsworth',
-    registered: 'Saturday, 1 January 2011',
-    shortName: 'f.helmsworth',
-    initials: 'FH'
-  },
-  {
-    firstName: 'Anna',
-    lastName: 'Freeman',
-    registered: 'Wednesday, 1 January 2003',
-    shortName: 'a.freeman',
-    initials: 'AF'
-  },
-  {
-    firstName: 'Damian',
-    lastName: 'Sipes',
-    registered: 'Monday, 1 January 2001',
-    shortName: 'd.sipes',
-    initials: 'DS'
-  },
-  {
-    firstName: 'Mara',
-    lastName: 'Homenick',
-    registered: 'Monday, 1 January 2007',
-    shortName: 'm.homenick',
-    initials: 'MH'
-  }
-]
-```
-
-Yikes, look at `registered`. Seems they are all fixed on `1 January` because
-_our_ procedure transforms `registered` _after_ it was cut down to just the
-year by `usersToSidebar`. Let's flip the order of invocation, just to see if
-that would fix it.
-
-```git
--usersToSidebar();
- usersToAdminView();
-+usersToSidebar();
-
- console.log(users);
-```
-
-```json5
-[
-  {
-    firstName: 'Barbara',
-    lastName: 'Selling',
-    registered: 'y, 3 January 2017',
-    initials: 'BS',
-    shortName: 'b.selling'
-  },
-  {
-    firstName: 'John',
-    lastName: 'Smith',
-    registered: 'y, 24 December 2019',
-    initials: 'JS',
-    shortName: 'j.smith'
-  },
-  {
-    firstName: 'Frank',
-    lastName: 'Helmsworth',
-    registered: 'day, 11 May 2011',
-    initials: 'FH',
-    shortName: 'f.helmsworth'
-  },
-  {
-    firstName: 'Anna',
-    lastName: 'Freeman',
-    registered: 'day, 9 July 2003',
-    initials: 'AF',
-    shortName: 'a.freeman'
-  },
-  {
-    firstName: 'Damian',
-    lastName: 'Sipes',
-    registered: 'day, 12 December 2001',
-    initials: 'DS',
-    shortName: 'd.sipes'
-  },
-  {
-    firstName: 'Mara',
-    lastName: 'Homenick',
-    registered: 'y, 14 August 2007',
-    initials: 'MH',
-    shortName: 'm.homenick'
-  }
-]
-```
-
-Oof. Broken. What we're seeing here is the cost of **shared, mutable
-state**. In our procedures we are reaching into the global scope and changing
-data in place that is used in other places. We're not preserving the integrity
-of the data. Like a spoiled toddler, we're rampaging through the sweets section
-of the supermarket, trained on that unearned treat, leaving a trail of
-destruction in our wake.
-
-And we've introduced another problem on the type level: because we keep changing
-our original data _in place_, we have to stuff all our new fields into the
-original type. `User` would grow in size if we kept adding new fields for
-totally unrelated views.
-
-We can imagine that writing an entire application in this style of unmanaged
-state mutation is an explosion of complexity.
-
-Fortunately, we have a simple solution at hand: the function. Specifically, the
-**pure** function.
-
-### Out of the tar pit
-
-Know what is fundamentally simple? A table:
-
-| key | value |
-|-----|-------|
-| a   | 1     |
-| b   | 99    |
-| c   | 1000  |
-| d   | 99999 |
-
-So simple and so utterly boring. It's so dull, I hesitate to talk about it. But
-we need to, in order to make a point. So here we go:
-
-* This table has two columns, a key and a value column.
-* We can look up values via its key.
-* Though the rows may _grow_, at the time of accessing it, all values and their
-  types are known.
-
-Know what behaves like a table? A pure function!
-
-```typescript
-const f = (key: 'a' | 'b' | 'c' | 'd') =>
-    key === 'a' ? 1
-    : key === 'b' ? 99
-    : key === 'c' ? 1000
-    : 99999;
-```
-
-* The pure function has two sets of values, input (`'a' | 'b' | 'c' | 'd'`)
-  and output (`1 | 99 | 1000 | 99999`).
-* We can look up output values by passing input values
-* Though we may add values to input and output sets, at the time of accessing
-  it, all values and their types are known.
-
-Noteworthy, a function like this does not share any of the problems of
-procedures:
-
-* It does not reach into its parent scope, all dependencies of it are declared
-  right there in the parameters.
-* It does not mutate the values it is working with, it effectively only _maps_
-  outputs to inputs.
-* If you run it, you don't need to fear side effects. It just returns values.
-
-If we can somehow rewrite our problematic procedures so that we get these
-benefits we have improved the comprehensibility of our program immensely.
-It is quite simple, actually:
-
-1. Instead of reaching into the parent scope, explicitly define inputs as parameters.
-2. Instead of mutating inputs, treat them as immutable data and create copies.
-3. Instead of storing the outputs in shared state, return them.
-
-Let's do that for `usersToAdmin` and `usersToSidebar`:
-
-```typescript
-const usersToAdmin = (users: User[]) => {
-    const result = [];
-    for (const user of users) {
-        result.push({
-            ...user,
-            // resolves to format: EEEE, d MMMM YYYY
-            // e.g. "Wednesday, 20 June 2019"
-            registered: new Date(user.registered).toLocaleDateString('en-gb', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-            }),
-            // e.g. 'AF'
-            initials: `${user.firstName[0]}${user.lastName[0]}`,
+        expect(S.stockOne(initialStore, flower)).toStrictEqual({
+            balance: 9.9,
+            inventory: [flower],
         });
-    }
-    return result;
-};
+    });
 
-const usersToSidebar = (users: User[]) => {
-    const result = [];
-    for (const user of users) {
-        result.push({
-            ...user,
-            // get the year, e.g. '2003'
-            registered: user.registered.slice(6),
-            // e.g. 'a.smith'
-            shortName: `${user.firstName[0].toLowerCase()}.${user.lastName.toLowerCase()}`,
-        });
-    }
-    return result;
-};
+    it('throws when cost exceeds the balance', () => {
+        const gold = I.from('Gold', 900, 0.01);
 
-const sidebarUsers = usersToSidebar(users);
-const adminUsers = usersToAdmin(users);
+        expect(() => S.stockOne(initialStore, gold)).toThrow();
+    });
 
-console.log({sidebarUsers, adminUsers});
+    it('does not mutate the store', () => {
+        expect(initialStore).toStrictEqual(createInitialStore());
+    });
+});
 ```
 
-```json5
-{
-  sidebarUsers: [
-    {
-      firstName: 'Barbara',
-      lastName: 'Selling',
-      registered: '2017',
-      shortName: 'b.selling'
-    },
-    {
-      firstName: 'John',
-      lastName: 'Smith',
-      registered: '2019',
-      shortName: 'j.smith'
-    },
-    {
-      firstName: 'Frank',
-      lastName: 'Helmsworth',
-      registered: '2011',
-      shortName: 'f.helmsworth'
-    },
-    {
-      firstName: 'Anna',
-      lastName: 'Freeman',
-      registered: '2003',
-      shortName: 'a.freeman'
-    },
-    {
-      firstName: 'Damian',
-      lastName: 'Sipes',
-      registered: '2001',
-      shortName: 'd.sipes'
-    },
-    {
-      firstName: 'Mara',
-      lastName: 'Homenick',
-      registered: '2007',
-      shortName: 'm.homenick'
-    }
-  ],
-  adminUsers: [
-    {
-      firstName: 'Barbara',
-      lastName: 'Selling',
-      registered: 'Tuesday, 3 January 2017',
-      initials: 'BS'
-    },
-    {
-      firstName: 'John',
-      lastName: 'Smith',
-      registered: 'Tuesday, 24 December 2019',
-      initials: 'JS'
-    },
-    {
-      firstName: 'Frank',
-      lastName: 'Helmsworth',
-      registered: 'Wednesday, 11 May 2011',
-      initials: 'FH'
-    },
-    {
-      firstName: 'Anna',
-      lastName: 'Freeman',
-      registered: 'Wednesday, 9 July 2003',
-      initials: 'AF'
-    },
-    {
-      firstName: 'Damian',
-      lastName: 'Sipes',
-      registered: 'Wednesday, 12 December 2001',
-      initials: 'DS'
-    },
-    {
-      firstName: 'Mara',
-      lastName: 'Homenick',
-      registered: 'Tuesday, 14 August 2007',
-      initials: 'MH'
-    }
-  ]
-}
-```
+### Next up
 
-Gorgeous. And the original data is untouched:
+Wonderful, but before we can attract any customers, we need a function
+to sell ingredients. And that's where you come in. As an exercise,
+implement the function `sellOne` in the `Store` namespace.
 
-```typescript
-console.log(users);
-```
+* `sellOne` takes a `Store` and a string `name`, and removes an ingredient with
+  that name from the inventory, increasing the `balance` by its cost.
+* Because we want to turn a profit, we need to sell at some `profitMargin`.
+  Extend the `Store` and its functions with a `profitMargin`, and use that in
+  `sellOne` to turn a profit.
 
-```json5
-[
-  {
-    firstName: 'Barbara',
-    lastName: 'Selling',
-    registered: '01.03.2017'
-  },
-  { firstName: 'John', lastName: 'Smith', registered: '12.24.2019' },
-  {
-    firstName: 'Frank',
-    lastName: 'Helmsworth',
-    registered: '05.11.2011'
-  },
-  { firstName: 'Anna', lastName: 'Freeman', registered: '07.09.2003' },
-  { firstName: 'Damian', lastName: 'Sipes', registered: '12.12.2001' },
-  { firstName: 'Mara', lastName: 'Homenick', registered: '08.14.2007' }
-]
-```
+To test your skills ...
 
-Our functions are now practically pure (not _technically_ pure, but pure for
-all we care about right now). We can run them in any order, repeatedly. They
-will return the same values every time.
+1. Clone, and prepare this repository:
+    ```bash
+    git clone https://github.com/tstelzer/workers-guide-to-fp-in-ts
+    cd workers-guide-to-fp-in-ts
+    npm ci
+    ```
+2.  Run the test suite:
+    ```bash
+    npm run test -- exercises/01 --watch
+    ```
+3. Extend the code in `exercises/01` until the tests pass.
 
-We can also fix the type issue we talked about: Instead of stuffing fields into
-the `User` type, we can make our new models _explicit_ by defining separate
-types for them:
-
-```typescript
-type AdminUser = User & {
-    initials: string;
-};
-
-type SidebarUser = User & {
-    shortName: string;
-};
-```
-
-And adding them to our function signatures:
-
-```git
--const usersToAdmin = (users: User[]) => {
-+const usersToAdmin = (users: User[]): AdminUser[] => {
-
--const usersToSidebar = (users: User[]) => {
-+const usersToSidebar = (users: User[]): SidebarUser[] => {
-```
-
-> Note: We're being somewhat naive here, forcing immutability by aggressively
-> copying data. While individually, the cost is small, in a large application
-> the memory overhead _will_ add up. We _can_ alleviate some of the cost by
-> using libraries that provide data structures made specifically for enabling
-> immutability (such as [immer.js](https://www.npmjs.com/package/immer)).
-> Other languages, such as Haskell, Rust or Clojure enable immutable data by
-> design, and offer built-in solutions for effecient, immutable programs. For
-> the purposes of this tutorial though, the memory overhead is a trade-off we
-> are willing to make.
-
-There is lots of opportunity for refactoring here which we will
-explore in the very next chapter, but we can be happy with the progress we've
-made so far!
-
-### Next Up
-
-In the next chapter we will refactor our code, removing redundancies by
-exploring the idea of using functions as values.
+Good luck, and see you in the next chapter.

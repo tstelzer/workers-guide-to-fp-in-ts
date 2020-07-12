@@ -1,600 +1,315 @@
-<html lang="en"><head><base href="/workers-guide-to-fp-in-ts/"/><meta charSet="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="ie=edge"/><title>A Workers Guide To Typed Functional Programming</title><link rel="stylesheet" href="styles.css"/></head><body><h1 class="page-title">A Workers Guide To Typed Functional Programming</h1><div class="layout"><nav class="nav"><h3 class="nav-title">Jump To Chapter</h3><ol><li><a href="index.html">Introduction</a><ol></ol></li><li><a href="the-road-to-composition.html">The road to composition</a><ol><li><a href="the-road-to-composition/pure-functions.html">Pure Functions</a></li><li><a href="the-road-to-composition/functions-as-values.html">Functions as values</a></li></ol></li></ol></nav><main class="main"><h2 class="chapter-title">Pure Functions</h2><div><h3 id="summary">Summary</h3>
-<p>In this chapter we will begin our journey by exploring functions. We will look
-at a piece of code that can be improved by using pure functions. If you are
-already familiar with the idea of pure functions and immutability, you can
-safely skip this chapter.</p>
-<h3 id="prelude">Prelude</h3>
-<p>It&#x27;s 10AM. The window in the developer room is fogged-up from dozens of steamy
-cups of coffee. You lean on the window frame and lose yourself in painting
-little lambdas on the misty glass. A tiny hummingbird flaps your way, with a
-coffee-stained slip of paper in its beak. Unfazed -- and feeling like a disney
-princess (this isn&#x27;t the first time workload was sent by way of fowl) -- you
-snatch it from the air with swift hands. It reads:</p>
-<pre><code>The junior wants to build the admin view, could you aid him and build the
-model? It should display the registration date in long date format and the user
-initials. Jim is building the side bar, maybe you guys should have a quick
-chat?
+<html lang="en"><head><base href="/workers-guide-to-fp-in-ts/"/><meta charSet="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="ie=edge"/><title>A Workers Guide To Typed Functional Programming</title><link rel="stylesheet" href="styles.css"/></head><body><h1 class="page-title">A Workers Guide To Typed Functional Programming</h1><div class="layout"><nav class="nav"><h3 class="nav-title">Jump To Chapter</h3><ol><li><a href="index.html">Introduction</a><ol></ol></li><li><a href="the-road-to-composition.html">The road to composition</a><ol><li><a href="the-road-to-composition/pure-functions.html">Pure Functions</a></li><li><a href="the-road-to-composition/functions-as-values.html">Functions as values</a></li></ol></li></ol></nav><main class="main"><h2 class="chapter-title">Pure Functions</h2><div><h3 id="capitalism-ho">Capitalism, ho!</h3>
+<p>As you step onto the creaking floor boards of the old shop, you breathe in a
+whiff of mouldy air. You firmly grip the key in your hand, melancholy washing
+over you, as you recall the many times you spent helping your granny running the shop
+in your childhood. Brushing off a layer of thick dust on the counter, you begin
+to inspect the inventory.</p>
+<p><a href="./inventory-01.json">inventory.json</a></p>
+<p>Grandmother supplied ingredients to adventurous alchemists, and you are picking
+up the trade. She used to do her accounting with pen and paper, but you will
+bring the shop into the 21th century, modeling the shop in a TypeScript
+program. So far, the list of ingredients look simple enough, let&#x27;s describe it
+in a <code>type</code>. Ingredients have a unique <code>name</code>, a <code>cost</code>, which denotes how much
+we payed for them, and a <code>rarity</code>, which describes a range of how likely it is
+to find, from <code>0</code> to <code>1</code>, with <code>1</code> being abundant.</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// file: Ingredient.ts</span>
+<span class="token keyword">export</span> <span class="token keyword">type</span> <span class="token maybe-class-name">Ingredient</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
+    name<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+    cost<span class="token punctuation">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+    rarity<span class="token punctuation">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
 </code></pre>
-<p>You open up your editor, excited to solve some problems. The small bird briefly
-pauses on your shoulder, silently judging your choice of programing language,
-before fluttering away again.</p>
-<h3 id="something-something-user">Something something user</h3>
-<p>Alright. Let&#x27;s have a look at the data.</p>
-<details><summary>output</summary><pre class="language-json5"><code class="language-json5"><span class="token punctuation">[</span>
-    <span class="token punctuation">{</span><span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Barbara&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Selling&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;01.03.2017&#x27;</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span><span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;John&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Smith&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;12.24.2019&#x27;</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span><span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Frank&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Helmsworth&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;05.11.2011&#x27;</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span><span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Anna&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Freeman&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;07.09.2003&#x27;</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span><span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Damian&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Sipes&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;12.12.2001&#x27;</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span><span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Mara&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Homenick&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;08.14.2007&#x27;</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
-<span class="token punctuation">]</span>;
-</code></pre></details>
-<p>Ah, glancing at the <code>registered</code> field we can see that it was stored
-as a US-formatted string, <code>MONTH.DAY.YEAR</code>, or <code>MM.DD.YYYY</code>, if you are
-familiar with <a href="https://www.unicode.org/reports/tr35/tr35-dates.html#Date_Field_Symbol_Table">date field notation</a>.
-The view needs it in a different format though, something like <code>Wednesday, 9 July 2003</code>,
-or <code>EEEE, d MMMM YYYY</code>. Before we go about and create our view
-model, we&#x27;ll capture the <em>structure</em> of our data in a type.</p>
-<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">type</span> <span class="token maybe-class-name">User</span> <span class="token punctuation">{</span>
-    firstName<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-    lastName<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-    registered<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+<p>This <code>type</code> describes the shape, or structure of the data in our program (think
+<code>struct</code>, if you&#x27;re familiar with that term). We can then define functions that
+take data of this type and transform it. For example, we could define a
+constructor function that creates data that fits the <code>Ingredient</code> type:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// file: Ingredient.ts</span>
+<span class="token keyword">export</span> <span class="token keyword">const</span> <span class="token keyword">from</span> <span class="token operator">=</span> <span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> cost<span class="token punctuation">:</span> <span class="token builtin">number</span><span class="token punctuation">,</span> rarity<span class="token punctuation">:</span> <span class="token builtin">number</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token parameter"><span class="token maybe-class-name">Ingredient</span></span> <span class="token arrow operator">=&gt;</span> <span class="token punctuation">(</span><span class="token punctuation">{</span>
+    name<span class="token punctuation">,</span>
+    cost<span class="token punctuation">,</span>
+    rarity<span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>Note that, unlike in object-oriented programming, our data is not an instance
+of a class. It is just that, data. Simple, serializable, context-free data.
+Our <code>Ingredient</code> does not have any behaviour (methods) attached to it. Any
+transformations we need, we will define as functions that take data of the type
+<code>Ingredient</code> as input. Note that our constructor function is just a helper,
+we don&#x27;t actually need it to create an <code>Ingredient</code>:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// file: Ingredient.test.ts</span>
+<span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> <span class="token constant">I</span> <span class="token keyword">from</span> <span class="token string">&#x27;./Ingredient&#x27;</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> flower <span class="token operator">=</span> <span class="token constant">I</span><span class="token punctuation">.</span><span class="token keyword">from</span><span class="token punctuation">(</span><span class="token string">&#x27;Flower&#x27;</span><span class="token punctuation">,</span> <span class="token number">0.1</span><span class="token punctuation">,</span> <span class="token number">0.95</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token function">describe</span><span class="token punctuation">(</span><span class="token string">&#x27;Ingredient::from&#x27;</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token arrow operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token function">it</span><span class="token punctuation">(</span><span class="token string">&#x27;creates a single ingredient&#x27;</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token arrow operator">=&gt;</span> <span class="token punctuation">{</span>
+        <span class="token function">expect</span><span class="token punctuation">(</span>flower<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token method function property-access">toStrictEqual</span><span class="token punctuation">(</span><span class="token punctuation">{</span>name<span class="token punctuation">:</span> <span class="token string">&#x27;Flower&#x27;</span><span class="token punctuation">,</span> cost<span class="token punctuation">:</span> <span class="token number">0.1</span><span class="token punctuation">,</span> rarity<span class="token punctuation">:</span> <span class="token number">0.95</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>Both pieces of data can be considered an <code>Ingredient</code>. In fact, any data that
+shares properties with our type can be, for all intents and purposes,
+considered an <code>Ingredient</code>. Here is a function <code>name</code>, that takes an
+<code>Ingredient</code> and returns its <code>name</code>:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// file: Ingredient.ts</span>
+<span class="token keyword">export</span> <span class="token keyword">const</span> <span class="token function-variable function">name</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">ingredient<span class="token punctuation">:</span> <span class="token maybe-class-name">Ingredient</span></span><span class="token punctuation">)</span> <span class="token arrow operator">=&gt;</span> ingredient<span class="token punctuation">.</span><span class="token property-access">name</span><span class="token punctuation">;</span>
+</code></pre>
+<p>We can use it on both pieces of data, the one we created manually and the
+one by using <code>from</code>:</p>
+<pre class="language-git"><code class="language-git">// file: Ingredient.test.ts
+@@ -7,3 +7,9 @@ describe(<span class="token string">&#x27;Ingredient::from&#x27;</span>, () =&gt; {
+         expect(flower).toStrictEqual({name: <span class="token string">&#x27;Flower&#x27;</span>, cost: 0.1, rarity: 0.95});
+     });
+ });
+<span class="token inserted">+</span>
+<span class="token inserted">+describe(&#x27;Ingredient::name&#x27;, () =&gt; {</span>
+<span class="token inserted">+    it(&#x27;returns the name of an ingredient&#x27;, () =&gt; {</span>
+<span class="token inserted">+        expect(I.name(flower)).toStrictEqual(&#x27;Flower&#x27;);</span>
+<span class="token inserted">+    });</span>
+<span class="token inserted">+});</span>
+</code></pre>
+<p>TypeScript requires us to be exact about the properties when passing in an
+object literal into <code>name</code>, the following will not compile, warning us that
+<code>color</code> does not exist on our <code>Ingredient</code> type:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">const</span> name <span class="token operator">=</span> <span class="token constant">I</span><span class="token punctuation">.</span><span class="token method function property-access">name</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    name<span class="token punctuation">:</span> <span class="token string">&#x27;Tyme&#x27;</span><span class="token punctuation">,</span>
+    cost<span class="token punctuation">:</span> <span class="token number">0.2</span><span class="token punctuation">,</span>
+    rarity<span class="token punctuation">:</span> <span class="token number">0.5</span><span class="token punctuation">,</span>
+    <span class="token comment">// Does not compile.</span>
+    color<span class="token punctuation">:</span> <span class="token string">&#x27;green&#x27;</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>TypeScript will also complain when we explicitly hint the type and we
+define our data ad-hoc:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">const</span> tyme<span class="token punctuation">:</span> <span class="token constant">I</span><span class="token punctuation">.</span><span class="token property-access"><span class="token maybe-class-name">Ingredient</span></span> <span class="token operator">=</span> <span class="token punctuation">{</span>
+    name<span class="token punctuation">:</span> <span class="token string">&#x27;Tyme&#x27;</span><span class="token punctuation">,</span>
+    cost<span class="token punctuation">:</span> <span class="token number">0.2</span><span class="token punctuation">,</span>
+    rarity<span class="token punctuation">:</span> <span class="token number">0.5</span><span class="token punctuation">,</span>
+    <span class="token comment">// Does not compile.</span>
+    color<span class="token punctuation">:</span> <span class="token string">&#x27;green&#x27;</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<p>Interestingly, when we drop the type hint, we can define the data prior and
+pass it into <code>name</code> without TypeScript complaining:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">const</span> tyme <span class="token operator">=</span> <span class="token punctuation">{</span>
+    name<span class="token punctuation">:</span> <span class="token string">&#x27;Tyme&#x27;</span><span class="token punctuation">,</span>
+    cost<span class="token punctuation">:</span> <span class="token number">0.2</span><span class="token punctuation">,</span>
+    rarity<span class="token punctuation">:</span> <span class="token number">0.5</span><span class="token punctuation">,</span>
+    color<span class="token punctuation">:</span> <span class="token string">&#x27;green&#x27;</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> name <span class="token operator">=</span> <span class="token constant">I</span><span class="token punctuation">.</span><span class="token method function property-access">name</span><span class="token punctuation">(</span>tyme<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>This is expected behaviour, as TypeScript is using <a href="https://www.typescriptlang.org/docs/handbook/type-compatibility.html">structural sub typing</a>,
+meaning that a piece of data is considered of type some <code>A</code>, when its
+properties match those of <code>A</code>. Excess properties are ignored. Only when we
+<em>explicitly</em> use a type hint, or constructor function, will TypeScript complain
+about excess properties. One interesting property that follows from this is
+that one piece of data can match many types:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">type</span> <span class="token constant">A</span> <span class="token operator">=</span> <span class="token punctuation">{</span> foo<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token keyword">type</span> <span class="token constant">B</span> <span class="token operator">=</span> <span class="token punctuation">{</span> bar<span class="token punctuation">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">f</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">a<span class="token punctuation">:</span> <span class="token constant">A</span></span><span class="token punctuation">)</span> <span class="token arrow operator">=&gt;</span> a<span class="token punctuation">.</span><span class="token property-access">foo</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> <span class="token function-variable function">g</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">b<span class="token punctuation">:</span> <span class="token constant">B</span></span><span class="token punctuation">)</span> <span class="token arrow operator">=&gt;</span> b<span class="token punctuation">.</span><span class="token property-access">bar</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> data <span class="token operator">=</span> <span class="token punctuation">{</span>foo<span class="token punctuation">:</span> <span class="token string">&#x27;Jeff&#x27;</span><span class="token punctuation">,</span> bar<span class="token punctuation">:</span> <span class="token number">24</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token console class-name">console</span><span class="token punctuation">.</span><span class="token method function property-access">log</span><span class="token punctuation">(</span><span class="token function">f</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// &#x27;Jeff&#x27;</span>
+<span class="token console class-name">console</span><span class="token punctuation">.</span><span class="token method function property-access">log</span><span class="token punctuation">(</span><span class="token function">g</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 24</span>
+</code></pre>
+<p>In our case, when a JavaScript object has the properties <code>name</code>, <code>cost</code>, and <code>rarity</code> that
+are of the primitive types <code>string</code>, <code>number</code> and <code>number</code> respectively, we can
+use it in any function that requires an <code>Ingredient</code>, even when we didn&#x27;t explicitly
+define it as such.</p>
+<h3 id="a-store-from-boards-and-nails">A store from boards and nails</h3>
+<p>Alright, now that we&#x27;ve defined our data type, let&#x27;s think about what else we need
+for our little item store to work. Rummaging around in grannies cupboards, you can&#x27;t
+find the program she was using to buy and sell ingredients, so we have to write our
+own. To make it easier for ourselfes, and as is the premise of this tutorial, we will
+write the store using stateless, pure functions. Immutable transformations or
+&quot;pure functions&quot;, by definition, produce the same output for the same input.
+Every time. Not only does this have benefits for the reasonability of our
+program, it is essentially the prerequisite for writing it in a composable,
+functional style. In later chapters, we can explore deeper the reasons,
+benefits and problems for that, for now, let&#x27;s just start writing.</p>
+<p>For now, our <code>Store</code> will simply hold the inventory, a list of all
+<code>Ingredient</code>s we have available. This is somewhat of a naíve way to represent
+the inventory, but we will have plenty of opportunity to change and refactor
+this code.</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// file: Store.ts</span>
+<span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> <span class="token constant">I</span> <span class="token keyword">from</span> <span class="token string">&#x27;./Ingredient&#x27;</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">type</span> <span class="token maybe-class-name">Store</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
+    inventory<span class="token punctuation">:</span> <span class="token constant">I</span><span class="token punctuation">.</span><span class="token property-access"><span class="token maybe-class-name">Ingredient</span></span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span>
-</code></pre>
-<p>Unlike in classical object-oriented programming (OOP), where designs tend to
-combine data, behaviour, state and identity, in the style of functional
-programming that we will learn as part of this series of tutorials, we clearly
-distinguish and separate these.</p>
-<p>When we see a type, we don&#x27;t mean an &quot;an instance of a class&quot;, we mean &quot;a piece
-of data that matches a certain structure&quot;. In our specific case, any data that
-matches its structure can be considered a <code>User</code>. Think one of those toys that
-seem to be sold exclusively to doctors waiting rooms, where children are
-supposed to match wooden blocks in various shapes (stars, circles, rectangles)
-to their corresponding holes. If the block matches the &quot;star&quot; hole, for all
-intents and purposes, its a star.</p>
-<p>This kind of type system is called <a href="https://www.typescriptlang.org/docs/handbook/type-compatibility.html">structural sub typing</a>.
-It means that the type of a thing is not defined by its place of declaration or
-internal name (as is the case in nominal typed languages like Java or C#), but
-by its properties. This means that the same piece of data can match many types.</p>
-<p>Let&#x27;s have a look at an example: We can explicitly tell TypeScript which shape
-we&#x27;re expecting this object, <code>damian</code>, to have. If the structure wouldn&#x27;t match
-the type, TypeScript would yell at us.</p>
-<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">const</span> damian<span class="token punctuation">:</span> <span class="token maybe-class-name">User</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
-    firstName<span class="token punctuation">:</span> <span class="token string">&#x27;Damian&#x27;</span><span class="token punctuation">,</span>
-    lastName<span class="token punctuation">:</span> <span class="token string">&#x27;Sipes&#x27;</span><span class="token punctuation">,</span>
-    registered<span class="token punctuation">:</span> <span class="token string">&#x27;12.12.2001&#x27;</span><span class="token punctuation">,</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span>
-</code></pre>
-<p>Just to re-iterate, we&#x27;re not <em>instantiating</em> a <code>User</code> here, we&#x27;re just giving
-a type hint. <code>damian</code> is just labeled data. Poor Damian. To show the use,
-let&#x27;s define a function that explicitly takes a user and returns its
-<code>firstName</code>.</p>
-<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">const</span> firstName <span class="token operator">=</span> <span class="token punctuation">(</span>user<span class="token punctuation">:</span> <span class="token maybe-class-name">User</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token parameter"><span class="token builtin">string</span></span> <span class="token arrow operator">=&gt;</span> user<span class="token punctuation">.</span><span class="token property-access">firstName</span><span class="token punctuation">;</span>
 
-<span class="token console class-name">console</span><span class="token punctuation">.</span><span class="token method function property-access">log</span><span class="token punctuation">(</span><span class="token function">firstName</span><span class="token punctuation">(</span>damian<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">export</span> <span class="token keyword">const</span> create <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token parameter"><span class="token maybe-class-name">Store</span></span> <span class="token arrow operator">=&gt;</span> <span class="token punctuation">(</span><span class="token punctuation">{</span>
+    inventory<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 </code></pre>
-<details><summary>output</summary><pre class="language-json5"><code class="language-json5">Damian
-</code></pre></details>
-<p>Damians friend Mara doesn&#x27;t like to be labeled:</p>
-<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">const</span> mara <span class="token operator">=</span> <span class="token punctuation">{</span>
-    firstName<span class="token punctuation">:</span> <span class="token string">&#x27;Mara&#x27;</span><span class="token punctuation">,</span>
-    lastName<span class="token punctuation">:</span> <span class="token string">&#x27;Homenick&#x27;</span><span class="token punctuation">,</span>
-    registered<span class="token punctuation">:</span> <span class="token string">&#x27;08.14.2007&#x27;</span><span class="token punctuation">,</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span>
-</code></pre>
-<p>TypeScript doesn&#x27;t care, <code>mara</code> matches the shape of a <code>User</code>, so the following
-code is perfectly valid and reasonable:</p>
-<pre class="language-typescript"><code class="language-typescript"><span class="token console class-name">console</span><span class="token punctuation">.</span><span class="token method function property-access">log</span><span class="token punctuation">(</span><span class="token function">firstName</span><span class="token punctuation">(</span>mara<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-</code></pre>
-<details><summary>output</summary><pre class="language-json5"><code class="language-json5">Mara
-</code></pre></details>
-<p>Yet another friend of theirs, Anna, does not feel like a <code>User</code> <em>at all</em>,
-they&#x27;re off, creating their own type, with black jack and hookers:</p>
-<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">type</span> <span class="token maybe-class-name">Person</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
-    firstName<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-    lastName<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-    registered<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span>
-
-<span class="token keyword">const</span> anna<span class="token punctuation">:</span> <span class="token maybe-class-name">Person</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
-    firstName<span class="token punctuation">:</span> <span class="token string">&#x27;Anna&#x27;</span><span class="token punctuation">,</span>
-    lastName<span class="token punctuation">:</span> <span class="token string">&#x27;Freeman&#x27;</span><span class="token punctuation">,</span>
-    registered<span class="token punctuation">:</span> <span class="token string">&#x27;07.09.2003&#x27;</span><span class="token punctuation">,</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span>
-</code></pre>
-<p>But, if it has a <code>firstName</code>, a <code>lastName</code> and <code>registered</code>, it can be used
-like a <code>User</code>.</p>
-<pre class="language-typescript"><code class="language-typescript"><span class="token console class-name">console</span><span class="token punctuation">.</span><span class="token method function property-access">log</span><span class="token punctuation">(</span><span class="token function">firstName</span><span class="token punctuation">(</span>anna<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-</code></pre>
-<details><summary>output</summary><pre class="language-json5"><code class="language-json5">Anna
-</code></pre></details>
-<p>Noteworthy: Our function doesn&#x27;t even need to take a <code>User</code>, we only really
-care about the <code>firstName</code> property, so we can
-<a href="https://www.typescriptlang.org/docs/handbook/variable-declarations.html#function-declarations">destructure</a>
-it from the input. Now we&#x27;ve signaled to the caller that we care <em>even less</em>
-about the label of the input, as long as it contains a <code>firstName</code> of type
-<code>string</code>.</p>
-<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">const</span> firstName <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">{</span>firstName<span class="token punctuation">}</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>firstName<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token parameter"><span class="token builtin">string</span></span> <span class="token arrow operator">=&gt;</span> input<span class="token punctuation">.</span><span class="token property-access">firstName</span><span class="token punctuation">;</span>
-<span class="token console class-name">console</span><span class="token punctuation">.</span><span class="token method function property-access">log</span><span class="token punctuation">(</span><span class="token function">firstName</span><span class="token punctuation">(</span>anna<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-</code></pre>
-<details><summary>output</summary><pre class="language-json5"><code class="language-json5">Anna
-</code></pre></details>
-<p>How concrete or general we are in defining our input types is entirely up to us. Each
-comes with benefits and trade offs we will explore in chapters to come.</p>
-<h3 id="intermission">Intermission</h3>
-<p>By now the opaque window of the developer room has cleared up. You get up,
-lacking the coffee to motivate yourself to continue. In passing, you hear Jim
-muttering curses under his breath. Barbara seems to hold on to her temples for
-dear life, staring in disbelief at the juniors code from past week, while said
-junior furiously researches ways to center divs.</p>
-<p>As you sit down again, armed with fresh coffee ready to directly inject it into
-your blood stream, your colleague Jim (who works on a similar part of the code)
-erupts: &quot;Done. Pushed. Merged.&quot;</p>
-<p>You raise your eyebrows, concerned, as you pull in Jims changes.</p>
-<h3 id="procedural-impurity-and-shared-complexity">Procedural impurity and shared complexity</h3>
-<p>Before we write our own model, let&#x27;s have a look at Jims code.</p>
-<pre class="language-git"><code class="language-git"> type User = {
-     firstName: string;
-     lastName: string;
-     registered: string;
-<span class="token inserted">+    shortName?: string;</span>
- };
-<span class="token inserted">+</span>
-<span class="token inserted">+const usersToSidebar = () =&gt; {</span>
-<span class="token inserted">+    for (const user of users) {</span>
-<span class="token inserted">+        // get the year, e.g. &#x27;2003&#x27;</span>
-<span class="token inserted">+        user.registered = user.registered.slice(6);</span>
-<span class="token inserted">+        // e.g. &#x27;a.smith&#x27;</span>
-<span class="token inserted">+        user.shortName = `${user.firstName[0].toLowerCase()}.${user.lastName.toLowerCase()}`;</span>
-<span class="token inserted">+    }</span>
-<span class="token inserted">+};</span>
-<span class="token inserted">+</span>
-<span class="token inserted">+usersToSidebar();</span>
-</code></pre>
-<p>We didn&#x27;t really listen in the stand-up, so we don&#x27;t know precisely what Jims
-feature is supposed to do, but we can assume from the comments. Let&#x27;s have a
-look at the result.</p>
-<pre class="language-typescript"><code class="language-typescript"><span class="token console class-name">console</span><span class="token punctuation">.</span><span class="token method function property-access">log</span><span class="token punctuation">(</span>users<span class="token punctuation">)</span><span class="token punctuation">;</span>
-</code></pre>
-<details><summary>output</summary><pre class="language-json5"><code class="language-json5"><span class="token punctuation">[</span>
-  <span class="token punctuation">{</span>
-    <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Barbara&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Selling&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;2017&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">shortName</span><span class="token operator">:</span> <span class="token string">&#x27;b.selling&#x27;</span>
-  <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span>
-    <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;John&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Smith&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;2019&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">shortName</span><span class="token operator">:</span> <span class="token string">&#x27;j.smith&#x27;</span>
-  <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span>
-    <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Frank&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Helmsworth&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;2011&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">shortName</span><span class="token operator">:</span> <span class="token string">&#x27;f.helmsworth&#x27;</span>
-  <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span>
-    <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Anna&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Freeman&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;2003&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">shortName</span><span class="token operator">:</span> <span class="token string">&#x27;a.freeman&#x27;</span>
-  <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span>
-    <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Damian&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Sipes&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;2001&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">shortName</span><span class="token operator">:</span> <span class="token string">&#x27;d.sipes&#x27;</span>
-  <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span>
-    <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Mara&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Homenick&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;2007&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">shortName</span><span class="token operator">:</span> <span class="token string">&#x27;m.homenick&#x27;</span>
-  <span class="token punctuation">}</span>
-<span class="token punctuation">]</span>
-</code></pre></details>
-<p>This may work for Jim, but we have a problem. Jims <em>procedure</em> freely mutates
-the data (i.e. changes it in place). If we want to derive our own view model
-from <code>users</code>, we would have to do it <em>before Jims procedure runs</em>, otherwise
-his mutation of specifically the <code>registered</code> field makes it impossible to
-derive our own transformation of the field.</p>
-<blockquote>
-<p>Note: We&#x27;re intentionally calling <code>usersToSidebar</code> a <em>procedure</em>. There is a
-critical difference between a <em>function</em> and a <em>procedure</em>. A <em>function</em>
-merely takes values as inputs and returns values as outputs -- all without
-affecting its environment, e.g. by changing inputs in-place. A <em>procedure</em> may
-run a series of statements, changing its environment, its inputs, having side
-effects other than returning values.</p>
-</blockquote>
-<p>Let&#x27;s explore this issue a bit more. We&#x27;ll define our own model-deriving
-<em>procedure</em> and see what happens.</p>
-<p>First, we extend <code>User</code> with an optional <code>initials</code> field.</p>
-<pre class="language-git"><code class="language-git"> type User = {
-     firstName: string;
-     lastName: string;
-     registered: string;
-     shortName?: string;
-<span class="token inserted">+    initials?: string;</span>
- };
-</code></pre>
-<p>Then we&#x27;re adding our own <em>procedure</em> and execute it <em>after</em> Jims.</p>
-<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">const</span> <span class="token function-variable function">usersToAdmin</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token arrow operator">=&gt;</span> <span class="token punctuation">{</span>
-    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> user <span class="token keyword">of</span> users<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment">// resolves to format: EEEE, d MMMM YYYY</span>
-        <span class="token comment">// e.g. &quot;Wednesday, 20 June 2019&quot;</span>
-        user<span class="token punctuation">.</span><span class="token property-access">registered</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span>user<span class="token punctuation">.</span><span class="token property-access">registered</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token method function property-access">toLocaleDateString</span><span class="token punctuation">(</span>
-            <span class="token string">&#x27;en-gb&#x27;</span><span class="token punctuation">,</span>
-            <span class="token punctuation">{</span>
-                weekday<span class="token punctuation">:</span> <span class="token string">&#x27;long&#x27;</span><span class="token punctuation">,</span>
-                year<span class="token punctuation">:</span> <span class="token string">&#x27;numeric&#x27;</span><span class="token punctuation">,</span>
-                month<span class="token punctuation">:</span> <span class="token string">&#x27;long&#x27;</span><span class="token punctuation">,</span>
-                day<span class="token punctuation">:</span> <span class="token string">&#x27;numeric&#x27;</span><span class="token punctuation">,</span>
-            <span class="token punctuation">}</span><span class="token punctuation">,</span>
-        <span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token comment">// e.g. &#x27;AF&#x27;</span>
-        user<span class="token punctuation">.</span><span class="token property-access">initials</span> <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>user<span class="token punctuation">.</span><span class="token property-access">firstName</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>user<span class="token punctuation">.</span><span class="token property-access">lastName</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span>
-
-<span class="token function">usersToSidebar</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token function">usersToAdminView</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-
-<span class="token console class-name">console</span><span class="token punctuation">.</span><span class="token method function property-access">log</span><span class="token punctuation">(</span>users<span class="token punctuation">)</span><span class="token punctuation">;</span>
-</code></pre>
-<details><summary>output</summary><pre class="language-json5"><code class="language-json5"><span class="token punctuation">[</span>
-  <span class="token punctuation">{</span>
-    <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Barbara&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Selling&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;Sunday, 1 January 2017&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">shortName</span><span class="token operator">:</span> <span class="token string">&#x27;b.selling&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">initials</span><span class="token operator">:</span> <span class="token string">&#x27;BS&#x27;</span>
-  <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span>
-    <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;John&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Smith&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;Tuesday, 1 January 2019&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">shortName</span><span class="token operator">:</span> <span class="token string">&#x27;j.smith&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">initials</span><span class="token operator">:</span> <span class="token string">&#x27;JS&#x27;</span>
-  <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span>
-    <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Frank&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Helmsworth&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;Saturday, 1 January 2011&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">shortName</span><span class="token operator">:</span> <span class="token string">&#x27;f.helmsworth&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">initials</span><span class="token operator">:</span> <span class="token string">&#x27;FH&#x27;</span>
-  <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span>
-    <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Anna&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Freeman&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;Wednesday, 1 January 2003&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">shortName</span><span class="token operator">:</span> <span class="token string">&#x27;a.freeman&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">initials</span><span class="token operator">:</span> <span class="token string">&#x27;AF&#x27;</span>
-  <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span>
-    <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Damian&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Sipes&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;Monday, 1 January 2001&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">shortName</span><span class="token operator">:</span> <span class="token string">&#x27;d.sipes&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">initials</span><span class="token operator">:</span> <span class="token string">&#x27;DS&#x27;</span>
-  <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span>
-    <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Mara&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Homenick&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;Monday, 1 January 2007&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">shortName</span><span class="token operator">:</span> <span class="token string">&#x27;m.homenick&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">initials</span><span class="token operator">:</span> <span class="token string">&#x27;MH&#x27;</span>
-  <span class="token punctuation">}</span>
-<span class="token punctuation">]</span>
-</code></pre></details>
-<p>Yikes, look at <code>registered</code>. Seems they are all fixed on <code>1 January</code> because
-<em>our</em> procedure transforms <code>registered</code> <em>after</em> it was cut down to just the
-year by <code>usersToSidebar</code>. Let&#x27;s flip the order of invocation, just to see if
-that would fix it.</p>
-<pre class="language-git"><code class="language-git"><span class="token deleted">-usersToSidebar();</span>
- usersToAdminView();
-<span class="token inserted">+usersToSidebar();</span>
- 
- console.log(users);
-</code></pre>
-<details><summary>output</summary><pre class="language-json5"><code class="language-json5"><span class="token punctuation">[</span>
-  <span class="token punctuation">{</span>
-    <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Barbara&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Selling&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;y, 3 January 2017&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">initials</span><span class="token operator">:</span> <span class="token string">&#x27;BS&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">shortName</span><span class="token operator">:</span> <span class="token string">&#x27;b.selling&#x27;</span>
-  <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span>
-    <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;John&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Smith&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;y, 24 December 2019&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">initials</span><span class="token operator">:</span> <span class="token string">&#x27;JS&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">shortName</span><span class="token operator">:</span> <span class="token string">&#x27;j.smith&#x27;</span>
-  <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span>
-    <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Frank&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Helmsworth&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;day, 11 May 2011&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">initials</span><span class="token operator">:</span> <span class="token string">&#x27;FH&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">shortName</span><span class="token operator">:</span> <span class="token string">&#x27;f.helmsworth&#x27;</span>
-  <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span>
-    <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Anna&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Freeman&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;day, 9 July 2003&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">initials</span><span class="token operator">:</span> <span class="token string">&#x27;AF&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">shortName</span><span class="token operator">:</span> <span class="token string">&#x27;a.freeman&#x27;</span>
-  <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span>
-    <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Damian&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Sipes&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;day, 12 December 2001&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">initials</span><span class="token operator">:</span> <span class="token string">&#x27;DS&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">shortName</span><span class="token operator">:</span> <span class="token string">&#x27;d.sipes&#x27;</span>
-  <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span>
-    <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Mara&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Homenick&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;y, 14 August 2007&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">initials</span><span class="token operator">:</span> <span class="token string">&#x27;MH&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">shortName</span><span class="token operator">:</span> <span class="token string">&#x27;m.homenick&#x27;</span>
-  <span class="token punctuation">}</span>
-<span class="token punctuation">]</span>
-</code></pre></details>
-<p>Oof. Completely broken. What we&#x27;re seeing here is the cost of <strong>shared, mutable
-state</strong>. In our procedures we are reaching into the global scope and changing
-data in place that is used in other places. We&#x27;re not preserving the integrity
-of the data. Like a spoiled toddler, we&#x27;re rampaging through the sweets section
-of the supermarket, trained on that unearned treat, leaving a trail of
-destruction in our wake.</p>
-<p>And we&#x27;ve introduced another problem on the type level: because we keep changing
-our original data <em>in place</em>, we have to stuff all our new fields into the
-original type. <code>User</code> would grow in size if we kept adding new fields for
-totally unrelated views.</p>
-<p>We can imagine that writing an entire application in this style of unmanaged
-state mutation is an explosion of complexity.</p>
-<p>Fortunately, we have a simple solution at hand: the function. Specifically, the
-<strong>pure</strong> function.</p>
-<h3 id="out-of-the-tar-pit">Out of the tar pit</h3>
-<p>You know what is fundamentally simple? A table:</p>
-<table>
-<thead>
-<tr>
-<th style="text-align:null">key</th>
-<th style="text-align:null">value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:null">a</td>
-<td style="text-align:null">1</td>
-</tr>
-<tr>
-<td style="text-align:null">b</td>
-<td style="text-align:null">99</td>
-</tr>
-<tr>
-<td style="text-align:null">c</td>
-<td style="text-align:null">1000</td>
-</tr>
-<tr>
-<td style="text-align:null">d</td>
-<td style="text-align:null">99999</td>
-</tr>
-</tbody>
-</table>
-<p>So simple and so utterly boring. It&#x27;s so dull, I hesitate to talk about it. But
-we need to, in order to make a point. So here we go:</p>
-<ul>
-<li>This table has two columns, a key and a value column.</li>
-<li>We can look up values via its key.</li>
-<li>Though the rows may <em>grow</em>, at the time of accessing it, all values and their
-types are known.</li>
-</ul>
-<p>Know what behaves like a table? A pure function!</p>
-<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">const</span> f <span class="token operator">=</span> <span class="token punctuation">(</span>key<span class="token punctuation">:</span> <span class="token string">&#x27;a&#x27;</span> <span class="token operator">|</span> <span class="token string">&#x27;b&#x27;</span> <span class="token operator">|</span> <span class="token string">&#x27;c&#x27;</span> <span class="token operator">|</span> <span class="token string">&#x27;d&#x27;</span><span class="token punctuation">)</span> <span class="token arrow operator">=&gt;</span>
-    key <span class="token operator">===</span> <span class="token string">&#x27;a&#x27;</span> <span class="token operator">?</span> <span class="token number">1</span>
-    <span class="token punctuation">:</span> key <span class="token operator">===</span> <span class="token string">&#x27;b&#x27;</span> <span class="token operator">?</span> <span class="token number">99</span>
-    <span class="token punctuation">:</span> key <span class="token operator">===</span> <span class="token string">&#x27;c&#x27;</span> <span class="token operator">?</span> <span class="token number">1000</span>
-    <span class="token punctuation">:</span> <span class="token number">99999</span><span class="token punctuation">;</span>
-</code></pre>
-<ul>
-<li>The pure function has two sets of values, input (<code>&#x27;a&#x27; | &#x27;b&#x27; | &#x27;c&#x27; | &#x27;d&#x27;</code>)
-and output (<code>1 | 99 | 1000 | 99999</code>).</li>
-<li>We can look up output values by passing input values</li>
-<li>Though we may add values to input and output sets, at the time of accessing
-it, all values and their types are known.</li>
-</ul>
-<p>Noteworthy, a function like this does not share any of the problems of
-procedures:</p>
-<ul>
-<li>It does not reach into its parent scope, all dependencies of it are declared
-right there in the parameters.</li>
-<li>It does not mutate the values it is working with, it effectively only <em>maps</em>
-outputs to inputs.</li>
-<li>If you run it, you don&#x27;t need to fear side effects. It just returns values.</li>
-</ul>
-<p>If we can somehow rewrite our problematic procedures so that we get these
-benefits we have improved the comprehensibility of our program immensely.
-It is quite simple, actually:</p>
+<p>Here, <code>create</code> acts as a constructor function for our <code>Store</code>, which is a plain
+object. Unlike in classical object-oriented programming, we&#x27;re not
+instantiating an object, we&#x27;re simply creating plain data. It does not have any
+behaviour (&quot;methods&quot;) attached, and thus is stateless. If we want to change
+it, we have to define pure functions that transform it, creating new data,
+without changing the original. Though we&#x27;re co-locating them, we&#x27;re clearly separating
+between the data type (<code>Store</code>) and our transformations (so far only <code>create</code>).</p>
+<p>Note that we can still combine object-oriented programming and functional
+programming in an elegant way, by using type classes, if we want to. Defining
+that is beyond this chapter though.</p>
+<p>A pure function has a couple of properties:</p>
 <ol>
-<li>Instead of reaching into the parent scope, explicitly define inputs as parameters.</li>
-<li>Instead of mutating inputs, treat them as immutable data and create copies.</li>
-<li>Instead of storing the outputs in shared state, return them.</li>
+<li>Following the principle of least astonishment, for any function input <code>a</code>, it always returns the output <code>b</code>, regardless of how often we call it, or in which context. For example, the function<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">const</span> <span class="token function-variable function">add</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">a<span class="token punctuation">,</span> b</span><span class="token punctuation">)</span> <span class="token arrow operator">=&gt;</span> a <span class="token operator">+</span> b<span class="token punctuation">;</span>
+</code></pre>always returns <code>4</code> for the inputs <code>1</code> and <code>3</code>. A formal way of describing this property saying that the function is &quot;referentially transparent&quot;, that is, you could replace the function invocation with its result, without breaking the program.</li>
+<li>It does not depend on its context or scope, otherwise it would break (1).</li>
+<li>It does not mutate its inputs, otherwise calling it multiple times with the same inputs would result in different outputs, and thus break (1).</li>
+<li>It does not cause any side effects in your program, it simply returns values. This is more of a theoretical problem, some side effects are harmless, others change the environment in a way where calling the function multiple times would result in different results, which would, again, break (1). Examples include making api calls, updating a database, interacting with the file system.</li>
 </ol>
-<p>Let&#x27;s do that for <code>usersToAdmin</code> and <code>usersToSidebar</code>:</p>
-<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">const</span> <span class="token function-variable function">usersToAdmin</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">users<span class="token punctuation">:</span> <span class="token maybe-class-name">User</span><span class="token punctuation">[</span><span class="token punctuation">]</span></span><span class="token punctuation">)</span> <span class="token arrow operator">=&gt;</span> <span class="token punctuation">{</span>
-    <span class="token keyword">const</span> result <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> user <span class="token keyword">of</span> users<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        result<span class="token punctuation">.</span><span class="token method function property-access">push</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
-            <span class="token spread operator">...</span>user<span class="token punctuation">,</span>
-            <span class="token comment">// resolves to format: EEEE, d MMMM YYYY</span>
-            <span class="token comment">// e.g. &quot;Wednesday, 20 June 2019&quot;</span>
-            registered<span class="token punctuation">:</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span>user<span class="token punctuation">.</span><span class="token property-access">registered</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token method function property-access">toLocaleDateString</span><span class="token punctuation">(</span><span class="token string">&#x27;en-gb&#x27;</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
-                weekday<span class="token punctuation">:</span> <span class="token string">&#x27;long&#x27;</span><span class="token punctuation">,</span>
-                year<span class="token punctuation">:</span> <span class="token string">&#x27;numeric&#x27;</span><span class="token punctuation">,</span>
-                month<span class="token punctuation">:</span> <span class="token string">&#x27;long&#x27;</span><span class="token punctuation">,</span>
-                day<span class="token punctuation">:</span> <span class="token string">&#x27;numeric&#x27;</span><span class="token punctuation">,</span>
-            <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
-            <span class="token comment">// e.g. &#x27;AF&#x27;</span>
-            initials<span class="token punctuation">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>user<span class="token punctuation">.</span><span class="token property-access">firstName</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>user<span class="token punctuation">.</span><span class="token property-access">lastName</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
-        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">return</span> result<span class="token punctuation">;</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span>
+<p>Callign <code>create</code>, unremarkably, creates a plain object that fits the <code>Store</code> type:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// file: run.ts</span>
+<span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> <span class="token constant">S</span> <span class="token keyword">from</span> <span class="token string">&#x27;./Store.ts&#x27;</span>
 
-<span class="token keyword">const</span> <span class="token function-variable function">usersToSidebar</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">users<span class="token punctuation">:</span> <span class="token maybe-class-name">User</span><span class="token punctuation">[</span><span class="token punctuation">]</span></span><span class="token punctuation">)</span> <span class="token arrow operator">=&gt;</span> <span class="token punctuation">{</span>
-    <span class="token keyword">const</span> result <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> user <span class="token keyword">of</span> users<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        result<span class="token punctuation">.</span><span class="token method function property-access">push</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
-            <span class="token spread operator">...</span>user<span class="token punctuation">,</span>
-            <span class="token comment">// get the year, e.g. &#x27;2003&#x27;</span>
-            registered<span class="token punctuation">:</span> user<span class="token punctuation">.</span><span class="token property-access">registered</span><span class="token punctuation">.</span><span class="token method function property-access">slice</span><span class="token punctuation">(</span><span class="token number">6</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
-            <span class="token comment">// e.g. &#x27;a.smith&#x27;</span>
-            shortName<span class="token punctuation">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>user<span class="token punctuation">.</span><span class="token property-access">firstName</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token method function property-access">toLowerCase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">.</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>user<span class="token punctuation">.</span><span class="token property-access">lastName</span><span class="token punctuation">.</span><span class="token method function property-access">toLowerCase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
-        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">return</span> result<span class="token punctuation">;</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span>
-
-<span class="token keyword">const</span> sidebarUsers <span class="token operator">=</span> <span class="token function">usersToSidebar</span><span class="token punctuation">(</span>users<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token keyword">const</span> adminUsers <span class="token operator">=</span> <span class="token function">usersToAdmin</span><span class="token punctuation">(</span>users<span class="token punctuation">)</span><span class="token punctuation">;</span>
-
-<span class="token console class-name">console</span><span class="token punctuation">.</span><span class="token method function property-access">log</span><span class="token punctuation">(</span><span class="token punctuation">{</span>sidebarUsers<span class="token punctuation">,</span> adminUsers<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> store <span class="token operator">=</span> <span class="token constant">S</span><span class="token punctuation">.</span><span class="token method function property-access">create</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 </code></pre>
-<details><summary>output</summary><pre class="language-json5"><code class="language-json5"><span class="token punctuation">{</span>
-  <span class="token property unquoted">sidebarUsers</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-    <span class="token punctuation">{</span>
-      <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Barbara&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Selling&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;2017&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">shortName</span><span class="token operator">:</span> <span class="token string">&#x27;b.selling&#x27;</span>
-    <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span>
-      <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;John&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Smith&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;2019&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">shortName</span><span class="token operator">:</span> <span class="token string">&#x27;j.smith&#x27;</span>
-    <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span>
-      <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Frank&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Helmsworth&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;2011&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">shortName</span><span class="token operator">:</span> <span class="token string">&#x27;f.helmsworth&#x27;</span>
-    <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span>
-      <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Anna&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Freeman&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;2003&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">shortName</span><span class="token operator">:</span> <span class="token string">&#x27;a.freeman&#x27;</span>
-    <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span>
-      <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Damian&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Sipes&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;2001&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">shortName</span><span class="token operator">:</span> <span class="token string">&#x27;d.sipes&#x27;</span>
-    <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span>
-      <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Mara&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Homenick&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;2007&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">shortName</span><span class="token operator">:</span> <span class="token string">&#x27;m.homenick&#x27;</span>
-    <span class="token punctuation">}</span>
-  <span class="token punctuation">]</span><span class="token punctuation">,</span>
-  <span class="token property unquoted">adminUsers</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-    <span class="token punctuation">{</span>
-      <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Barbara&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Selling&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;Tuesday, 3 January 2017&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">initials</span><span class="token operator">:</span> <span class="token string">&#x27;BS&#x27;</span>
-    <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span>
-      <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;John&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Smith&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;Tuesday, 24 December 2019&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">initials</span><span class="token operator">:</span> <span class="token string">&#x27;JS&#x27;</span>
-    <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span>
-      <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Frank&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Helmsworth&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;Wednesday, 11 May 2011&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">initials</span><span class="token operator">:</span> <span class="token string">&#x27;FH&#x27;</span>
-    <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span>
-      <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Anna&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Freeman&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;Wednesday, 9 July 2003&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">initials</span><span class="token operator">:</span> <span class="token string">&#x27;AF&#x27;</span>
-    <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span>
-      <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Damian&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Sipes&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;Wednesday, 12 December 2001&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">initials</span><span class="token operator">:</span> <span class="token string">&#x27;DS&#x27;</span>
-    <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span>
-      <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Mara&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Homenick&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;Tuesday, 14 August 2007&#x27;</span><span class="token punctuation">,</span>
-      <span class="token property unquoted">initials</span><span class="token operator">:</span> <span class="token string">&#x27;MH&#x27;</span>
-    <span class="token punctuation">}</span>
-  <span class="token punctuation">]</span>
-<span class="token punctuation">}</span>
-</code></pre></details>
-<p>Gorgous. And the original data is untouched:</p>
-<pre class="language-typescript"><code class="language-typescript"><span class="token console class-name">console</span><span class="token punctuation">.</span><span class="token method function property-access">log</span><span class="token punctuation">(</span>users<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<p>Granny left us a little bit of cash, <code>$95.4</code>, not enough to live decadently. Let&#x27;s
+extend the <code>Store</code>, so that it holds a balance, and an alternative constructor that
+allows us to define an initial stock and balance.</p>
+<pre class="language-git"><code class="language-git">// file: Store.ts
+@@ -2,8 +2,21 @@ import * as I from <span class="token string">&#x27;./Ingredient&#x27;</span>;
+ 
+ export type Store = {
+     inventory: I.Ingredient[];
+<span class="token inserted">+    balance: number;</span>
+ };
+ 
+ export const create = (): Store =&gt; ({
+     inventory: [],
+<span class="token inserted">+    balance: 0,</span>
+<span class="token inserted">+});</span>
+<span class="token inserted">+</span>
+<span class="token inserted">+export const from = ({</span>
+<span class="token inserted">+    inventory,</span>
+<span class="token inserted">+    balance,</span>
+<span class="token inserted">+}: {</span>
+<span class="token inserted">+    inventory: I.Ingredient[];</span>
+<span class="token inserted">+    balance: number;</span>
+<span class="token inserted">+}): Store =&gt; ({</span>
+<span class="token inserted">+    inventory,</span>
+<span class="token inserted">+    balance,</span>
+ });
 </code></pre>
-<details><summary>output</summary><pre class="language-json5"><code class="language-json5"><span class="token punctuation">[</span>
-  <span class="token punctuation">{</span>
-    <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Barbara&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Selling&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;01.03.2017&#x27;</span>
-  <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span> <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;John&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Smith&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;12.24.2019&#x27;</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span>
-    <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Frank&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Helmsworth&#x27;</span><span class="token punctuation">,</span>
-    <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;05.11.2011&#x27;</span>
-  <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span> <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Anna&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Freeman&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;07.09.2003&#x27;</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span> <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Damian&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Sipes&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;12.12.2001&#x27;</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span> <span class="token property unquoted">firstName</span><span class="token operator">:</span> <span class="token string">&#x27;Mara&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">lastName</span><span class="token operator">:</span> <span class="token string">&#x27;Homenick&#x27;</span><span class="token punctuation">,</span> <span class="token property unquoted">registered</span><span class="token operator">:</span> <span class="token string">&#x27;08.14.2007&#x27;</span> <span class="token punctuation">}</span>
-<span class="token punctuation">]</span>
-</code></pre></details>
-<p>Our functions are now practically pure (not <em>technically</em> pure, but pure for
-all we care about right now). We can run them in any order, repeatedly. They
-will return the same values every time.</p>
-<p>We can also fix the type issue we talked about: Instead of stuffing fields into
-the <code>User</code> type, we can make our new models <em>explicit</em> by defining separate
-types for them:</p>
-<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">type</span> <span class="token maybe-class-name">AdminUser</span> <span class="token operator">=</span> <span class="token maybe-class-name">User</span> <span class="token operator">&amp;</span> <span class="token punctuation">{</span>
-    initials<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span>
+<p>Now we use <code>from</code> to generate a store with our humble balance and inventory.</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// file: run.ts</span>
+<span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> <span class="token constant">S</span> <span class="token keyword">from</span> <span class="token string">&#x27;./Store&#x27;</span><span class="token punctuation">;</span>
 
-<span class="token keyword">type</span> <span class="token maybe-class-name">SidebarUser</span> <span class="token operator">=</span> <span class="token maybe-class-name">User</span> <span class="token operator">&amp;</span> <span class="token punctuation">{</span>
-    shortName<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span>
-</code></pre>
-<p>And adding them to our function signatures:</p>
-<pre class="language-git"><code class="language-git"><span class="token deleted">-const usersToAdmin = (users: User[]) =&gt; {</span>
-<span class="token inserted">+const usersToAdmin = (users: User[]): AdminUser[] =&gt; {</span>
+<span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> inventory <span class="token keyword">from</span> <span class="token string">&#x27;./inventory.json&#x27;</span><span class="token punctuation">;</span>
 
-<span class="token deleted">-const usersToSidebar = (users: User[]) =&gt; {</span>
-<span class="token inserted">+const usersToSidebar = (users: User[]): SidebarUser[] =&gt; {</span>
+<span class="token keyword">const</span> store <span class="token operator">=</span> <span class="token constant">S</span><span class="token punctuation">.</span><span class="token keyword">from</span><span class="token punctuation">(</span><span class="token punctuation">{</span>inventory<span class="token punctuation">,</span> balance<span class="token punctuation">:</span> <span class="token number">95.4</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 </code></pre>
-<blockquote>
-<p>Note: We&#x27;re being somewhat naive here, forcing immutability by aggressively
+<p>And we can see that our store is still a plain object:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token console class-name">console</span><span class="token punctuation">.</span><span class="token method function property-access">log</span><span class="token punctuation">(</span>store<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p><a href="./02-store-output.json&#x27;">store-output.json</a></p>
+<p>But we still can&#x27;t do anything with our store. Let&#x27;s change that by extending it
+with a function to stock up on ingredients:</p>
+<pre class="language-typescript"><code class="language-typescript">@@ <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span><span class="token number">5</span> <span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">,</span><span class="token number">12</span> @@
+ <span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> <span class="token constant">I</span> <span class="token keyword">from</span> <span class="token string">&#x27;./Ingredient&#x27;</span><span class="token punctuation">;</span>
+ 
+<span class="token operator">+</span><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">BalanceExhausted</span> <span class="token keyword">extends</span> <span class="token class-name">Error</span> <span class="token punctuation">{</span>
+<span class="token operator">+</span>    <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+<span class="token operator">+</span>        <span class="token keyword">super</span><span class="token punctuation">(</span><span class="token string">&quot;The balance can&#x27;t go below 0.&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token operator">+</span>        <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token property-access">name</span> <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token keyword">constructor</span><span class="token punctuation">.</span><span class="token property-access">name</span><span class="token punctuation">;</span>
+<span class="token operator">+</span>    <span class="token punctuation">}</span>
+<span class="token operator">+</span><span class="token punctuation">}</span>
+<span class="token operator">+</span>
+ <span class="token keyword">export</span> <span class="token keyword">type</span> <span class="token maybe-class-name">Store</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
+     inventory<span class="token punctuation">:</span> <span class="token constant">I</span><span class="token punctuation">.</span><span class="token property-access"><span class="token maybe-class-name">Ingredient</span></span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+     balance<span class="token punctuation">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+@@ <span class="token operator">-</span><span class="token number">20</span><span class="token punctuation">,</span><span class="token number">3</span> <span class="token operator">+</span><span class="token number">27</span><span class="token punctuation">,</span><span class="token number">21</span> @@ <span class="token keyword">export</span> <span class="token keyword">const</span> <span class="token keyword">from</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">{</span>
+     inventory<span class="token punctuation">,</span>
+     balance<span class="token punctuation">,</span>
+ <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token operator">+</span>
+<span class="token doc-comment comment">+/**
++ * Adds `ingredient` to the `store`, given that the balance can
++ * cover the cost.
++ *
++ * @throws BalanceExhausted
++ */</span>
+<span class="token operator">+</span><span class="token keyword">export</span> <span class="token keyword">const</span> stockOne <span class="token operator">=</span> <span class="token punctuation">(</span>store<span class="token punctuation">:</span> <span class="token maybe-class-name">Store</span><span class="token punctuation">,</span> ingredient<span class="token punctuation">:</span> <span class="token constant">I</span><span class="token punctuation">.</span><span class="token property-access"><span class="token maybe-class-name">Ingredient</span></span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token parameter"><span class="token maybe-class-name">Store</span></span> <span class="token arrow operator">=&gt;</span> <span class="token punctuation">{</span>
+<span class="token operator">+</span>    <span class="token keyword">const</span> balance <span class="token operator">=</span> store<span class="token punctuation">.</span><span class="token property-access">balance</span> <span class="token operator">-</span> ingredient<span class="token punctuation">.</span><span class="token property-access">cost</span><span class="token punctuation">;</span>
+<span class="token operator">+</span>
+<span class="token operator">+</span>    <span class="token comment">// There are no money lenders around in this back-water town. We can only</span>
+<span class="token operator">+</span>    <span class="token comment">// work with the money we&#x27;ve got in the balance.</span>
+<span class="token operator">+</span>    <span class="token keyword">if</span> <span class="token punctuation">(</span>balance <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+<span class="token operator">+</span>        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">BalanceExhausted</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token operator">+</span>    <span class="token punctuation">}</span>
+<span class="token operator">+</span>
+<span class="token operator">+</span>    <span class="token keyword">return</span> <span class="token punctuation">{</span>inventory<span class="token punctuation">:</span> store<span class="token punctuation">.</span><span class="token property-access">inventory</span><span class="token punctuation">.</span><span class="token method function property-access">concat</span><span class="token punctuation">(</span>ingredient<span class="token punctuation">)</span><span class="token punctuation">,</span> balance<span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token operator">+</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<p>Note that <code>stockOne</code> does not mutate the passed in <code>store</code>, but instead creates
+a new object. We&#x27;re being naive here in forcing immutability by aggressively
 copying data. While individually, the cost is small, in a large application the
-memory overhead <em>will</em> add up. Though we <em>can</em> alleviate some of the cost by
-using libraries that provide data structures made specifically for enabling
-immutability (such as <a href="https://www.npmjs.com/package/immer">immer.js</a>), the
-memory overhead is a trade-off functional programmers are willing to make.</p>
-</blockquote>
-<p>There are lots of opportunity for refactoring here which we will
-explore in the very next chapter, but we can be happy with the progress we&#x27;ve
-made so far!</p>
-<h3 id="next-up">Next Up</h3>
-<p>In the next chapter we will refactor our code, removing some redundancies by
-exploring the idea of using functions as values.</p></div></main></div></body></html>
+memory overhead <em>will</em> add up. We <em>can</em> alleviate some of the cost by using
+libraries that provide data structures made specifically for enabling
+immutability (such as <a href="https://www.npmjs.com/package/immer">immer.js</a>). Other
+languages, such as Haskell, Rust or Clojure afford us immutable data by design,
+and offer built-in efficient, immutable data structures. For the purposes of
+this tutorial though, the memory overhead is a trade-off we are willing to
+make.</p>
+<p>Our function is not quite pure, though, as we don&#x27;t have an elegant way yet to
+handle failure cases in our program (later we will use the <code>Either</code> type to do
+that), so we we will resort to the crude way of throwing exceptions.</p>
+<p>For now that is good enough, we&#x27;ll refactor it later. Let&#x27;s verify our new
+functionality:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// file: Store.test.ts</span>
+<span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> <span class="token constant">I</span> <span class="token keyword">from</span> <span class="token string">&#x27;./Ingredient&#x27;</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> <span class="token constant">S</span> <span class="token keyword">from</span> <span class="token string">&#x27;./Store&#x27;</span><span class="token punctuation">;</span>
+
+<span class="token function">describe</span><span class="token punctuation">(</span><span class="token string">&#x27;Store::stockOne&#x27;</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token arrow operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> <span class="token function-variable function">createInitialStore</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token arrow operator">=&gt;</span> <span class="token constant">S</span><span class="token punctuation">.</span><span class="token keyword">from</span><span class="token punctuation">(</span><span class="token punctuation">{</span>inventory<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span> balance<span class="token punctuation">:</span> <span class="token number">10</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">const</span> initialStore <span class="token operator">=</span> <span class="token function">createInitialStore</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token function">it</span><span class="token punctuation">(</span><span class="token string">&#x27;stocks a single ingredient&#x27;</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token arrow operator">=&gt;</span> <span class="token punctuation">{</span>
+        <span class="token keyword">const</span> flower <span class="token operator">=</span> <span class="token constant">I</span><span class="token punctuation">.</span><span class="token keyword">from</span><span class="token punctuation">(</span><span class="token string">&#x27;Flower&#x27;</span><span class="token punctuation">,</span> <span class="token number">0.1</span><span class="token punctuation">,</span> <span class="token number">0.95</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token function">expect</span><span class="token punctuation">(</span><span class="token constant">S</span><span class="token punctuation">.</span><span class="token method function property-access">stockOne</span><span class="token punctuation">(</span>initialStore<span class="token punctuation">,</span> flower<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token method function property-access">toStrictEqual</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+            balance<span class="token punctuation">:</span> <span class="token number">9.9</span><span class="token punctuation">,</span>
+            inventory<span class="token punctuation">:</span> <span class="token punctuation">[</span>flower<span class="token punctuation">]</span><span class="token punctuation">,</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token function">it</span><span class="token punctuation">(</span><span class="token string">&#x27;throws when cost exceeds the balance&#x27;</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token arrow operator">=&gt;</span> <span class="token punctuation">{</span>
+        <span class="token keyword">const</span> gold <span class="token operator">=</span> <span class="token constant">I</span><span class="token punctuation">.</span><span class="token keyword">from</span><span class="token punctuation">(</span><span class="token string">&#x27;Gold&#x27;</span><span class="token punctuation">,</span> <span class="token number">900</span><span class="token punctuation">,</span> <span class="token number">0.01</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token function">expect</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token arrow operator">=&gt;</span> <span class="token constant">S</span><span class="token punctuation">.</span><span class="token method function property-access">stockOne</span><span class="token punctuation">(</span>initialStore<span class="token punctuation">,</span> gold<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token method function property-access">toThrow</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token function">it</span><span class="token punctuation">(</span><span class="token string">&#x27;does not mutate the store&#x27;</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token arrow operator">=&gt;</span> <span class="token punctuation">{</span>
+        <span class="token function">expect</span><span class="token punctuation">(</span>initialStore<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token method function property-access">toStrictEqual</span><span class="token punctuation">(</span><span class="token function">createInitialStore</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<h3 id="next-up">Next up</h3>
+<p>Wonderful, but before we can attract any customers, we need a function
+to sell ingredients. And that&#x27;s where you come in. As an exercise,
+implement the function <code>sellOne</code> in the <code>Store</code> namespace.</p>
+<ul>
+<li><code>sellOne</code> takes a <code>Store</code> and a string <code>name</code>, and removes an ingredient with
+that name from the inventory, increasing the <code>balance</code> by its cost.</li>
+<li>Because we want to turn a profit, we need to sell at some <code>profitMargin</code>.
+Extend the <code>Store</code> and its functions with a <code>profitMargin</code>, and use that in
+<code>sellOne</code> to turn a profit.</li>
+</ul>
+<p>To test your skills ...</p>
+<ol>
+<li>Clone, and prepare this repository:<pre class="language-bash"><code class="language-bash"><span class="token function">git</span> clone https://github.com/tstelzer/workers-guide-to-fp-in-ts
+<span class="token builtin class-name">cd</span> workers-guide-to-fp-in-ts
+<span class="token function">npm</span> ci
+</code></pre></li>
+<li>Run the test suite:<pre class="language-bash"><code class="language-bash"><span class="token function">npm</span> run <span class="token builtin class-name">test</span> -- exercises/01 --watch
+</code></pre></li>
+<li>Extend the code in <code>exercises/01</code> until the tests pass.</li>
+</ol>
+<p>Good luck, and see you in the next chapter.</p></div></main></div></body></html>
