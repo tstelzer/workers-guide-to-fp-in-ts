@@ -52,3 +52,5 @@ export const stockOne = (store: Store, ingredient: I.Ingredient): Store => {
 
     return {inventory: store.inventory.concat(ingredient), balance};
 };
+
+export const sellOne = (store: Store, name: string): Store => undefined;
