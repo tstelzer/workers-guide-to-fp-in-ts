@@ -369,22 +369,33 @@ implement the function `sellOne` in the `Store` namespace.
 
 * `sellOne` takes a `Store` and a string `name`, and removes an ingredient with
   that name from the inventory, increasing the `balance` by its cost.
-* Because we want to turn a profit, we need to sell at some `profitMargin`.
-  Extend the `Store` and its functions with a `profitMargin`, and use that in
-  `sellOne` to turn a profit.
+* Because we want to turn a profit, we need to sell at some `PROFIT_MARGIN`.
+  For now, you can define it as a global, immutable constant of `0.25`.
+* When the ingredient cannot be found, throw a `IngredientNotFound` exception.
+  To re-iterate the point, we're going to refactor the code later, using `Either`
+  instead of exceptions.
 
-To test your skills ...
+To test your skills, clone, and prepare this repository:
 
-1. Clone, and prepare this repository:
-    ```bash
-    git clone https://github.com/tstelzer/workers-guide-to-fp-in-ts
-    cd workers-guide-to-fp-in-ts
-    npm ci
-    ```
-2.  Run the test suite:
-    ```bash
-    npm run test -- exercises/01 --watch
-    ```
-3. Extend the code in `exercises/01` until the tests pass.
+```bash
+git clone https://github.com/tstelzer/workers-guide-to-fp-in-ts
+cd workers-guide-to-fp-in-ts/exercises
+npm ci
+```
+
+The code of this chapter should be under `1-pure-functions`.
+To run the test suite in watch mode, run:
+
+```bash
+npm run test:1 -- --watch
+```
+
+Or to simply run the code and play around with it, run:
+
+```bash
+npm run dev:1
+```
+
+That should also start the node debugger under `0.0.0.0:9229`.
 
 Good luck, and see you in the next chapter.

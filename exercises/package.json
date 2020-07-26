@@ -1,37 +1,38 @@
 {
-  "scripts": {
-    "test:1": "jest --config jest.config.js ./chapters/1-pure-functions"
-  },
-  "private": true,
-  "devDependencies": {
-    "@types/faker": "^4.1.12",
-    "@types/jest": "^26.0.7",
-    "@types/node": "^14.0.26",
-    "@types/node-fetch": "^2.5.7",
-    "@types/uuid": "^8.0.0",
-    "@typescript-eslint/eslint-plugin": "^3.7.0",
-    "@typescript-eslint/parser": "^3.7.0",
-    "@typescript-eslint/typescript-estree": "^3.7.0",
-    "eslint": "^7.5.0",
-    "eslint-config-prettier": "^6.11.0",
-    "eslint-plugin-prettier": "^3.1.4",
-    "jest": "^26.1.0",
-    "nodemon": "2.0.4",
-    "prettier": "2.0.5",
-    "ts-jest": "^26.1.3",
-    "ts-node": "8.10.2",
-    "typescript": "3.9.7"
-  },
-  "dependencies": {
-    "chalk": "^4.1.0",
-    "date-fns": "^2.15.0",
-    "faker": "^4.1.0",
-    "fast-check": "^2.0.0",
-    "fp-ts": "^2.7.1",
-    "io-ts": "^2.2.9",
-    "io-ts-types": "^0.5.8",
-    "morphism": "^1.12.3",
-    "node-fetch": "^2.6.0",
-    "uuid": "^8.2.0"
-  }
+    "scripts": {
+        "dev:1": "nodemon chapters/1-pure-functions/run.ts",
+        "test:1": "jest --config jest.config.js ./chapters/1-pure-functions"
+    },
+    "private": true,
+    "devDependencies": {
+        "@types/faker": "^4.1.12",
+        "@types/jest": "^26.0.7",
+        "@types/node": "^14.0.26",
+        "@types/node-fetch": "^2.5.7",
+        "@types/uuid": "^8.0.0",
+        "@typescript-eslint/eslint-plugin": "^3.7.0",
+        "@typescript-eslint/parser": "^3.7.0",
+        "@typescript-eslint/typescript-estree": "^3.7.0",
+        "eslint": "^7.5.0",
+        "eslint-config-prettier": "^6.11.0",
+        "eslint-plugin-prettier": "^3.1.4",
+        "jest": "^26.1.0",
+        "nodemon": "2.0.4",
+        "prettier": "2.0.5",
+        "ts-jest": "^26.1.3",
+        "ts-node": "8.10.2",
+        "typescript": "3.9.7"
+    },
+    "dependencies": {
+        "chalk": "^4.1.0",
+        "date-fns": "^2.15.0",
+        "faker": "^4.1.0",
+        "fast-check": "^2.0.0",
+        "fp-ts": "^2.7.1",
+        "io-ts": "^2.2.9",
+        "io-ts-types": "^0.5.8",
+        "morphism": "^1.12.3",
+        "node-fetch": "^2.6.0",
+        "uuid": "^8.2.0"
+    }
 }

@@ -7,6 +7,13 @@ export class BalanceExhausted extends Error {
     }
 }
 
+export class IngredientNotFound extends Error {
+    constructor() {
+        super('The ingredient is not in the inventory.');
+        this.name = this.constructor.name;
+    }
+}
+
 export type Store = {
     inventory: I.Ingredient[];
     balance: number;
