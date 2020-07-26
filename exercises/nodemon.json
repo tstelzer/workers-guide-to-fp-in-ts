@@ -1,0 +1,18 @@
+{
+    "events": {
+        "start": "clear",
+        "restart": "clear"
+    },
+    "execMap": {
+        "ts": "ts-node"
+    },
+    "env": {
+        "NODE_ENV": "development",
+        "NODE_OPTIONS": "--inspect=0.0.0.0:9229",
+        "TS_NODE_PROJECT": "tsconfig.json",
+        "TS_NODE_IGNORE_DIAGNOSTICS": true,
+        "TS_PRETTY": true
+    },
+    "ext": "ts,env,json",
+    "watch": ["./chapters/**/*.ts"]
+}

@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "strict": true,
+        "lib": ["esnext"],
+        "module": "commonjs",
+        "target": "es2017",
+        "pretty": true,
+        "noEmit": true,
+        "removeComments": false,
+        "preserveConstEnums": true,
+        "sourceMap": true,
+        "resolveJsonModule": true,
+        "typeRoots": ["./node_modules/@types"]
+    },
+    "include": ["./chapters/**/*.ts"]
+}
