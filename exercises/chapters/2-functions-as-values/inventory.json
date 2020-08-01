@@ -5,6 +5,11 @@
     "rarity": 0.05
   },
   {
+    "name": "Wheat",
+    "cost": 0.05,
+    "rarity": 1
+  },
+  {
     "name": "Boar Tusk",
     "cost": 20,
     "rarity": 0.35
@@ -18,6 +23,11 @@
     "name": "Deathbell",
     "cost": 0.18,
     "rarity": 0.45
+  },
+  {
+    "name": "Wheat",
+    "cost": 0.05,
+    "rarity": 1
   },
   {
     "name": "Hawk Feathers",
@@ -35,6 +45,16 @@
     "rarity": 0.45
   },
   {
+    "name": "Wheat",
+    "cost": 0.05,
+    "rarity": 1
+  },
+  {
+    "name": "Wheat",
+    "cost": 0.05,
+    "rarity": 1
+  },
+  {
     "name": "Glowing Mushroom",
     "cost": 1.4,
     "rarity": 0.5
@@ -43,6 +63,11 @@
     "name": "Bone Meal",
     "cost": 5.2,
     "rarity": 0.5
+  },
+  {
+    "name": "Wheat",
+    "cost": 0.05,
+    "rarity": 1
   },
   {
     "name": "Canis Root",
@@ -60,6 +85,11 @@
     "rarity": 0.6
   },
   {
+    "name": "Wheat",
+    "cost": 0.05,
+    "rarity": 1
+  },
+  {
     "name": "Canis Root",
     "cost": 0.09,
     "rarity": 0.6
@@ -73,6 +103,11 @@
     "name": "Beehive Husk",
     "cost": 1.1,
     "rarity": 0.7
+  },
+  {
+    "name": "Wheat",
+    "cost": 0.05,
+    "rarity": 1
   },
   {
     "name": "Garlic",

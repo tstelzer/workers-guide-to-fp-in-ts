@@ -23,6 +23,22 @@ export type Store = {
     balance: number;
 };
 
+export const filterWheat = (inventory: Inventory): Inventory => {
+    const result = [];
+    for (const ingredient of inventory) {
+        if (ingredient.name === 'Wheat') result.push(ingredient);
+    }
+    return result;
+};
+
+export const show = (inventory: Inventory): string => {
+    const result = [];
+    for (const {cost, name} of inventory) {
+        result.push(`${name}: $${cost}`);
+    }
+    return result.join('\n');
+};
+
 export const create = (): Store => ({
     inventory: [],
     balance: 0,
