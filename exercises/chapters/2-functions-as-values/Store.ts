@@ -16,8 +16,10 @@ export class IngredientNotFound extends Error {
 
 const PROFIT_MARGIN = 0.25;
 
+export type Inventory = I.Ingredient[];
+
 export type Store = {
-    inventory: I.Ingredient[];
+    inventory: Inventory;
     balance: number;
 };
 
@@ -30,7 +32,7 @@ export const from = ({
     inventory,
     balance,
 }: {
-    inventory: I.Ingredient[];
+    inventory: Inventory;
     balance: number;
 }): Store => ({
     inventory,
