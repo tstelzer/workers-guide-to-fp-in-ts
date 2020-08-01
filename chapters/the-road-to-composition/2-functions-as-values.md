@@ -6,29 +6,110 @@ title: Functions as values
 state: draft
 ---
 
-### Summary
+Here is the code from the previous chapter. It includes a solution for the exercises.
 
-In this chapter we're discovering that we can use functions as values by
-having a look at two higher-order functions: `map` and `filter`. If you
-already know about higher order functions and have built an intuition for `map`
-and `filter` you can skip this chapter.
+[Store.ts]()
+[Ingredient.ts]()
+[run.ts]()
 
-* new features
-    * `show` (to be refactored via `map`)
-    * `findAllWheat`
+Wiping away the sweat off your brow from a hard days work, you wave goodbye to
+farmer Frank, who just delivered a cart full of wheat. Good old Frank has
+always been both customer and supplier to your granny, and decided to bootstrap
+your business venture with some free wheat. You didn't really have the time to
+weigh it, but now you're curious, and would like to see all of the wheat in
+your inventory.
+
+[inventory.json]()
+
+For convinience and encapsulation, let's create a new `Inventory` type:
+
+```git
+// file: Store.ts
+@@ -16,8 +16,10 @@ export class IngredientNotFound extends Error {
+ 
+ const PROFIT_MARGIN = 0.25;
+ 
++export type Inventory = I.Ingredient[];
++
+ export type Store = {
+-    inventory: I.Ingredient[];
++    inventory: Inventory;
+     balance: number;
+ };
+ 
+@@ -30,7 +32,7 @@ export const from = ({
+     inventory,
+     balance,
+ }: {
+-    inventory: I.Ingredient[];
++    inventory: Inventory;
+     balance: number;
+ }): Store => ({
+     inventory,
+```
+
+You quickly write a simple function to _filter_ the inventory for wheat. Taking
+the inventory as input, it quite simply goes over it and puts all the `Wheat`
+it can find into a new list, and then returning the list:
+
+```typescript
+// file: Store.ts
+export const filterWheat = (inventory: Inventory): Inventory => {
+    const result = [];
+    for (const ingredient of inventory) {
+        if (ingredient.name === 'Wheat') result.push(ingredient);
+    }
+    return result;
+};
+```
+
+Printing the raw JSON you find somewhat unsatisfying, though:
+
+```typescript
+// file: run.ts
+console.log(S.filterWheat(store.inventory));
+```
+
+[output.json]()
+
+You would love to show a less mechanical, human-readable list.
+Should be easy enough, you just iterate over the inventory again,
+transforming each ingredient to a human-readable string,
+push that into another list, and return the joined list.
+
+```typescript
+export const show = (inventory: Inventory): string => {
+    const result = [];
+    for (const {cost, name} of inventory) {
+        result.push(`${name}: $${cost}`);
+    }
+    return result.join('\n');
+};
+```
+
+We can now chain the two functions and display a neat, tidy list of
+human-readable strings:
+
+```typescript
+// file: run.ts
+console.log(S.show(S.filterWheat(store.inventory)));
+```
+
+[output.txt]()
+
 * identify opportunities for refactoring
     * what is operational logic?
     * what is business logic?
-* parametrize functions, as functions are values
-    * simplest case
-    * parametrize so that it works for `Ingredient -> Ingredient`
-    * parametrize so that it works for _any_ `A -> A`
-    * refactor code with `map`
 * filter
     * simplest case
     * parametrize so that it works for `Ingredient -> boolean`
     * parametrize so that it works for _any_ `A -> boolean`
     * refactor code with `filter`
+* parametrize functions, as functions are values
+    * simplest case
+    * parametrize so that it works for `Ingredient -> Ingredient`
+    * parametrize so that it works for _any_ `A -> A`
+    * refactor code with `map`
 
 ---
 

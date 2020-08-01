@@ -14,11 +14,11 @@ over you, as you recall the many times you spent helping your granny running the
 in your childhood. Brushing off a layer of thick dust on the counter, you begin
 to inspect the inventory.
 
-[inventory.json](./inventory-01.json)
+[inventory.json]()
 
 Grandmother supplied ingredients to adventurous alchemists, and you are picking
 up the trade. She used to do her accounting with pen and paper, but you will
-bring the shop into the 21th century, modeling the shop in a TypeScript
+bring the shop into the 21th century, modeling the shop as a TypeScript
 program. So far, the list of ingredients look simple enough, let's describe it
 in a `type`. Ingredients have a unique `name`, a `cost`, which denotes how much
 we payed for them, and a `rarity`, which describes a range of how likely it is
@@ -269,7 +269,7 @@ And we can see that our store is still a plain object:
 console.log(store);
 ```
 
-[store-output.json](./02-store-output.json')
+[store-output.json]()
 
 But we still can't do anything with our store. Let's change that by extending it
 with a function to stock up on ingredients:
@@ -372,8 +372,6 @@ implement the function `sellOne` in the `Store` namespace.
 * Because we want to turn a profit, we need to sell at some `PROFIT_MARGIN`.
   For now, you can define it as a global, immutable constant of `0.25`.
 * When the ingredient cannot be found, throw a `IngredientNotFound` exception.
-  To re-iterate the point, we're going to refactor the code later, using `Either`
-  instead of exceptions.
 
 To test your skills, clone, and prepare this repository:
 
