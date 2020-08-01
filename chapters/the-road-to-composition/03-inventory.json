@@ -1,0 +1,162 @@
+[
+  {
+    "name": "Pearl",
+    "cost": 75,
+    "rarity": 0.05
+  },
+  {
+    "name": "Wheat",
+    "cost": 0.05,
+    "rarity": 1
+  },
+  {
+    "name": "Boar Tusk",
+    "cost": 20,
+    "rarity": 0.35
+  },
+  {
+    "name": "Moon Sugar",
+    "cost": 9.39,
+    "rarity": 0.41
+  },
+  {
+    "name": "Deathbell",
+    "cost": 0.18,
+    "rarity": 0.45
+  },
+  {
+    "name": "Wheat",
+    "cost": 0.05,
+    "rarity": 1
+  },
+  {
+    "name": "Hawk Feathers",
+    "cost": 3.25,
+    "rarity": 0.45
+  },
+  {
+    "name": "Hawk Beak",
+    "cost": 7.9,
+    "rarity": 0.45
+  },
+  {
+    "name": "Hawk Feathers",
+    "cost": 3.25,
+    "rarity": 0.45
+  },
+  {
+    "name": "Wheat",
+    "cost": 0.05,
+    "rarity": 1
+  },
+  {
+    "name": "Wheat",
+    "cost": 0.05,
+    "rarity": 1
+  },
+  {
+    "name": "Glowing Mushroom",
+    "cost": 1.4,
+    "rarity": 0.5
+  },
+  {
+    "name": "Bone Meal",
+    "cost": 5.2,
+    "rarity": 0.5
+  },
+  {
+    "name": "Wheat",
+    "cost": 0.05,
+    "rarity": 1
+  },
+  {
+    "name": "Canis Root",
+    "cost": 0.09,
+    "rarity": 0.6
+  },
+  {
+    "name": "Blisterwort",
+    "cost": 0.02,
+    "rarity": 0.6
+  },
+  {
+    "name": "Canis Root",
+    "cost": 0.09,
+    "rarity": 0.6
+  },
+  {
+    "name": "Wheat",
+    "cost": 0.05,
+    "rarity": 1
+  },
+  {
+    "name": "Canis Root",
+    "cost": 0.09,
+    "rarity": 0.6
+  },
+  {
+    "name": "Beehive Husk",
+    "cost": 1.1,
+    "rarity": 0.7
+  },
+  {
+    "name": "Beehive Husk",
+    "cost": 1.1,
+    "rarity": 0.7
+  },
+  {
+    "name": "Wheat",
+    "cost": 0.05,
+    "rarity": 1
+  },
+  {
+    "name": "Garlic",
+    "cost": 0.21,
+    "rarity": 0.75
+  },
+  {
+    "name": "Lavender",
+    "cost": 0.09,
+    "rarity": 0.78
+  },
+  {
+    "name": "Lavender",
+    "cost": 0.09,
+    "rarity": 0.78
+  },
+  {
+    "name": "Hanging Moss",
+    "cost": 0.04,
+    "rarity": 0.82
+  },
+  {
+    "name": "Hanging Moss",
+    "cost": 0.04,
+    "rarity": 0.82
+  },
+  {
+    "name": "Hanging Moss",
+    "cost": 0.04,
+    "rarity": 0.82
+  },
+  {
+    "name": "Hanging Moss",
+    "cost": 0.04,
+    "rarity": 0.82
+  },
+  {
+    "name": "Wheat",
+    "cost": 0.05,
+    "rarity": 1
+  },
+  {
+    "name": "Wheat",
+    "cost": 0.05,
+    "rarity": 1
+  },
+  {
+    "name": "Wheat",
+    "cost": 0.05,
+    "rarity": 1
+  }
+]
