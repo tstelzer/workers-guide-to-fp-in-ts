@@ -1,5 +1,10 @@
 # Workers Guide To Static Functional Programming
 
+## todo
+
+* chore: update dependencies, make sure builds still run
+* feat: expand linked json in chapters
+
 ## Development
 
 Clone this repository and install dependencies:
