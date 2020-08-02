@@ -49,7 +49,7 @@ For convinience and encapsulation, let's create a new `Inventory` type:
 ```
 
 You quickly write a simple function to _filter_ the inventory for wheat. Taking
-the inventory as input, it quite simply goes over it and puts all the `Wheat`
+an inventory as input, it quite simply iterates over it and puts all the `Wheat`
 it can find into a new list, and then returning the list:
 
 ```typescript
@@ -63,39 +63,78 @@ export const filterWheat = (inventory: Inventory): Inventory => {
 };
 ```
 
-Printing the raw JSON you find somewhat unsatisfying, though:
+You also decide that, for your own accounting, you want to incorporate
+the profit margin per ingredient and calculate a total selling price.
+For that, you, again, take an inventory as input, iterate over it
+and add a property `sellingPrice`, returning it as part of a cloned list.
+
+```typescript
+export const withSellingPrice = (
+    inventory: Inventory,
+): (I.Ingredient & {sellingPrice: number})[] => {
+    const result = [];
+    for (const ingredient of inventory) {
+        const sellingPrice = ingredient.cost * (1 + PROFIT_MARGIN);
+        result.push({...ingredient, sellingPrice});
+    }
+    return result;
+};
+```
+
+We're not creating a separate type yet for the added property to avoid needless
+type proliferation. Now you are specifically interested in seeing that for all
+of the wheat in the inventory, printing the raw JSON you find unsatisfying,
+though:
 
 ```typescript
 // file: run.ts
-console.log(S.filterWheat(store.inventory));
+console.log(S.withSellingPrice(S.filterWheat(store.inventory)));
 ```
 
 [output.json]()
 
 You would love to show a less mechanical, human-readable list.
-Should be easy enough, you just iterate over the inventory again,
+A simple task, you just iterate over the inventory again,
 transforming each ingredient to a human-readable string,
 push that into another list, and return the joined list.
 
 ```typescript
-export const show = (inventory: Inventory): string => {
+export const show = (
+    inventory: (I.Ingredient & {sellingPrice: number})[],
+): string => {
     const result = [];
-    for (const {cost, name} of inventory) {
-        result.push(`${name}: $${cost}`);
+    for (const ingredient of inventory) {
+        const name = ingredient.name.trim().padEnd(40, ' ');
+        const sellingPrice = `$${ingredient.sellingPrice.toFixed(2)}`.padStart(
+            10,
+            ' ',
+        );
+        result.push(`${name} ${sellingPrice}`);
     }
     return result.join('\n');
 };
 ```
 
-We can now chain the two functions and display a neat, tidy list of
-human-readable strings:
+We can now chain the functions and display a neat and tidy
+human-readable string.
 
 ```typescript
 // file: run.ts
-console.log(S.show(S.filterWheat(store.inventory)));
+console.log(S.show(S.withSellingPrice(S.filterWheat(store.inventory))));
 ```
 
 [output.txt]()
+
+Examining your functions, you can find opportunities for refactoring. We'll
+specifically focus on one: avoiding repetition. We're invoking the spell of
+DRY.
+
+> Note: "Don't Repeat Yourself", or "DRY" is a useful principle when applied
+sensibly. Always try to discern between essential and accidental duplication
+before mindlessly attempting to DRY out code.
+
+Have another look at the code. What pattern can you spot? What is similar
+between those functions?
 
 * identify opportunities for refactoring
     * what is operational logic?
@@ -116,10 +155,6 @@ console.log(S.show(S.filterWheat(store.inventory)));
 > Note: *Refactoring* is defined as changing the structure and organization of
 code -- without breaking expected behaviour of the program -- with the goal of
 improving readability, maintainability and reducing overall complexity.
-
-> Note: "Don't Repeat Yourself", or "DRY" is a useful principle when applied
-sensibly. Always try to discern between essential and accidental duplication
-before mindlessly attempting to DRY out code.
 
 Here is a rather silly function that takes a function `f` and a string `s` as
 arguments, uppercases the string and applies `f` to it.

@@ -31,10 +31,28 @@ export const filterWheat = (inventory: Inventory): Inventory => {
     return result;
 };
 
-export const show = (inventory: Inventory): string => {
+export const withSellingPrice = (
+    inventory: Inventory,
+): (I.Ingredient & {sellingPrice: number})[] => {
     const result = [];
-    for (const {cost, name} of inventory) {
-        result.push(`${name}: $${cost}`);
+    for (const ingredient of inventory) {
+        const sellingPrice = ingredient.cost * (1 + PROFIT_MARGIN);
+        result.push({...ingredient, sellingPrice});
+    }
+    return result;
+};
+
+export const show = (
+    inventory: (I.Ingredient & {sellingPrice: number})[],
+): string => {
+    const result = [];
+    for (const ingredient of inventory) {
+        const name = ingredient.name.trim().padEnd(40, ' ');
+        const sellingPrice = `$${ingredient.sellingPrice.toFixed(2)}`.padStart(
+            10,
+            ' ',
+        );
+        result.push(`${name} ${sellingPrice}`);
     }
     return result.join('\n');
 };
