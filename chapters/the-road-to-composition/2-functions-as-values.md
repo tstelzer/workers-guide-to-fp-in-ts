@@ -125,20 +125,76 @@ console.log(S.show(S.withSellingPrice(S.filterWheat(store.inventory))));
 
 [output.txt]()
 
-Examining your functions, you can find opportunities for refactoring. We'll
-specifically focus on one: avoiding repetition. We're invoking the spell of
-DRY.
+Have another look at the code. What patterns can you spot to find opportunities
+for refactoring? Which parts are similar or different? Let's invoke the spell
+of DRY to clean it up.
 
 > Note: "Don't Repeat Yourself", or "DRY" is a useful principle when applied
 sensibly. Always try to discern between essential and accidental duplication
 before mindlessly attempting to DRY out code.
 
-Have another look at the code. What pattern can you spot? What is similar
-between those functions?
+`withSellingPrice` and `show` seem to follow a similar structure:
 
-* identify opportunities for refactoring
-    * what is operational logic?
-    * what is business logic?
+1. Define an empty array that serves as the output container.
+2. Iterate over the inputs
+3. Transform the item in some way before adding it to the result array.
+4. Return the result array.
+
+Remarkably similar, no? `filterWheat` closely resembles that as well:
+
+1. Define an empty array that serves as the output container.
+2. Iterate over the inputs
+3. Optionally add items to the result array based on a condition.
+4. Return the result array.
+
+Let's call these similarities the _operational_ logic because they follow
+structural patterns that have nothing to do with our business domain. What is
+meaningfully different between functions and actually defines our business
+cases we'll call the _business logic_.
+
+Before we try to factor out the operational logic, let's try to first extract
+the business logic. For `withSellingPrice` and `show`, that would
+be the transformation we apply to each item, and for `filterWheat` that would be
+the condition we use to filter items. How do we extract them? Using functions,
+of course.
+
+```typescript
+// file: Ingredient.ts
+
+export const withSellingPrice = (
+    ingredient: Ingredient,
+    profitMargin: number,
+): Ingredient & {sellingPrice: number} => ({
+    ...ingredient,
+    sellingPrice: ingredient.cost * (1 + profitMargin),
+});
+
+export const show = (ingredient: Ingredient & {sellingPrice: number}) => {
+    const name = ingredient.name.trim().padEnd(40, ' ');
+    const sellingPrice = `$${ingredient.sellingPrice.toFixed(2)}`.padStart(
+        10,
+        ' ',
+    );
+    return `${name} ${sellingPrice}`;
+};
+```
+
+`withSellingPrice` and `show` are now defined in terms of a _single_
+`Ingredient` and no longer for the entire inventory. That also means that we
+are able to pull them into the `Ingredient` name space. Its nice to have
+business logic as close to the name space of the entity that its concerned
+about. Though that means we have to parametrize the profit margin, as its not
+available in this scope (and shouldn't be).
+
+```typescript
+// file: Ingredient.ts
+
+export const isWheat = (ingredient: Ingredient) => ingredient.name === 'Wheat';
+```
+
+`isWheat` too is defined in the `Ingredient` name space and is remarkeably simple.
+
+* define operational logic (map, filter)
 * filter
     * simplest case
     * parametrize so that it works for `Ingredient -> boolean`
