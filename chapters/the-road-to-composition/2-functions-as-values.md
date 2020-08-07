@@ -153,10 +153,10 @@ meaningfully different between functions and actually defines our business
 cases we'll call the _business logic_.
 
 Before we try to factor out the operational logic, let's try to first extract
-the business logic. For `withSellingPrice` and `show`, that would
-be the transformation we apply to each item, and for `filterWheat` that would be
-the condition we use to filter items. How do we extract them? Using functions,
-of course.
+the business logic, so that we can later parametrize it. For `withSellingPrice`
+and `show`, that would be the transformation we apply to each item, and for
+`filterWheat` that would be the condition we use to filter items. How do we
+extract them? Using functions, of course.
 
 ```typescript
 // file: Ingredient.ts
@@ -189,12 +189,58 @@ available in this scope (and shouldn't be).
 ```typescript
 // file: Ingredient.ts
 
-export const isWheat = (ingredient: Ingredient) => ingredient.name === 'Wheat';
+export const isWheat = (ingredient: Ingredient): boolean => ingredient.name === 'Wheat';
 ```
 
 `isWheat` too is defined in the `Ingredient` name space and is remarkeably simple.
+To introduce some nomenclature, `isWheat` is a _predicate function_. When we
+say _predicate function_, we mean _any_ function taking a value that returns
+a `boolean` value.
 
-* define operational logic (map, filter)
+TODO: first define as non-HOC, then explain the benefits of HOC and define that
+
+In order to define our `filterWheat` in terms of `isWheat`, we need an abstract
+function that takes the predicate as parameter, and returns a new function that
+has the same characteristics as `filterWheat`. Let's call it `filterInventory`.
+
+```typescript
+const filterInventory = (predicate: (ingredient: I.Ingredient) => boolean, inventory: Inventory) => {
+    const result = [];
+    for (const ingredient of inventory) {
+        if (predicate(ingredient)) result.push(ingredient);
+    }
+    return result;
+};
+```
+
+Note the similarities between it and our old `filterWheat`, what changed is
+that the business logic is defined in terms of a (somewhat) generic predicate
+that is used to filter the ingredients.
+
+We can now use it like this:
+
+```typescript
+const filterWheat = filterInventory(isWheat);
+```
+
+Calling `filterInventory` with `isWheat` returns a function 
+
+Now that we have generalized the operational logic, we can reuse it with different predicates:
+
+```typescript
+const isTusk = (ingredient: Ingredient) => ingredient.name === 'Tusk';
+const filterTusks = filterInventory(isTusk);
+```
+
+Congrats, by the way, you just defined your first _higher-order function_.
+
+> Note: A higher-order function takes advantage of the fact that _functions are values_.
+Higher-order functions, or HOC, are functions that take other functions as
+parameters so that they behave differently depending on inputs. They are
+more powerful than regular functions in the way that they don't just abstract
+over _values_, but over _transformations and actions_.
+
+* define operational logic (map)
 * filter
     * simplest case
     * parametrize so that it works for `Ingredient -> boolean`
@@ -297,10 +343,6 @@ discover that almost every type in `fp-ts` support `map`.
 ### Introducing filter
 
 * separate the "iterate over the users" concern from our business logic
-
-When we say _predicate function_, we mean _any_ function taking a value that
-resolves to a `boolean` value. For example, all of the following functions are
-considered predicate functions:
 
 ```typescript
 const startsWithC = (s: string): boolean => s.toLowerCase().startsWith('c');
