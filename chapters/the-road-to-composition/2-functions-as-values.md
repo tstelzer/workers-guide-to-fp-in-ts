@@ -153,20 +153,86 @@ meaningfully different between functions and actually defines our business
 cases we'll call the _business logic_.
 
 Before we try to factor out the operational logic, let's try to first extract
-the business logic, so that we can later parametrize it. For `withSellingPrice`
-and `show`, that would be the transformation we apply to each item, and for
-`filterWheat` that would be the condition we use to filter items. How do we
-extract them? Using functions, of course.
+the business logic, so that we can later parametrize it. Let's start with
+`filterWheat`, because its business logic is dead-simple.
+
+```typescript
+// file: Ingredient.ts
+
+export const isWheat = (ingredient: Ingredient): boolean => ingredient.name === 'Wheat';
+```
+
+`isWheat` is defined in the `Ingredient` name space, because it is concerned
+only with a single `Ingredient` and is unaware of a `Store`. To introduce some
+nomenclature, `isWheat` is a _predicate function_. When we say _predicate
+function_, we mean _any_ function taking a value that returns a `boolean`
+value.
+
+In order to define our `filterWheat` in terms of `isWheat`, we need a function
+that parametrizes the predicate function. Let's call it `filterInventory`.
+
+```typescript
+// file: Store.ts
+
+const filterInventory = (inventory: Inventory, predicate: (ingredient: I.Ingredient) => boolean) => {
+    const result = [];
+    for (const ingredient of inventory) {
+        if (predicate(ingredient)) result.push(ingredient);
+    }
+    return result;
+};
+```
+
+`filterInventory` defines all the operational logic for filtering ingredients
+from an inventory, but is unaware of the _concrete_ predicate that is applied.
+All we have to do is describe the _signature_ of the predicate function that we expect
+as an argument, which looks like this:
+
+```
+(ingredient: I.Ingredient) => boolean
+```
+
+Which matches the sginature of `isWheat`. The function body then contains
+the same steps as before:
+
+1. Define an empty array that serves as the output container.
+2. Iterate over the inputs
+3. Optionally add items to the result array based on our predicate function.
+4. Return the result array.
+
+We can now use it like this:
+
+```typescript
+// file: run.ts
+
+import * as S from './Store';
+import * as I from './Ingredient';
+
+import * as inventory from './inventory.json';
+
+const store = S.from({inventory, balance: 100.0});
+
+const onlyWheat = S.filterInventory(store.inventory, I.isWheat);
+
+console.log(onlyWheat);
+```
+
+[output-2.json]()
+
+Let's do the same for `withSellingPrice` and `show` and first extract their
+business logic. Like `isWheat` we will define them in the `Ingredient` name
+space, though that means we have to parametrize the profit margin (as it is not
+part of the `Ingredient` name space).
 
 ```typescript
 // file: Ingredient.ts
 
 export const withSellingPrice = (
     ingredient: Ingredient,
-    profitMargin: number,
+    margin: number,
 ): Ingredient & {sellingPrice: number} => ({
     ...ingredient,
-    sellingPrice: ingredient.cost * (1 + profitMargin),
+    sellingPrice: ingredient.cost * (1 + margin),
 });
 
 export const show = (ingredient: Ingredient & {sellingPrice: number}) => {
@@ -179,60 +245,70 @@ export const show = (ingredient: Ingredient & {sellingPrice: number}) => {
 };
 ```
 
-`withSellingPrice` and `show` are now defined in terms of a _single_
-`Ingredient` and no longer for the entire inventory. That also means that we
-are able to pull them into the `Ingredient` name space. Its nice to have
-business logic as close to the name space of the entity that its concerned
-about. Though that means we have to parametrize the profit margin, as its not
-available in this scope (and shouldn't be).
+And now for defining the operational logic:
 
 ```typescript
-// file: Ingredient.ts
+// file: Store.ts
 
-export const isWheat = (ingredient: Ingredient): boolean => ingredient.name === 'Wheat';
-```
-
-`isWheat` too is defined in the `Ingredient` name space and is remarkeably simple.
-To introduce some nomenclature, `isWheat` is a _predicate function_. When we
-say _predicate function_, we mean _any_ function taking a value that returns
-a `boolean` value.
-
-TODO: first define as non-HOC, then explain the benefits of HOC and define that
-
-In order to define our `filterWheat` in terms of `isWheat`, we need an abstract
-function that takes the predicate as parameter, and returns a new function that
-has the same characteristics as `filterWheat`. Let's call it `filterInventory`.
-
-```typescript
-const filterInventory = (predicate: (ingredient: I.Ingredient) => boolean, inventory: Inventory) => {
+export const mapInventory = <A extends I.Ingredient, B>(
+    inventory: A[],
+    transformIngredient: (ingredient: A) => B,
+) => {
     const result = [];
     for (const ingredient of inventory) {
-        if (predicate(ingredient)) result.push(ingredient);
+        result.push(transformIngredient(ingredient));
     }
     return result;
 };
 ```
 
-Note the similarities between it and our old `filterWheat`, what changed is
-that the business logic is defined in terms of a (somewhat) generic predicate
-that is used to filter the ingredients.
+As with `filterInventory`, we've generalized the concrete transformation
+function by defining it as a parameter, describing its signature as generic as
+possible:
 
-We can now use it like this:
-
-```typescript
-const filterWheat = filterInventory(isWheat);
+```
+(ingredient: A) => B
 ```
 
-Calling `filterInventory` with `isWheat` returns a function 
+If you have never seen generics, don't let the `A` and `B` confuse you, we will
+go into that in the next chapter. For now, understand `A` as "Something that
+looks like an I.Ingredient" and `B` as "Whatever `transformIngredient`
+returns". In the case of `Ingredient.withSellingPrice`, `B` is `Ingredient &
+{sellingPrice: number}` and in the case of `show`, `B` is `string`.
 
-Now that we have generalized the operational logic, we can reuse it with different predicates:
+And heres how we can use it:
+
+```typescript
+// file: run.ts
+
+import * as S from './Store';
+import * as I from './Ingredient';
+
+import * as inventory from './inventory.json';
+
+const store = S.from({inventory, balance: 100.0});
+
+const onlyWheat = S.filterInventory(store.inventory, I.isWheat);
+
+const inventoryWithSellingPrice = S.mapInventory(onlyWheat, (ingredient) =>
+    I.withSellingPrice(ingredient, S.PROFIT_MARGIN),
+);
+
+const inventoryAsString = S.mapInventory(inventoryWithSellingPrice, I.show);
+
+console.log(inventoryAsString.join('\n'));
+```
+
+Note that using `I.withSellingPrice` is a bit awkward, as we need to supply the
+profit margin as well. We will discover in later chapters how we can clean that up.
+
+[output-2.json]()
+---
 
 ```typescript
 const isTusk = (ingredient: Ingredient) => ingredient.name === 'Tusk';
 const filterTusks = filterInventory(isTusk);
 ```
-
-Congrats, by the way, you just defined your first _higher-order function_.
 
 > Note: A higher-order function takes advantage of the fact that _functions are values_.
 Higher-order functions, or HOC, are functions that take other functions as

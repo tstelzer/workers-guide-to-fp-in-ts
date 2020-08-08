@@ -14,13 +14,24 @@ export class IngredientNotFound extends Error {
     }
 }
 
-const PROFIT_MARGIN = 0.25;
+export const PROFIT_MARGIN = 0.25;
 
 export type Inventory = I.Ingredient[];
 
 export type Store = {
     inventory: Inventory;
     balance: number;
+};
+
+export const filterInventory = (
+    inventory: Inventory,
+    predicate: (ingredient: I.Ingredient) => boolean,
+) => {
+    const result = [];
+    for (const ingredient of inventory) {
+        if (predicate(ingredient)) result.push(ingredient);
+    }
+    return result;
 };
 
 export const filterWheat = (inventory: Inventory): Inventory => {
@@ -31,13 +42,13 @@ export const filterWheat = (inventory: Inventory): Inventory => {
     return result;
 };
 
-export const withSellingPrice = (
-    inventory: Inventory,
-): (I.Ingredient & {sellingPrice: number})[] => {
+export const mapInventory = <A extends I.Ingredient, B>(
+    inventory: A[],
+    transformIngredient: (ingredient: A) => B,
+) => {
     const result = [];
     for (const ingredient of inventory) {
-        const sellingPrice = ingredient.cost * (1 + PROFIT_MARGIN);
-        result.push({...ingredient, sellingPrice});
+        result.push(transformIngredient(ingredient));
     }
     return result;
 };

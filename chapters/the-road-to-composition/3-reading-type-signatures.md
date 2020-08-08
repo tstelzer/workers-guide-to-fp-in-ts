@@ -6,6 +6,10 @@ title: Understanding type signatures
 state: outline
 ---
 
+* introduce generics
+* make previous functions more generic
+* difference to `any`
+
 ## Summary
 
 In the last two chapters we have been looking at type signatures without really
