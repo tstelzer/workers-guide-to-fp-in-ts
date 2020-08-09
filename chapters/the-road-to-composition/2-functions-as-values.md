@@ -8,9 +8,11 @@ state: draft
 
 Here is the code from the previous chapter. It includes a solution for the exercises.
 
-[Store.ts]()
-[Ingredient.ts]()
-[run.ts]()
+[Store.ts](../../exercises/chapters/1/Store.ts)
+
+[Ingredient.ts](../../exercises/chapters/1/Ingredient.ts)
+
+[run.ts](../../exercises/chapters/1/run.ts)
 
 Wiping away the sweat off your brow from a hard days work, you wave goodbye to
 farmer Frank, who just delivered a cart full of wheat. Good old Frank has
@@ -63,10 +65,10 @@ export const filterWheat = (inventory: Inventory): Inventory => {
 };
 ```
 
-You also decide that, for your own accounting, you want to incorporate
+You also decide that, for accounting, you want to incorporate
 the profit margin per ingredient and calculate a total selling price.
 For that, you, again, take an inventory as input, iterate over it
-and add a property `sellingPrice`, returning it as part of a cloned list.
+and add a property `sellingPrice`, returning it as part of a new list.
 
 ```typescript
 export const withSellingPrice = (
@@ -171,10 +173,10 @@ value.
 Testing `isWheat` is super straight forward:
 
 ```git
-diff --git a/exercises/chapters/2-functions-as-values/Ingredient.test.ts b/exercises/chapters/2-functions-as-values/Ingredient.test.ts
+diff --git a/exercises/chapters/2/Ingredient.test.ts b/exercises/chapters/2/Ingredient.test.ts
 index a4f3785..437bb8c 100644
---- a/exercises/chapters/2-functions-as-values/Ingredient.test.ts
-+++ b/exercises/chapters/2-functions-as-values/Ingredient.test.ts
+--- a/exercises/chapters/2/Ingredient.test.ts
++++ b/exercises/chapters/2/Ingredient.test.ts
 @@ -1,6 +1,8 @@
  import * as I from './Ingredient';
  
@@ -226,7 +228,7 @@ as an argument, which looks like this:
 (ingredient: I.Ingredient) => boolean
 ```
 
-Which matches the sginature of `isWheat`. The function body then contains
+Which matches the signature of `isWheat`. The function body then contains
 the same steps as before:
 
 1. Define an empty array that serves as the output container.
@@ -338,19 +340,39 @@ profit margin as well. We will discuss in later chapters how we can clean that u
 
 [output-2.txt]()
 
----
+### Recap
 
-```typescript
-const isTusk = (ingredient: Ingredient) => ingredient.name === 'Tusk';
-const filterTusks = filterInventory(isTusk);
+Let's recap:
+
+* Separating operational logic and business logic affords highly reusable functions.
+* `filterInventory` takes an inventory and a predicate function, and returns a
+  list that filters an inventory using the predicate function.
+* `mapInventory` takes an inventory and a function that transforms individual
+  ingredients to something else, and then returns a new list, applying that
+  function to every ingredient.
+
+### Next Up And Exercises
+
+Following the example of the wheat, you want to expand your insight into your
+own inventory:
+
+1. Define three more predicate functions:
+    * `isDeathbell`, identifying ingredients with the name "Deathbell"
+    * `isRare`, identifying very rare ingredients with a rarity rating at or below 0.1
+    * `isCheap`, identifying very cheap ingredients with a cost rating at or below 0.5
+2. Define two more functions that work with `mapInventory`:
+    * `withInitials`, which transforms ingredients, adding a new field
+      `initials` which is either the first characters of the first two words in
+      the `name`, or first and last characters if there is only one word. So,
+      "Wheat" becomes "WT" and "Boar Tusk" becomes "BT".
+    * `withRarityAsPercentage` modifes the `rarity` field so that it displays
+      as rounded up percentage values, including the `%` symbol. So, 0.25
+      becomes `25%` and `99.51` becomes `100%`.
+
+As with the previous chapter, navigate to the `exercises` directory and run
+
+```sh
+npm run test:2
 ```
 
-> Note: A higher-order function takes advantage of the fact that _functions are values_.
-Higher-order functions, or HOC, are functions that take other functions as
-parameters so that they behave differently depending on inputs. They are
-more powerful than regular functions in the way that they don't just abstract
-over _values_, but over _transformations and actions_.
-
-> Note: *Refactoring* is defined as changing the structure and organization of
-code -- without breaking expected behaviour of the program -- with the goal of
-improving readability, maintainability and reducing overall complexity.
+to run the test suite.

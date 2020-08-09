@@ -6,6 +6,8 @@ title: Pure Functions
 state: draft
 ---
 
+TODO: explain use of namespaces
+
 ### Capitalism, ho!
 
 As you step onto the creaking floor boards of the old shop, you breathe in a
@@ -209,9 +211,8 @@ A pure function has a couple of properties:
     const add = (a, b) => a + b;
     ```
     always returns `4` for the inputs `1` and `3`. A formal way of describing this property saying that the function is "referentially transparent", that is, you could replace the function invocation with its result, without breaking the program.
-2. It does not depend on its context or scope, otherwise it would break (1).
-3. It does not mutate its inputs, otherwise calling it multiple times with the same inputs would result in different outputs, and thus break (1).
-4. It does not cause any side effects in your program, it simply returns values. This is more of a theoretical problem, some side effects are harmless, others change the environment in a way where calling the function multiple times would result in different results, which would, again, break (1). Examples include making api calls, updating a database, interacting with the file system.
+2. It does not mutate its inputs, otherwise calling it multiple times with the same inputs would result in different outputs, and thus break (1).
+3. It does not cause any side effects in your program, it simply returns values. This is more of a theoretical problem, some side effects are harmless, others change the environment in a way where calling the function multiple times would result in different results, which would, again, break (1). Examples include making api calls, updating a database, interacting with the file system.
 
 Callign `create`, unremarkably, creates a plain object that fits the `Store` type:
 
@@ -361,9 +362,23 @@ describe('Store::stockOne', () => {
 });
 ```
 
-### Next up
+### Recap
 
-Wonderful, but before we can attract any customers, we need a function
+Let's recap.
+
+* We describe the shape of our simple data with `type`s.
+* To transform data, we use pure functions, which
+    * are referentially transparent. That is, for any input A they always return output B.
+    * do not mutate their inputs.
+    * does not cause side effects such as printing read and write to a database
+      or the file system
+* We use name spaces to separate concerns and structure our code. Every name
+  space should only include code that is relevant to its concept, following the
+  principle of "I don't know, I don't want to know".
+
+### Next Up And Exercises
+
+Before we can attract any customers, we need a function
 to sell ingredients. And that's where you come in. As an exercise,
 implement the function `sellOne` in the `Store` namespace.
 
@@ -381,7 +396,7 @@ cd workers-guide-to-fp-in-ts/exercises
 npm ci
 ```
 
-The code of this chapter should be under `1-pure-functions`.
+The code of this chapter should be under `chapters/1/`.
 To run the test suite in watch mode, run:
 
 ```bash

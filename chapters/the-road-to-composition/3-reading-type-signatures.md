@@ -142,3 +142,9 @@ would be derived as `f: (a: number) => number`, and so on.
 as they all have the generalized function signature of `<A>(a: A) => boolean`.
 
 ### mapping functions
+
+> Note: A higher-order function takes advantage of the fact that _functions are values_.
+Higher-order functions, or HOC, are functions that take other functions as
+parameters so that they behave differently depending on inputs. They are
+more powerful than regular functions in the way that they don't just abstract
+over _values_, but over _transformations and actions_.
