@@ -1,9 +1,9 @@
 {
     "scripts": {
-        "dev:1": "nodemon chapters/1-pure-functions/run.ts",
-        "dev:2": "nodemon chapters/2-functions-as-values/run.ts",
-        "test:1": "jest --config jest.config.js ./chapters/1-pure-functions",
-        "test:2": "jest --config jest.config.js ./chapters/2-functions-as-values"
+        "dev:1": "nodemon chapters/1/run.ts",
+        "dev:2": "nodemon chapters/2/run.ts",
+        "test:1": "jest --config jest.config.js ./chapters/1",
+        "test:2": "jest --config jest.config.js ./chapters/2"
     },
     "private": true,
     "devDependencies": {
