@@ -1,14 +1,15 @@
-import * as React from 'react';
+import React from 'react';
 import frontmatter from 'remark-frontmatter';
 import parseFrontmatter from 'remark-parse-yaml';
+import codeImport from 'remark-code-import';
 import remark2rehype from 'remark-rehype';
 import parseMarkdown from 'remark-parse';
 import refractor from 'refractor';
 import typescript from 'refractor/lang/typescript';
 import unified from 'unified';
-import {VFileCompatible} from 'vfile';
+import {VFileCompatible, VFile} from 'vfile';
 import visit from 'unist-util-visit';
-import toc from 'rehype-toc';
+// import toc from 'rehype-toc';
 import slug from 'rehype-slug';
 import highlight from '@mapbox/rehype-prism';
 import toReact from 'rehype-react';
@@ -34,16 +35,16 @@ const Pre: React.FC<{className: string}> = ({className, ...rest}) => {
     }
 };
 
-export const process = (file: VFileCompatible) =>
+export const process = (file: VFileCompatible): Promise<VFile> =>
     unified()
         .use(parseMarkdown)
-        .use(frontmatter)
+        .use(codeImport)
+        .use(frontmatter, ['yaml'])
         .use(parseFrontmatter)
         .use(copyFrontmatter)
         .use(remark2rehype)
         .use(highlight)
         .use(slug)
-        /* .use(toc) */
         .use(toReact, {
             createElement: React.createElement,
             components: {

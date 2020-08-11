@@ -7,6 +7,7 @@ export type ViewChapter = {
     parent?: string;
     title: string;
     contents: string;
+    result: React.Component;
 };
 
 export type ChildNode = {id: string; order: number};
@@ -98,7 +99,7 @@ export const Home: React.FC<ViewProps> = props => (
         <Nav {...props} />
         <main className="main">
             <h2 className="chapter-title">{props.title}</h2>
-            {props.contents}
+            {props.result}
         </main>
     </Layout>
 );

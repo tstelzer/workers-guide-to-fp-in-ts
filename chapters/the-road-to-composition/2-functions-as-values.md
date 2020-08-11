@@ -8,11 +8,14 @@ state: draft
 
 Here is the code from the previous chapter. It includes a solution for the exercises.
 
-[Store.ts](../../exercises/chapters/1/Store.ts)
+```typescript file=../../exercises/chapters/1/Store.ts
+```
 
-[Ingredient.ts](../../exercises/chapters/1/Ingredient.ts)
+```typescript file=../../exercises/chapters/1/Ingredient.ts
+```
 
-[run.ts](../../exercises/chapters/1/run.ts)
+```typescript file=../../exercises/chapters/1/run.ts
+```
 
 Wiping away the sweat off your brow from a hard days work, you wave goodbye to
 farmer Frank, who just delivered a cart full of wheat. Good old Frank has
@@ -371,7 +374,7 @@ own inventory:
 
 As with the previous chapter, navigate to the `exercises` directory and run
 
-```sh
+```bash
 npm run test:2
 ```
 

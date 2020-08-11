@@ -82,6 +82,7 @@ export const reportErrors = (vfile: VFile) => (errors: io.Errors) =>
     errors.map(e => reportError(vfile, e)).reduce(s => `${s}\n`);
 
 const ParsedChapterCodec = io.type({
+    result: io.any,
     contents: io.any,
     data: io.type({
         frontmatter: io.intersection([
@@ -106,6 +107,7 @@ type ParsedChapterWithId = ParsedChapter & {id: string};
 
 const defaultParsedChapter = (): ParsedChapter => ({
     contents: '',
+    result: undefined,
     data: {
         frontmatter: {
             title: '',
@@ -138,15 +140,18 @@ const reduceBySlug = (
     chapter: ParsedChapterWithId,
 ): {[id: string]: ViewChapter} => {
     const {slug, title, parent} = chapter.data.frontmatter;
-    const {id, contents} = chapter;
+    const {id, contents, result} = chapter;
+    const href = !!parent ? `${parent}/${slug}.html` : `${slug}.html`;
+
     return {
         ...byId,
         [id]: {
+            result,
             id,
             slug,
             title,
             parent,
-            href: !!parent ? `${parent}/${slug}.html` : `${slug}.html`,
+            href,
             contents,
         },
     };
@@ -155,7 +160,7 @@ const reduceBySlug = (
 /*
  * NOTE: Mutation here is fine for now. If the reducer grows in complexity
  * (e.g. more than two levels of nodes in hierarchy), refactor by modeling it
- * as a proper tree.
+ * as a tree.
  */
 const reduceNav = (nav: ParentNode[], chapter: ParsedChapterWithId) => {
     const {parent, slug, order} = chapter.data.frontmatter;
