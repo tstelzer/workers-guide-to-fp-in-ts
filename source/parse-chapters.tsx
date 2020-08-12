@@ -9,31 +9,17 @@ import typescript from 'refractor/lang/typescript';
 import unified from 'unified';
 import {VFileCompatible, VFile} from 'vfile';
 import visit from 'unist-util-visit';
-// import toc from 'rehype-toc';
 import slug from 'rehype-slug';
 import highlight from '@mapbox/rehype-prism';
 import toReact from 'rehype-react';
+import remarkCustomBlocks from 'remark-custom-blocks';
 
 refractor.register(typescript);
 
-const copyFrontmatter: unified.Plugin = () => (ast, file) =>
-    visit(ast, 'yaml', item => {
-        (file as {data: any}).data.frontmatter = item.data?.parsedValue;
+const copyFrontmatter: unified.Plugin = () => (tree, file) =>
+    visit(tree, 'yaml', node => {
+        (file as {data: any}).data.frontmatter = node.data?.parsedValue;
     });
-
-const Pre: React.FC<{className: string}> = ({className, ...rest}) => {
-    switch (className) {
-        case 'language-json5':
-            return (
-                <details>
-                    <summary>output</summary>
-                    <pre {...rest} className={className} />
-                </details>
-            );
-        default:
-            return <pre {...rest} className={className} />;
-    }
-};
 
 export const process = (file: VFileCompatible): Promise<VFile> =>
     unified()
@@ -42,15 +28,17 @@ export const process = (file: VFileCompatible): Promise<VFile> =>
         .use(frontmatter, ['yaml'])
         .use(parseFrontmatter)
         .use(copyFrontmatter)
+        .use(remarkCustomBlocks, {
+            expand: {
+                classes: 'expand',
+                title: 'optional',
+                details: true,
+            },
+        })
         .use(remark2rehype)
         .use(highlight)
         .use(slug)
-        .use(toReact, {
-            createElement: React.createElement,
-            components: {
-                pre: Pre,
-            },
-        })
+        .use(toReact, {createElement: React.createElement})
         .process(file);
 
 export default process;

@@ -21,3 +21,29 @@ without knowing that we did: partial application.
 Feel free to skip chapters when you feel already comfortable with the concepts,
 though it would be advisable to at least skim them to understand the context of
 the example code and exercises.
+
+### Exercises And Code
+
+In order to run the exercises for each chapter, first clone the repository and
+install all dependencies.
+
+```bash
+git clone https://github.com/tstelzer/workers-guide-to-fp-in-ts
+cd workers-guide-to-fp-in-ts/exercises
+npm ci
+```
+
+Each chapters code is under `exercises/chapters/<CHAPTER>`, for example the
+code for chapter one would be under `exercises/chapters/1`. To run each chapters test suite, run:
+
+```bash
+npm run test:<CHAPTER> -- --watch
+```
+
+And to run each chapters repl, run:
+
+```bash
+npm run dev:<CHAPTER>
+```
+
+That should also start the node debugger under `0.0.0.0:9229`.

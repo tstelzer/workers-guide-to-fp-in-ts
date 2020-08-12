@@ -16,7 +16,9 @@ over you, as you recall the many times you spent helping your granny running the
 in your childhood. Brushing off a layer of thick dust on the counter, you begin
 to inspect the inventory.
 
-[inventory.json]()
+[[expand | inventory.json]]
+| ```json5 file=../../exercises/chapters/1/inventory.json
+| ```
 
 Grandmother supplied ingredients to adventurous alchemists, and you are picking
 up the trade. She used to do her accounting with pen and paper, but you will
@@ -270,7 +272,9 @@ And we can see that our store is still a plain object:
 console.log(store);
 ```
 
-[store-output.json]()
+[[expand | output]]
+| ```json5 file=../../exercises/chapters/1/output.json
+| ```
 
 But we still can't do anything with our store. Let's change that by extending it
 with a function to stock up on ingredients:
@@ -388,27 +392,7 @@ implement the function `sellOne` in the `Store` namespace.
   For now, you can define it as a global, immutable constant of `0.25`.
 * When the ingredient cannot be found, throw a `IngredientNotFound` exception.
 
-To test your skills, clone, and prepare this repository:
-
-```bash
-git clone https://github.com/tstelzer/workers-guide-to-fp-in-ts
-cd workers-guide-to-fp-in-ts/exercises
-npm ci
-```
-
-The code of this chapter should be under `chapters/1/`.
-To run the test suite in watch mode, run:
-
-```bash
-npm run test:1 -- --watch
-```
-
-Or to simply run the code and play around with it, run:
-
-```bash
-npm run dev:1
-```
-
-That should also start the node debugger under `0.0.0.0:9229`.
+Check the [part introduction](../index) on how you can run the code and solve
+the exercises.
 
 Good luck, and see you in the next chapter.

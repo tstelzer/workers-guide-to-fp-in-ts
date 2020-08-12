@@ -6,17 +6,6 @@ title: Functions as values
 state: draft
 ---
 
-Here is the code from the previous chapter. It includes a solution for the exercises.
-
-```typescript file=../../exercises/chapters/1/Store.ts
-```
-
-```typescript file=../../exercises/chapters/1/Ingredient.ts
-```
-
-```typescript file=../../exercises/chapters/1/run.ts
-```
-
 Wiping away the sweat off your brow from a hard days work, you wave goodbye to
 farmer Frank, who just delivered a cart full of wheat. Good old Frank has
 always been both customer and supplier to your granny, and decided to bootstrap
@@ -24,7 +13,9 @@ your business venture with some free wheat. You didn't really have the time to
 weigh it, but now you're curious, and would like to see all of the wheat in
 your inventory.
 
-[inventory.json]()
+[[expand | inventory.json]]
+| ```json5 file=../../exercises/chapters/2/inventory.json
+| ```
 
 For convinience and encapsulation, let's create a new `Inventory` type:
 
@@ -96,7 +87,9 @@ though:
 console.log(S.withSellingPrice(S.filterWheat(store.inventory)));
 ```
 
-[output.json]()
+[[expand | output]]
+| ```json5 file=../../exercises/chapters/2/output-1.json
+| ```
 
 You would love to show a less mechanical, human-readable list.
 A simple task, you just iterate over the inventory again,
@@ -128,7 +121,9 @@ human-readable string.
 console.log(S.show(S.withSellingPrice(S.filterWheat(store.inventory))));
 ```
 
-[output.txt]()
+[[expand | output]]
+| ```json5 file=../../exercises/chapters/2/output-2.json
+| ```
 
 Have another look at the code. What patterns can you spot to find opportunities
 for refactoring? Which parts are similar or different? Let's invoke the spell
@@ -256,7 +251,9 @@ const onlyWheat = S.filterInventory(store.inventory, I.isWheat);
 console.log(onlyWheat);
 ```
 
-[output-2.json]()
+[[expand | output]]
+| ```json5 file=../../exercises/chapters/2/output-3.json
+| ```
 
 Let's do the same for `withSellingPrice` and `show` and first extract their
 business logic. Like `isWheat` we will define them in the `Ingredient` name
@@ -341,7 +338,9 @@ console.log(inventoryAsString.join('\n'));
 Note that using `I.withSellingPrice` is a bit awkward, as we need to supply the
 profit margin as well. We will discuss in later chapters how we can clean that up.
 
-[output-2.txt]()
+[[expand | output]]
+| ```json5 file=../../exercises/chapters/2/output-4.json
+| ```
 
 ### Recap
 
@@ -371,11 +370,3 @@ own inventory:
     * `withRarityAsPercentage` modifes the `rarity` field so that it displays
       as rounded up percentage values, including the `%` symbol. So, 0.25
       becomes `25%` and `99.51` becomes `100%`.
-
-As with the previous chapter, navigate to the `exercises` directory and run
-
-```bash
-npm run test:2
-```
-
-to run the test suite.

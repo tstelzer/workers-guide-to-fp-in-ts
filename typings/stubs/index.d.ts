@@ -12,3 +12,4 @@ declare module 'remark-code-import';
 declare module 'remark-parse-yaml';
 declare module 'rehype-react';
 declare module 'to-vfile';
+declare module 'remark-custom-blocks';
