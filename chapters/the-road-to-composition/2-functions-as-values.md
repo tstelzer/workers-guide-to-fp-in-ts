@@ -154,7 +154,7 @@ cases we'll call the _business logic_.
 
 Before we try to factor out the operational logic, let's try to first extract
 the business logic, so that we can later parametrize it. Let's start with
-`filterWheat`, because its business logic is dead-simple.
+`filterWheat`, because its logic is dead-simple.
 
 ```typescript
 // file: Ingredient.ts
@@ -359,14 +359,14 @@ Following the example of the wheat, you want to expand your insight into your
 own inventory:
 
 1. Define three more predicate functions:
-    * `isDeathbell`, identifying ingredients with the name "Deathbell"
-    * `isRare`, identifying very rare ingredients with a rarity rating at or below 0.1
-    * `isCheap`, identifying very cheap ingredients with a cost rating at or below 0.5
+    1. `isDeathbell`, identifying ingredients with the name "Deathbell"
+    2. `isRare`, identifying very rare ingredients with a rarity rating at or below 0.1
+    3. `isCheap`, identifying very cheap ingredients with a cost rating at or below 0.5
 2. Define two more functions that work with `mapInventory`:
-    * `withInitials`, which transforms ingredients, adding a new field
+    1. `withInitials`, which transforms ingredients, adding a new field
       `initials` which is either the first characters of the first two words in
       the `name`, or first and last characters if there is only one word. So,
       "Wheat" becomes "WT" and "Boar Tusk" becomes "BT".
-    * `withRarityAsPercentage` modifes the `rarity` field so that it displays
+    2. `withRarityAsPercentage` modifes the `rarity` field so that it displays
       as rounded up percentage values, including the `%` symbol. So, 0.25
       becomes `25%` and `99.51` becomes `100%`.
