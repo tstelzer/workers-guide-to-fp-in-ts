@@ -6,11 +6,76 @@ title: Understanding type signatures
 state: outline
 ---
 
-* introduce generics
-* make previous functions more generic
-* difference to `any`
+Business is booming. While your town is quite small, Alchemists from a larger
+city, close by, have heard of your shop and spread the word. In moments of
+respite, you search for suppliers and traders offering exotic goods, and the
+diversity of your catalogue grows and grows. An opportunity presents itself
+to you, when the local blacksmith, who has heard of, and is keen to profit
+from your success, offers to sell you her wares. You decide to take her up on
+the offer, but as your shop is already bursting at the seams with
+ingredients, you want to pick a small subset of weapons, the most precious
+and rarest. Unfortunately you aren't rich (yet), so they can't be exceedingly
+expensive either. The blacksmith showcases her inventory:
 
-## Summary
+[[expand | blacksmith-inventory.json]]
+| ```json5 file=../../exercises/chapters/3/blacksmith-inventory.json
+| ```
+
+In order to fit the new kind of items into your model, you first define a new
+type for `Weapon`, along with three predicates that, in combination, select the
+subset of her inventory you are interested in:
+
+```typescript
+```
+
+---
+
+With an ever increasing range of ingredients, you tire of defining predicates
+for each and every one, and you ponder the nature of the predicate function.
+
+In the last chapter, we've defined predicate functions like this:
+
+> When we say _predicate function_, we mean _any_ function taking a value
+> that returns a `boolean` value.
+
+Including the three exercize functions, we now have four:
+
+```typescript
+// file: Ingredient.ts
+export const isWheat = (ingredient: Ingredient): boolean =>
+    ingredient.name === 'Wheat';
+
+export const isDeathbell = (ingredient: Ingredient): boolean =>
+    ingredient.name === 'Deathbell';
+
+export const isRare = (ingredient: Ingredient): boolean =>
+    ingredient.rarity <= 0.1;
+
+export const isCheap = (ingredient: Ingredient): boolean =>
+    ingredient.cost <= 0.5;
+```
+
+And we're using them via `filterInventory`, which defines the `predicate`
+signature as `predicate: (ingredient: I.Ingredient) => boolean`:
+
+```typescript
+// file: Store.ts
+
+export const filterInventory = (
+    inventory: Inventory,
+    predicate: (ingredient: I.Ingredient) => boolean,
+) => {
+    const result = [];
+    for (const ingredient of inventory) {
+        if (predicate(ingredient)) result.push(ingredient);
+    }
+    return result;
+};
+```
+
+* generalizing predicates
+* introduce generics
+* generalize map
 
 In the last two chapters we have been looking at type signatures without really
 explaining them. In this chapter, we will build an understanding for their
@@ -26,18 +91,18 @@ so code like this should not surprise you:
 const startsWithC = (s: string): boolean => s.toLowerCase().startsWith('c');
 ```
 
-You've seen this function at the end of the last chapter.  Nothing fancy, it's
+You've seen this function at the end of the last chapter. Nothing fancy, it's
 just a simple function that asserts that a `string` starts with the character
-`c`. This code combines type signature and implementation, though. For the sake
-of isolating its type signature, let's define it as a `type`:
+`c`. Let's look at the type signature in isolation:
 
 ```typescript
 type startsWithC = (s: string) => boolean;
 ```
 
 We've removed pesky implementation details and are left with the types for the
-input value, `string`, and the output value, `boolean`. We are looking at the
-function from a higher level of abstraction.
+input value, `string`, and the output value, `boolean`. The function signature
+defines a contract that other code can rely on. This function only takes
+strings and only returns booleans.
 
 Let's look at the other two predicates we've introduced:
 
@@ -82,7 +147,7 @@ Property 'toLowerCase' does not exist on type 'string | | number | Date'.
 ```
 
 The issue here is that we've spread the three potential input types across all
-three functions.  All three functions now expect a `string` _or_ a `number`
+three functions. All three functions now expect a `string` _or_ a `number`
 _or_ a `Date`. That is not actually how our functions work. Coincidentally, for
 `moreThanThreeDigits` and `afterMoonLanding`, this is not a problem, because
 `.toString` works for all three input types, and so does comparison via `>`.
