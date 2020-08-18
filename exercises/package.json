@@ -1,9 +1,7 @@
 {
     "scripts": {
-        "dev:1": "nodemon chapters/1/run.ts",
-        "dev:2": "nodemon chapters/2/run.ts",
-        "test:1": "jest --config jest.config.js ./chapters/1",
-        "test:2": "jest --config jest.config.js ./chapters/2"
+        "dev": "nodemon",
+        "test": "jest --config jest.config.js"
     },
     "private": true,
     "devDependencies": {

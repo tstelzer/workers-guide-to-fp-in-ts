@@ -33,17 +33,21 @@ cd workers-guide-to-fp-in-ts/exercises
 npm ci
 ```
 
-Each chapters code is under `exercises/chapters/<CHAPTER>`, for example the
-code for chapter one would be under `exercises/chapters/1`. To run each chapters test suite, run:
+Each chapters code is under `chapters/<CHAPTER>`, for example the
+code for chapter one would be under `chapters/1`. To run each chapters test suite, run:
 
 ```bash
-npm run test:<CHAPTER> -- --watch
+npm run test -- chapters/<CHAPTER> --watch
+# for example
+npm run test -- chapters/1 --watch
 ```
 
 And to run each chapters repl, run:
 
 ```bash
-npm run dev:<CHAPTER>
+npm run dev -- chapters/<CHAPTER>/run.ts
+# for example
+npm run dev -- chapters/1/run.ts
 ```
 
 That should also start the node debugger under `0.0.0.0:9229`.
