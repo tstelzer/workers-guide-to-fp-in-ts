@@ -22,11 +22,79 @@ expensive either. The blacksmith showcases her inventory:
 | ```
 
 In order to fit the new kind of items into your model, you first define a new
-type for `Weapon`, along with three predicates that, in combination, select the
-subset of her inventory you are interested in:
+type for `Weapon`:
 
 ```typescript
+// file: Weapon.ts
+export type Weapon = {
+    name: string;
+    cost: number;
+    rarity: number;
+    quality: number;
+};
 ```
+
+As for the three predicates, two of those we have already defined as part of
+the exercizes from the last chapter: `isCheap` and `isRare`, though we defined
+them for `Ingredient`. Can we re-use them for `Weapon`? What would accomplish
+that? Speaking strictly syntactically, there are three ways for us to re-use
+the predicates:
+
+1. We define a base type that `Weapon` and `Ingredient` extend.
+2. We ease the requirements of the predicate inputs, requesting only the subset
+   of properties that are relevant for it.
+3. We define the inputs as a union of `Weapon` and `Ingredient`.
+
+Solution #1 unfortunately yields an unnecessary proliferation of types in our
+application. That path leads us down a road with many `Base` and `Abstract`
+types, which in and of themselves aren't used anywhere, and are only extended
+from. This solution likely seems natural to many developers coming from an OOP
+background, and may be the only solution if your language of choice forces you
+to use nominal types everywhere. We don't use such a language.
+
+When our types naturally grow from our problem domain, our code stays
+comprehensible and simple.
+
+Solution #2 works well when the logic is simple and and does not differ
+between the actual types:
+
+```typescript
+export const isCheap = ({cost}: {cost: number}): boolean => cost <= 0.5;
+export const isRare = ({rarity}: {rarity: number}): boolean => rarity <= 0.1;
+```
+
+Here, we're not using _any_ named type in the parameters, and instead
+destructure, only defining the property we need. We trade type context for
+generality.
+
+Solution #3 unites both `Weapon` and `Ingredient`:
+
+```typescript
+export const isCheap = (item: Weapon | Ingredient): boolean => item.cost <= 0.5;
+export const isRare = (item: Weapon | Ingredient): boolean => item.rarity <= 0.1;
+```
+
+If we're inclined to do so, we could name the union (but we don't have to):
+
+```typescript
+type Item = Weapon | Ingredient;
+
+export const isCheap = (item: Item): boolean => item.cost <= 0.5;
+export const isRare = (item: Item): boolean => item.rarity <= 0.1;
+```
+
+Though before we get too enamoured with our ability to generalize, we should
+stop and think if we _should_ do so; can `isCheap` and `isRare` both be
+generalized in this way?
+
+As rarity is expressed relatively as a percentage, it should apply to both
+`Weapon` and `Ingredient`. Not so cost. What may be cheap for a weapon is
+likely incredibly expensive for an ingredient and so `isCheap` shouldn't be
+re-used.
+
+We'll pick solution #2 for `isRare` and re-define `isCheap` for `Weapon`.
+
+TODO: fix blacksmith-inventory, invert rarity in calculation
 
 ---
 
