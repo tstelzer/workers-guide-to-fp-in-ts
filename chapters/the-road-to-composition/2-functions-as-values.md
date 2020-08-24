@@ -360,7 +360,7 @@ own inventory:
 
 1. Define three more predicate functions:
     1. `isDeathbell`, identifying ingredients with the name "Deathbell"
-    2. `isRare`, identifying very rare ingredients with a rarity rating at or below 0.1
+    2. `isRare`, identifying very rare ingredients with a rarity rating at or below 0.2
     3. `isCheap`, identifying very cheap ingredients with a cost rating at or below 0.5
 2. Define two more functions that work with `mapInventory`:
     1. `withInitials`, which transforms ingredients, adding a new field

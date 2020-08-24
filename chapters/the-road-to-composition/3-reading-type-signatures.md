@@ -14,7 +14,7 @@ to you, when the local blacksmith, who has heard of, and is keen to profit
 from your success, offers to sell you her wares. You decide to take her up on
 the offer, but as your shop is already bursting at the seams with
 ingredients, you want to pick a small subset of weapons, the most precious
-and rarest. Unfortunately you aren't rich (yet), so they can't be exceedingly
+_or_ rarest. Unfortunately you aren't rich (yet), so they can't be exceedingly
 expensive either. The blacksmith showcases her inventory:
 
 [[expand | blacksmith-inventory.json]]
@@ -60,7 +60,7 @@ between the actual types:
 
 ```typescript
 export const isCheap = ({cost}: {cost: number}): boolean => cost <= 0.5;
-export const isRare = ({rarity}: {rarity: number}): boolean => rarity <= 0.1;
+export const isRare = ({rarity}: {rarity: number}): boolean => rarity <= 0.2;
 ```
 
 Here, we're not using _any_ named type in the parameters, and instead
@@ -71,7 +71,7 @@ Solution #3 unites both `Weapon` and `Ingredient`:
 
 ```typescript
 export const isCheap = (item: Weapon | Ingredient): boolean => item.cost <= 0.5;
-export const isRare = (item: Weapon | Ingredient): boolean => item.rarity <= 0.1;
+export const isRare = (item: Weapon | Ingredient): boolean => item.rarity <= 0.2;
 ```
 
 If we're inclined to do so, we could name the union (but we don't have to):
@@ -80,7 +80,7 @@ If we're inclined to do so, we could name the union (but we don't have to):
 type Item = Weapon | Ingredient;
 
 export const isCheap = (item: Item): boolean => item.cost <= 0.5;
-export const isRare = (item: Item): boolean => item.rarity <= 0.1;
+export const isRare = (item: Item): boolean => item.rarity <= 0.2;
 ```
 
 Though before we get too enamoured with our ability to generalize, we should
@@ -90,11 +90,84 @@ generalized in this way?
 As rarity is expressed relatively as a percentage, it should apply to both
 `Weapon` and `Ingredient`. Not so cost. What may be cheap for a weapon is
 likely incredibly expensive for an ingredient and so `isCheap` shouldn't be
-re-used.
+re-used. One could argue, we shouldn't even be generalizing `isCheap` for
+`Weapon` _or_ `Ingredient`, as cost varies greatly between weapon or ingredient
+types, but we don't care about that for now.
 
-We'll pick solution #2 for `isRare` and re-define `isCheap` for `Weapon`.
+We'll pick solution #2 for `isRare` and re-define `isCheap` so that it works
+with `Weapon`, chosing `300` as the threshold value. As we don't have a
+predicate for quality yet, we're defining it as `isPrecious`, with a `quality`
+value of `0.75` or higher.
 
-TODO: fix blacksmith-inventory, invert rarity in calculation
+```typescript
+// file: common.ts
+export const isRare = ({rarity}: {rarity: number}): boolean => rarity <= 0.2;
+```
+
+```typescript
+// file: Weapon.ts
+export const isCheap = (weapon: Weapon): boolean => weapon.cost <= 300;
+
+export const isPrecious = (weapon: Weapon): boolean => weapon.quality >= 0.75;
+```
+
+Now that we have our three predicates, we can use them to filter the
+blacksmith's inventory. Our `filterInventory` function from chapter 2 doesn't
+include `Weapon` yet, as it is defined for `Ingredient`. We could apply the
+approach we found in solution #2 from above, and define the Inventory as a
+union of `Weapon` and `Ingredient`, like this:
+
+```git
+diff --git a/exercises/chapters/3/Store.ts b/exercises/chapters/3/Store.ts
+index bd6fef8..44d6ed0 100644
+--- a/exercises/chapters/3/Store.ts
++++ b/exercises/chapters/3/Store.ts
+@@ -1,4 +1,5 @@
+ import * as I from './Ingredient';
++import * as W from './Weapon';
+ 
+ export class BalanceExhausted extends Error {
+     constructor() {
+@@ -16,7 +17,8 @@ export class IngredientNotFound extends Error {
+ 
+ export const PROFIT_MARGIN = 0.25;
+ 
+-export type Inventory = I.Ingredient[];
++export type Item = I.Ingredient | W.Weapon;
++export type Inventory = Item[];
+ 
+ export type Store = {
+     inventory: Inventory;
+@@ -25,11 +27,11 @@ export type Store = {
+ 
+ export const filterInventory = (
+     inventory: Inventory,
+-    predicate: (ingredient: I.Ingredient) => boolean,
+-) => {
++    predicate: (item: Item) => boolean,
++): Inventory => {
+     const result = [];
+-    for (const ingredient of inventory) {
+-        if (predicate(ingredient)) result.push(ingredient);
++    for (const item of inventory) {
++        if (predicate(item)) result.push(item);
+     }
+     return result;
+ };
+```
+
+It is sensible to include `Weapon` in our `Inventory` type, but as for
+`filterInventory`, surely we can do better in terms of generality.
+Is there any reason `filterInventory` must be specifically about `Inventory`
+types? The function body looks generic enough already, if it weren't for those
+pesky, concrete types of `Inventory` and `Ingredient`.
+
+To solve this issue, we need something else from the TypeScript toolset: [generics](http://www.typescriptlang.org/docs/handbook/generics.html).
+
+In a nutshell, generics are place holder types, or type variables that stand in
+for a concrete type. Generics let us define generalized functions without
+concrete types, allowing the _caller_ of the functions to define them
+instead, either explicitly, or implicitly inferred by TypeScript.
 
 ---
 
@@ -225,12 +298,6 @@ We need a mechanism where we can some how express the idea of "take any value"
 without losing the type information of that value. This will allow us to write
 these kind of abstract type signatures that we need for `Predicate`.
 
-Fortunately, there is such a thing in TypeScript: meet [generics](http://www.typescriptlang.org/docs/handbook/generics.html)
-
-In a nutshell, generics are place holder types, or type variables that stand in
-for a concrete type. Generics let us define generalized functions without
-concrete types, allowing the _caller_ of the functions to define them
-instead, either explicitly, or implicitly inferred by TypeScript.
 
 Using generics, we can define our `Predicate` like this:
 

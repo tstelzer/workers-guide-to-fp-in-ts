@@ -5,4 +5,6 @@ export type Weapon = {
     quality: number;
 };
 
-export const isCheap = ({cost}: {cost: number}): boolean => cost <= 0.5;
+export const isCheap = (weapon: Weapon): boolean => weapon.cost <= 300;
+
+export const isPrecious = (weapon: Weapon): boolean => weapon.quality >= 0.75;

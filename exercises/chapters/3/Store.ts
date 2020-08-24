@@ -1,4 +1,5 @@
 import * as I from './Ingredient';
+import * as W from './Weapon';
 
 export class BalanceExhausted extends Error {
     constructor() {
@@ -16,7 +17,8 @@ export class IngredientNotFound extends Error {
 
 export const PROFIT_MARGIN = 0.25;
 
-export type Inventory = I.Ingredient[];
+export type Item = I.Ingredient | W.Weapon;
+export type Inventory = Item[];
 
 export type Store = {
     inventory: Inventory;
@@ -25,11 +27,11 @@ export type Store = {
 
 export const filterInventory = (
     inventory: Inventory,
-    predicate: (ingredient: I.Ingredient) => boolean,
-) => {
+    predicate: (item: Item) => boolean,
+): Inventory => {
     const result = [];
-    for (const ingredient of inventory) {
-        if (predicate(ingredient)) result.push(ingredient);
+    for (const item of inventory) {
+        if (predicate(item)) result.push(item);
     }
     return result;
 };
