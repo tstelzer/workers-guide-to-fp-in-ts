@@ -156,18 +156,67 @@ index bd6fef8..44d6ed0 100644
  };
 ```
 
+TODO: actually filter the things
+
 It is sensible to include `Weapon` in our `Inventory` type, but as for
 `filterInventory`, surely we can do better in terms of generality.
 Is there any reason `filterInventory` must be specifically about `Inventory`
 types? The function body looks generic enough already, if it weren't for those
 pesky, concrete types of `Inventory` and `Ingredient`.
 
-To solve this issue, we need something else from the TypeScript toolset: [generics](http://www.typescriptlang.org/docs/handbook/generics.html).
+To solve this issue, we need something else from the TypeScript toolset:
+[generics](http://www.typescriptlang.org/docs/handbook/generics.html). In a
+nutshell, generics are place holder types, or type variables that stand in for
+a concrete type.
 
-In a nutshell, generics are place holder types, or type variables that stand in
-for a concrete type. Generics let us define generalized functions without
-concrete types, allowing the _caller_ of the functions to define them
-instead, either explicitly, or implicitly inferred by TypeScript.
+```typescript
+const identity = <T>(a: T) => a;
+```
+
+In this function, `T` is a generic, and as with any variable, we pick the to be
+what we want. Conventionally, generics are named with single characters,
+sometimes abbreviating the thing they are standing in for. Generics let us
+define generalized functions without concrete types, allowing the _caller_ of
+the functions to define them instead. We can let TypeScript infer types
+implicitly:
+
+```typescript
+identity(42); // type of T: 42
+identity('hello'); // type of T: 'hello'
+identity({}); // type of T: {}
+```
+
+Or explicitly pass them in:
+
+```typescript
+identity<string>('hello');
+identity<string>(42); // does not compile
+```
+
+Using generics, we can generalize the concrete types `Ingredient` and
+`Inventory` from our `filterInventory` function, and define `filter`:
+
+```typescript
+// file: common.ts
+export const filter = <A>(as: A[], predicate: (a: A) => boolean): A[] => {
+    const result = [];
+    for (const a of as) {
+        if (predicate(a)) result.push(a);
+    }
+    return result;
+};
+```
+
+Here, `A` stands in for the concrete type of items in the list `as`. Note where it is used:
+
+1. `as` is a list of `A`.
+2. The `predicate` requires a _single_ `A` as input.
+3. The function output is again a list of `A`.
+
+When we use it with our store, `A` is replaced with the concrete type. And yet,
+`filter` knows nothing of our domain types, now _that_ is truly reusable code.
+
+TODO: filter the things
 
 ---
 
