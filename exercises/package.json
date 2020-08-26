@@ -1,6 +1,7 @@
 {
     "scripts": {
         "dev": "nodemon",
+        "start": "ts-node",
         "test": "jest --config jest.config.js"
     },
     "private": true,

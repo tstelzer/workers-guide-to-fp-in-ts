@@ -1,0 +1,206 @@
+[
+  {
+    "name": "Bow",
+    "rarity": 0.1,
+    "quality": 0.57,
+    "cost": 18.6
+  },
+  {
+    "name": "Bow",
+    "rarity": 0.1,
+    "quality": 0.48,
+    "cost": 17.17
+  },
+  {
+    "name": "Bow",
+    "rarity": 0.1,
+    "quality": 0.37,
+    "cost": 15.56
+  },
+  {
+    "name": "Bow",
+    "rarity": 0.35,
+    "quality": 0.86,
+    "cost": 19.37
+  },
+  {
+    "name": "Bow",
+    "rarity": 0.1,
+    "quality": 0.96,
+    "cost": 24.41
+  },
+  {
+    "name": "Bow",
+    "rarity": 0.1,
+    "quality": 0.15,
+    "cost": 12.27
+  },
+  {
+    "name": "Bow",
+    "rarity": 0.1,
+    "quality": 0.69,
+    "cost": 20.35
+  },
+  {
+    "name": "Bow",
+    "rarity": 0.1,
+    "quality": 0.13,
+    "cost": 11.98
+  },
+  {
+    "name": "Bow",
+    "rarity": 0.1,
+    "quality": 0.1,
+    "cost": 11.51
+  },
+  {
+    "name": "Bow",
+    "rarity": 0.1,
+    "quality": 0.36,
+    "cost": 15.41
+  },
+  {
+    "name": "Bow",
+    "rarity": 0.1,
+    "quality": 0.1,
+    "cost": 11.34
+  },
+  {
+    "name": "Bow",
+    "rarity": 0.13,
+    "quality": 0.52,
+    "cost": 16.75
+  },
+  {
+    "name": "Crossbow",
+    "rarity": 0.71,
+    "quality": 0.99,
+    "cost": 123.54
+  },
+  {
+    "name": "Crossbow",
+    "rarity": 0.1,
+    "quality": 0.1,
+    "cost": 69
+  },
+  {
+    "name": "Crossbow",
+    "rarity": 0.1,
+    "quality": 0.84,
+    "cost": 135.36
+  },
+  {
+    "name": "Crossbow",
+    "rarity": 0.12,
+    "quality": 0.52,
+    "cost": 101.21
+  },
+  {
+    "name": "Crossbow",
+    "rarity": 0.1,
+    "quality": 0.1,
+    "cost": 69
+  },
+  {
+    "name": "Crossbow",
+    "rarity": 0.11,
+    "quality": 0.1,
+    "cost": 66.42
+  },
+  {
+    "name": "Crossbow",
+    "rarity": 0.1,
+    "quality": 0.47,
+    "cost": 102.48
+  },
+  {
+    "name": "Crossbow",
+    "rarity": 0.14,
+    "quality": 0.45,
+    "cost": 92.1
+  },
+  {
+    "name": "Crossbow",
+    "rarity": 0.1,
+    "quality": 0.1,
+    "cost": 69
+  },
+  {
+    "name": "Crossbow",
+    "rarity": 0.16,
+    "quality": 0.99,
+    "cost": 138.24
+  },
+  {
+    "name": "Crossbow",
+    "rarity": 0.1,
+    "quality": 0.47,
+    "cost": 102.68
+  },
+  {
+    "name": "Longsword",
+    "rarity": 0.1,
+    "quality": 0.1,
+    "cost": 230
+  },
+  {
+    "name": "Longsword",
+    "rarity": 0.1,
+    "quality": 0.1,
+    "cost": 230.01
+  },
+  {
+    "name": "Longsword",
+    "rarity": 0.1,
+    "quality": 0.1,
+    "cost": 230
+  },
+  {
+    "name": "Longsword",
+    "rarity": 0.1,
+    "quality": 0.18,
+    "cost": 254.01
+  },
+  {
+    "name": "Spear",
+    "rarity": 0.1,
+    "quality": 0.1,
+    "cost": 23
+  },
+  {
+    "name": "Spear",
+    "rarity": 0.1,
+    "quality": 0.64,
+    "cost": 39.21
+  },
+  {
+    "name": "Spear",
+    "rarity": 0.1,
+    "quality": 0.27,
+    "cost": 28.06
+  },
+  {
+    "name": "Spear",
+    "rarity": 0.1,
+    "quality": 0.1,
+    "cost": 23
+  },
+  {
+    "name": "Spear",
+    "rarity": 0.1,
+    "quality": 0.86,
+    "cost": 45.9
+  },
+  {
+    "name": "Spear",
+    "rarity": 0.1,
+    "quality": 0.26,
+    "cost": 27.67
+  },
+  {
+    "name": "Spear",
+    "rarity": 0.1,
+    "quality": 0.71,
+    "cost": 41.41
+  }
+]
