@@ -251,5 +251,82 @@ Here, `A` stands in for the concrete type of items in the list `as`. Note where 
 
 When we use it with our store, `A` is replaced with the concrete type. And yet,
 `filter` knows nothing of our domain types, now _that_ is truly reusable code.
+Here is how we use it to filter the blacksmiths inventory:
 
-TODO: filter the things
+```git
+diff --git a/exercises/chapters/3/run.ts b/exercises/chapters/3/run.ts
+index 2a3637d..ff928a9 100644
+--- a/exercises/chapters/3/run.ts
++++ b/exercises/chapters/3/run.ts
+@@ -1,22 +1,11 @@
+ import * as W from './Weapon';
+-import {isRare} from './common';
++import {isRare, filter} from './common';
+ 
+ import * as blackSmithInventory from './blacksmith-inventory.json';
+ 
+-export const filterBlackSmithInventory = (
+-    inventory: W.Weapon[],
+-    predicate: (weapon: W.Weapon) => boolean,
+-): W.Weapon[] => {
+-    const result = [];
+-    for (const item of inventory) {
+-        if (predicate(item)) result.push(item);
+-    }
+-    return result;
+-};
+-
+ const isBuyable = (weapon: W.Weapon) =>
+     (isRare(weapon) || W.isPrecious(weapon)) && W.isCheap(weapon);
+ 
+-const result = filterBlackSmithInventory(blackSmithInventory, isBuyable);
++const result = filter(blackSmithInventory, isBuyable);
+ 
+ console.log(result);
+```
+
+`Store.filterInventory` is fully replaced by `filter`, and, we can
+simplify `filterWheat` as well:
+
+```git
+diff --git a/exercises/chapters/3/Store.ts b/exercises/chapters/3/Store.ts
+index 44d6ed0..acb5cd4 100644
+--- a/exercises/chapters/3/Store.ts
++++ b/exercises/chapters/3/Store.ts
+@@ -1,5 +1,6 @@
+ import * as I from './Ingredient';
+ import * as W from './Weapon';
++import {filter} from './common';
+ 
+ export class BalanceExhausted extends Error {
+     constructor() {
+@@ -25,24 +26,8 @@ export type Store = {
+     balance: number;
+ };
+ 
+-export const filterInventory = (
+-    inventory: Inventory,
+-    predicate: (item: Item) => boolean,
+-): Inventory => {
+-    const result = [];
+-    for (const item of inventory) {
+-        if (predicate(item)) result.push(item);
+-    }
+-    return result;
+-};
+-
+-export const filterWheat = (inventory: Inventory): Inventory => {
+-    const result = [];
+-    for (const ingredient of inventory) {
+-        if (ingredient.name === 'Wheat') result.push(ingredient);
+-    }
+-    return result;
+-};
++export const filterWheat = (inventory: Inventory): Inventory =>
++    filter(inventory, I.isWheat);
+ 
+ export const mapInventory = <A extends I.Ingredient, B>(
+     inventory: A[],
+```
+
+What else can we do with generics?

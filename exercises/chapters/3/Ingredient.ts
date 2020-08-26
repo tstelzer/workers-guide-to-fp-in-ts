@@ -14,7 +14,8 @@ export const from = (
     rarity,
 });
 
-export const isWheat = (ingredient: Ingredient) => ingredient.name === 'Wheat';
+export const isWheat = (ingredient: Ingredient): boolean =>
+    ingredient.name === 'Wheat';
 
 export const withSellingPrice = (
     ingredient: Ingredient,

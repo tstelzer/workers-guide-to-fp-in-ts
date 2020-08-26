@@ -1,5 +1,6 @@
 import * as I from './Ingredient';
 import * as W from './Weapon';
+import {filter} from './common';
 
 export class BalanceExhausted extends Error {
     constructor() {
@@ -25,24 +26,8 @@ export type Store = {
     balance: number;
 };
 
-export const filterInventory = (
-    inventory: Inventory,
-    predicate: (item: Item) => boolean,
-): Inventory => {
-    const result = [];
-    for (const item of inventory) {
-        if (predicate(item)) result.push(item);
-    }
-    return result;
-};
-
-export const filterWheat = (inventory: Inventory): Inventory => {
-    const result = [];
-    for (const ingredient of inventory) {
-        if (ingredient.name === 'Wheat') result.push(ingredient);
-    }
-    return result;
-};
+export const filterWheat = (inventory: Inventory): Inventory =>
+    filter(inventory, I.isWheat);
 
 export const mapInventory = <A extends I.Ingredient, B>(
     inventory: A[],
